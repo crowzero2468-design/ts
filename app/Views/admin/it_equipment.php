@@ -147,13 +147,17 @@ $this->section('body');
               <label>Estimated Life Span</label>
               <input type="date" name="estimatedlife" class="form-control">
             </div>
-            <div class="col-md-12">
+            <div class="col-md-6">
               <label>Status</label>
                     <select name="status" class="form-control" required>
                         <option value="" disabled selected>Select Status</option>
                         <option value="NEW">New</option>
                         <option value="OLD">Old</option>
                     </select>
+            </div>
+            <div class="col-md-6">
+              <label>Quantity</label>
+              <input type="text" name="quantity" class="form-control">
             </div>
 
             <div class="col-md-12">

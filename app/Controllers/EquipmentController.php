@@ -29,7 +29,8 @@ class EquipmentController extends BaseController
             'acquisitiondate' => $this->request->getPost('acquisitiondate'),
             'estimatedlife' => $this->request->getPost('estimatedlife'),
             'remarks' => $this->request->getPost('remarks'),
-            'status' => $this->request->getPost('status') ?? 'new' // default to new if not provided
+            'status' => $this->request->getPost('status') ?? 'new',
+            'quantity' => $this->request->getPost('quantity') ?? 1,
         ]);
 
         return redirect()->to('/equip')->with('success', 'Equipment saved successfully');
@@ -245,6 +246,10 @@ class EquipmentController extends BaseController
                     'model' => $row[1] ?? '',
                     'AccountableArea' => $row[2] ?? '',
                     'description' => $row[3] ?? '',
+                    'acquisitiondate' => $row[4] ?? '',
+                    'type' => $row[5] ?? '',
+                    'quantity' => $row[6] ?? '',
+                    'inspector' => $row[7] ?? '',
                     'status' => $status ?? 'new',
                 ];
 
