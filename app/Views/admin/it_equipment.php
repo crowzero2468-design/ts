@@ -26,7 +26,7 @@ $this->section('body');
 
     <!-- View Filtered -->
     <button type="button" id="viewFilteredForm" class="btn btn-secondary me-2">
-        View as Form
+        Generate PDF
     </button>
 
     <!-- Trigger Button -->
@@ -311,49 +311,48 @@ $(document).ready(function () {
             }
         },
         columns: [
-                { data: 'type' },
-                { data: 'model' },
-                { data: 'label' },
-                { data: 'AccountableArea' },
-                { data: 'description' },
-                {
-                    data: 'acquisitiondate',
-                    render: function(data) {
-                        if (!data || data === '0000-00-00') return '-';
-                        let date = new Date(data);
-                        return date.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
-                    }
-                },
-                {
-                    data: 'estimatedlife',
-                    render: function(data) {
-                        if (!data || data === '0000-00-00') return '-';
-                        let date = new Date(data);
-                        return date.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
-                    }
-                },
-                { data: 'remarks' },
-                {
-                    data: 'id', // Actions
-                    render: function(data, type, row) {
-                        return `
-                            <div class="d-flex gap-2">
-                                <button class="btn btn-sm btn-primary editBtn" data-id="${data}" data-bs-toggle="modal" data-bs-target="#editEquipmentModal">Edit</button>
-                                <button class="btn btn-sm btn-danger deleteBtn" data-id="${data}">Delete</button>
-                            </div>
-                        `;
-                    },
-                    orderable: false,
-                    searchable: false
+            { data: 'type' },
+            { data: 'model' },
+            { data: 'label' },
+            { data: 'AccountableArea' },
+            { data: 'description' },
+            {
+                data: 'acquisitiondate',
+                render: function(data) {
+                    if (!data || data === '0000-00-00') return '-';
+                    let date = new Date(data);
+                    return date.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
                 }
-            ],
+            },
+            {
+                data: 'estimatedlife',
+                render: function(data) {
+                    if (!data || data === '0000-00-00') return '-';
+                    let date = new Date(data);
+                    return date.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
+                }
+            },
+            { data: 'remarks' },
+            {
+                data: 'id',
+                render: function(data) {
+                    return `
+                        <div class="d-flex gap-2">
+                            <button class="btn btn-sm btn-primary editBtn" data-id="${data}" data-bs-toggle="modal" data-bs-target="#editEquipmentModal">Edit</button>
+                            <button class="btn btn-sm btn-danger deleteBtn" data-id="${data}">Delete</button>
+                        </div>
+                    `;
+                },
+                orderable: false,
+                searchable: false
+            }
+        ],
         initComplete: function() {
-            // Close SweetAlert after initial load
             Swal.close();
         }
     });
 
-    // Overlay spinner for subsequent reloads
+    // Overlay spinner for reloads
     table.on('preXhr.dt', function() { $('#tableLoader').show(); });
     table.on('xhr.dt', function() { $('#tableLoader').hide(); });
 
@@ -381,57 +380,115 @@ $(document).ready(function () {
         window.open("<?= base_url('equipment/form'); ?>?" + params, "_blank");
     });
 
-    // Edit button click
-$('#equipmentTable').on('click', '.editBtn', function() {
-    let id = $(this).data('id');
-    $.get("<?= base_url('equipment/get'); ?>/" + id, function(data) {
-        $('#editEquipmentId').val(data.id);
-        $('#editType').val(data.type);
-        $('#editModel').val(data.model);
-        $('#editLabel').val(data.label);
-        $('#editAccountableArea').val(data.AccountableArea);
-        $('#editDescription').val(data.description);
-        $('#editAcquisitionDate').val(data.acquisitiondate);
-        $('#editEstimatedLife').val(data.estimatedlife);
-        $('#editRemarks').val(data.remarks);
-    }, 'json');
-});
+    // -------------------- EDIT --------------------
+    $('#equipmentTable').on('click', '.editBtn', function() {
+        let id = $(this).data('id');
+        $.get("<?= base_url('equipment/get'); ?>/" + id, function(data) {
+            $('#editEquipmentId').val(data.id);
+            $('#editType').val(data.type);
+            $('#editModel').val(data.model);
+            $('#editLabel').val(data.label);
+            $('#editAccountableArea').val(data.AccountableArea);
+            $('#editDescription').val(data.description);
+            $('#editAcquisitionDate').val(data.acquisitiondate);
+            $('#editEstimatedLife').val(data.estimatedlife);
+            $('#editRemarks').val(data.remarks);
+        }, 'json');
+    });
 
-// Submit edit form
-$('#editEquipmentForm').submit(function(e) {
+    $('#editEquipmentForm').submit(function(e) {
+        e.preventDefault();
+        $.post("<?= base_url('equipment/update'); ?>", $(this).serialize(), function(response) {
+            if(response.success){
+                Swal.fire('Updated!', response.message, 'success');
+                $('#editEquipmentModal').modal('hide');
+                table.ajax.reload(null,false);
+            } else {
+                Swal.fire('Error!', response.message, 'error');
+            }
+        }, 'json');
+    });
+
+    // -------------------- DELETE --------------------
+    $('#equipmentTable').on('click', '.deleteBtn', function() {
+        let id = $(this).data('id');
+        Swal.fire({
+            title: 'Are you sure?',
+            text: "This will mark the equipment as inactive!",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#d33',
+            cancelButtonColor: '#3085d6',
+            confirmButtonText: 'Yes, delete it!'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                $.post("<?= base_url('equipment/delete'); ?>", {id:id}, function(resp){
+                    if(resp.success){
+                        Swal.fire('Deleted!', resp.message, 'success');
+                        table.ajax.reload(null,false);
+                    } else {
+                        Swal.fire('Error!', resp.message, 'error');
+                    }
+                }, 'json');
+            }
+        });
+    });
+
+    // -------------------- ADD EQUIPMENT --------------------
+$('#addEquipmentModal form').submit(function(e){
     e.preventDefault();
-    $.post("<?= base_url('equipment/update'); ?>", $(this).serialize(), function(response) {
-        if(response.success){
-            Swal.fire('Updated!', response.message, 'success');
-            $('#editEquipmentModal').modal('hide');
-            table.ajax.reload(null,false);
-        } else {
-            Swal.fire('Error!', response.message, 'error');
+    let form = $(this);
+    $.ajax({
+        url: form.attr('action'),
+        type: 'POST',
+        data: form.serialize(),
+        dataType: 'json',
+        success: function(resp){
+            if(resp.success){
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Added!',
+                    text: resp.message,
+                    timer: 3000,           // Auto close after 3 seconds
+                    showConfirmButton: false
+                });
+                form[0].reset();
+                $('#addEquipmentModal').modal('hide');
+                $('#equipmentTable').DataTable().ajax.reload(null,false);
+            } else {
+                Swal.fire('Error!', resp.message, 'error');
+            }
         }
-    }, 'json');
+    });
 });
 
-// Delete button click
-$('#equipmentTable').on('click', '.deleteBtn', function() {
-    let id = $(this).data('id');
-    Swal.fire({
-        title: 'Are you sure?',
-        text: "This will mark the equipment as inactive!",
-        icon: 'warning',
-        showCancelButton: true,
-        confirmButtonColor: '#d33',
-        cancelButtonColor: '#3085d6',
-        confirmButtonText: 'Yes, delete it!'
-    }).then((result) => {
-        if (result.isConfirmed) {
-            $.post("<?= base_url('equipment/delete'); ?>", {id:id}, function(resp){
-                if(resp.success){
-                    Swal.fire('Deleted!', resp.message, 'success');
-                    table.ajax.reload(null,false);
-                } else {
-                    Swal.fire('Error!', resp.message, 'error');
-                }
-            }, 'json');
+    // -------------------- IMPORT EXCEL --------------------
+$('#importExcelModal form').submit(function(e){
+    e.preventDefault();
+    let form = $(this);
+    let formData = new FormData(this); // for file upload
+    $.ajax({
+        url: form.attr('action'),
+        type: 'POST',
+        data: formData,
+        contentType: false,
+        processData: false,
+        dataType: 'json',
+        success: function(resp){
+            if(resp.success){
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Imported!',
+                    text: resp.message,
+                    timer: 3000,           // Auto close after 3 seconds
+                    showConfirmButton: false
+                });
+                form[0].reset();
+                $('#importExcelModal').modal('hide');
+                $('#equipmentTable').DataTable().ajax.reload(null,false);
+            } else {
+                Swal.fire('Error!', resp.message, 'error');
+            }
         }
     });
 });

@@ -18,9 +18,9 @@ class EquipmentController extends BaseController
 
     public function save()
     {
-        $model = new EquipmentModel();
+        $model = new \App\Models\EquipmentModel();
 
-        $model->save([
+        $data = [
             'type' => $this->request->getPost('type'),
             'model' => $this->request->getPost('model'),
             'label' => $this->request->getPost('label'),
@@ -29,11 +29,21 @@ class EquipmentController extends BaseController
             'acquisitiondate' => $this->request->getPost('acquisitiondate'),
             'estimatedlife' => $this->request->getPost('estimatedlife'),
             'remarks' => $this->request->getPost('remarks'),
-            'status' => $this->request->getPost('status') ?? 'new',
+            'status' => $this->request->getPost('status') ?? 'NEW',
             'quantity' => $this->request->getPost('quantity') ?? 1,
-        ]);
+        ];
 
-        return redirect()->to('/equip')->with('success', 'Equipment saved successfully');
+        if ($model->insert($data)) {
+            return $this->response->setJSON([
+                'success' => true,
+                'message' => 'Equipment saved successfully!'
+            ]);
+        } else {
+            return $this->response->setJSON([
+                'success' => false,
+                'message' => 'Failed to save equipment. Please try again.'
+            ]);
+        }
     }
 
     public function getData()
@@ -227,40 +237,47 @@ class EquipmentController extends BaseController
         }
 
     // New method: Import Excel
-    public function importExcel()
-    {
-        $file = $this->request->getFile('excelFile');
-        $status = $this->request->getPost('status');
+   public function importExcel()
+{
+    $file = $this->request->getFile('excelFile');
+    $status = $this->request->getPost('status');
 
-        if ($file && $file->isValid()) {
-            $spreadsheet = IOFactory::load($file->getTempName());
-            $sheetData = $spreadsheet->getActiveSheet()->toArray();
+    if ($file && $file->isValid()) {
+        $spreadsheet = \PhpOffice\PhpSpreadsheet\IOFactory::load($file->getTempName());
+        $sheetData = $spreadsheet->getActiveSheet()->toArray();
 
-            $model = new EquipmentModel();
+        $model = new \App\Models\EquipmentModel();
 
-            foreach ($sheetData as $index => $row) {
-                if ($index === 0) continue; // skip header if present
+        foreach ($sheetData as $index => $row) {
+            if ($index === 0) continue; // skip header if present
 
-                $data = [
-                    'label' => $row[0] ?? '',
-                    'model' => $row[1] ?? '',
-                    'AccountableArea' => $row[2] ?? '',
-                    'description' => $row[3] ?? '',
-                    'acquisitiondate' => $row[4] ?? '',
-                    'type' => $row[5] ?? '',
-                    'quantity' => $row[6] ?? '',
-                    'inspector' => $row[7] ?? '',
-                    'status' => $status ?? 'new',
-                ];
+            $data = [
+                'label' => $row[0] ?? '',
+                'model' => $row[1] ?? '',
+                'AccountableArea' => $row[2] ?? '',
+                'description' => $row[3] ?? '',
+                'acquisitiondate' => $row[4] ?? '',
+                'type' => $row[5] ?? '',
+                'quantity' => $row[6] ?? 1,
+                'inspector' => $row[7] ?? '',
+                'status' => $status ?? 'NEW',
+            ];
 
-                $model->insert($data);
-            }
-
-            return redirect()->back()->with('success', 'Excel imported successfully!');
+            $model->insert($data);
         }
 
-        return redirect()->back()->with('error', 'Invalid Excel file!');
+        // Return JSON instead of redirect
+        return $this->response->setJSON([
+            'success' => true,
+            'message' => 'Excel imported successfully!'
+        ]);
     }
+
+    return $this->response->setJSON([
+        'success' => false,
+        'message' => 'Invalid Excel file!'
+    ]);
+}
 
     public function get($id)
 {

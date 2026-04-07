@@ -35,7 +35,7 @@
         <button class="btn btn-secondary w-100" id="filterBtn">Filter</button>
         <button class="btn btn-secondary w-100" id="clearFilterBtn">Clear Filter</button>
         <button class="btn btn-secondary w-100" id="addSpeedtestBtn">Add Speedtest</button>
-        <button class="btn btn-secondary w-100" id="viewFormBtn">View as Form</button>
+        <button class="btn btn-secondary w-100" id="viewFormBtn">Generate PDF</button>
     </div>
 
 </div>
@@ -186,29 +186,35 @@ $(document).ready(function(){
                 d.checked_by = $('#filterBy').val();
             },
             dataSrc: function(json) {
-                let totalPing = 0;
-                let totalDownload = 0;
-                let totalUpload = 0;
-                let count = json.data.length;
+                    let totalPing = 0;
+                    let totalDownload = 0;
+                    let totalUpload = 0;
+                    let count = json.data.length;
 
-                if (count > 0) {
-                    json.data.forEach(row => {
-                        totalPing += parseFloat(row.ping) || 0;
-                        totalDownload += parseFloat(row.download) || 0;
-                        totalUpload += parseFloat(row.upload) || 0;
-                    });
+                    function formatNumber(num) {
+                        // Round to 2 decimals
+                        let rounded = Number(num.toFixed(2));
+                        return rounded;
+                    }
 
-                    $('#avgPing').text((totalPing / count) + ' ms');
-                    $('#avgDownload').text((totalDownload / count).toFixed(2) + ' Mbps');
-                    $('#avgUpload').text((totalUpload / count).toFixed(2) + ' Mbps');
-                } else {
-                    $('#avgPing').text('0 ms');
-                    $('#avgDownload').text('0 Mbps');
-                    $('#avgUpload').text('0 Mbps');
-                }
+                    if (count > 0) {
+                        json.data.forEach(row => {
+                            totalPing += parseFloat(row.ping) || 0;
+                            totalDownload += parseFloat(row.download) || 0;
+                            totalUpload += parseFloat(row.upload) || 0;
+                        });
 
-                return json.data;
-            },
+                        $('#avgPing').text(formatNumber(totalPing / count) + ' ms');
+                        $('#avgDownload').text(formatNumber(totalDownload / count) + ' Mbps');
+                        $('#avgUpload').text(formatNumber(totalUpload / count) + ' Mbps');
+                    } else {
+                        $('#avgPing').text('0 ms');
+                        $('#avgDownload').text('0 Mbps');
+                        $('#avgUpload').text('0 Mbps');
+                    }
+
+                    return json.data;
+                },
             beforeSend: function() {
                 Swal.fire({
                     title: 'Loading data...',
@@ -230,24 +236,29 @@ $(document).ready(function(){
             { data: 'upload' },
             { data: 'checked_by' },
             { data: 'remarks' },
-            { 
-                data: null, 
-                orderable: false, 
+            { data: null, orderable: false, render: function(data, type, row) {
+                <?php if(session()->get('role') == 3): ?>
+                return `
+                    <div class="d-flex gap-1">
+                        <button class="btn btn-sm btn-primary editBtn" data-id="${row.id}">Edit</button>
+                        <button class="btn btn-sm btn-danger deleteBtn" data-id="${row.id}">Delete</button>
+                    </div>
+                `;
+                <?php else: ?>
+                return '';
+                <?php endif; ?>
+            }}
+        ],
+        columnDefs: [
+            {
+                targets: [0,1],       // date and time columns
                 render: function(data, type, row) {
-                    <?php if(session()->get('role') == 3): ?>
-                    return `
-                        <div class="d-flex gap-1">
-                            <button class="btn btn-sm btn-primary editBtn" data-id="${row.id}">Edit</button>
-                            <button class="btn btn-sm btn-danger deleteBtn" data-id="${row.id}">Delete</button>
-                        </div>
-                    `;
-                    <?php else: ?>
-                    return '';
-                    <?php endif; ?>
+                    if(type === 'sort') return row.datetime_raw; // use raw datetime for sorting
+                    return data; // display formatted
                 }
             }
         ],
-        order:[[1, 'decs']]
+        order: [[0, 'desc']]
     });
 
     // Reload table with SweetAlert when filter button clicked

@@ -104,6 +104,10 @@ $routes->post('temp/add', 'TempController::add');
 $routes->get('temp/getSingle/(:num)', 'TempController::getSingle/$1');
 $routes->post('temp/update', 'TempController::update');
 $routes->post('temp/delete', 'TempController::delete');
+$routes->get('temperature/report', 'TempController::TempReport');
+
+
+
 
 
 $routes->get('speedtest', 'SpeedtestController::index');

@@ -17,7 +17,7 @@ $this->section('body');
 
                 <div class="col-md-auto">
                     <button id="viewFormBtn" class="btn btn-secondary">
-                        <i class="bi bi-file-earmark-text"></i> View as Form
+                        <i class="bi bi-file-earmark-text"></i> Generate PDF
                     </button>
                 </div>
 

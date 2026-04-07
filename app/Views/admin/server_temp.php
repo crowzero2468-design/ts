@@ -22,6 +22,7 @@ $this->section('body');
             <button id="btnAddTemp" class="btn btn-secondary w-100" data-bs-toggle="modal" data-bs-target="#addTempModal">
                 Add Temperature
             </button>
+            <button id="btnTempPDF" class="btn btn-secondary">Generate PDF</button>
         </div>
     </div>
 
@@ -79,20 +80,19 @@ $this->section('body');
 <script>
 $(document).ready(function() {
 
-    function showLoading() {
-        Swal.fire({
-            title: 'Loading...',
-            html: 'Please wait while data is being fetched.',
-            allowOutsideClick: false,
-            didOpen: () => {
-                Swal.showLoading()
-            }
-        });
-    }
+document.getElementById('btnTempPDF').addEventListener('click', function() {
+    // Optional filters
+    let date = document.getElementById('filterDate')?.value || '';
+    let monitor_by = document.getElementById('filterBy')?.value || '';
+    let status = document.getElementById('filterStatus')?.value || '';
 
-    function hideLoading() {
-        Swal.close();
-    }
+    let url = '<?= base_url("temperature/report") ?>';
+    url += '?date=' + encodeURIComponent(date);
+    url += '&monitor_by=' + encodeURIComponent(monitor_by);
+    url += '&status=' + encodeURIComponent(status);
+
+    window.open(url, '_blank'); // Open PDF in new tab
+});
 
     var table = $('#tempTable').DataTable({
         ajax: {
@@ -103,23 +103,30 @@ $(document).ready(function() {
                 d.temp = $('#filterTemp').val();
             },
             beforeSend: function() {
-                showLoading(); // Show SweetAlert loading before request
+                Swal.fire({
+                    title: 'Loading...',
+                    html: 'Fetching data...',
+                    allowOutsideClick: false,
+                    didOpen: () => Swal.showLoading()
+                });
             },
             complete: function() {
-                hideLoading(); // Close SweetAlert after request
+                Swal.close();
             },
-            error: function(xhr, status, error) {
-                hideLoading();
-                Swal.fire('Error', 'Failed to fetch data', 'error');
+            error: function() {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error!',
+                    text: 'Failed to fetch data',
+                    timer: 3000,
+                    showConfirmButton: false
+                });
             }
         },
         columns: [
             { data: 'date' },
             { data: 'time' },
-            { data: 'temp',  
-                render: function(data, type, row) {
-                    return data + ' ℃';}
-            },
+            { data: 'temp', render: d => d + ' ℃' },
             { data: 'monitor_by' }
         ],
         order: [[0, 'desc'], [1, 'desc']]
@@ -129,39 +136,63 @@ $(document).ready(function() {
         table.ajax.reload();
     });
 
-
     // Add Temperature Form submit
     $('#addTempForm').on('submit', function(e) {
         e.preventDefault();
 
-        let data = {
+        let formData = {
             datetime: $('#tempDate').val() + ' ' + $('#tempTime').val(),
             temp: $('#temperature').val(),
             monitor_by: $('#monitoredBy').val()
         };
 
         $.ajax({
-            url: "<?= base_url('temp/add') ?>", // create this route in your controller
+            url: "<?= base_url('temp/add') ?>",
             type: "POST",
-            data: data,
+            data: formData,
+            dataType: 'json',
             success: function(res) {
-                Swal.fire('Success', 'Temperature record added!', 'success');
-                $('#addTempModal').modal('hide');
-                $('#tempTable').DataTable().ajax.reload();
+                if(res.status === 'success') {
+                    $('#addTempModal').modal('hide'); // hide modal first
+                    $('#addTempForm')[0].reset(); // reset form
+                    table.ajax.reload(null, false); // reload table without resetting pagination
+
+                    // Show SweetAlert after modal is hidden
+                    setTimeout(() => {
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Added!',
+                            text: res.message,
+                            timer: 3000,
+                            showConfirmButton: false
+                        });
+                    }, 500); // slight delay to ensure modal fully hides
+                } else {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error!',
+                        text: res.message,
+                        timer: 3000,
+                        showConfirmButton: false
+                    });
+                }
             },
-            error: function(err) {
-                Swal.fire('Error', 'Failed to add record', 'error');
+            error: function() {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error!',
+                    text: 'Failed to add record',
+                    timer: 3000,
+                    showConfirmButton: false
+                });
             }
         });
     });
 
     $('#btnClearFilter').on('click', function() {
-        // Clear all filter inputs
         $('#filterDate').val('');
         $('#filterMonitor').val('');
         $('#filterTemp').val('');
-
-        // Reload the DataTable
         table.ajax.reload();
     });
 
