@@ -1,0 +1,50 @@
+/* Add a transition to the table margin */
+.table-responsive {
+  transition: margin-top 0.5s ease;
+  /* Adjust the duration and easing as needed */
+}
+
+/* When the success alert is shown, add a top margin to the table */
+.table-responsive.has-alert {
+  margin-top: 50px;
+  /* Adjust this value based on the height of your alert */
+}
+
+.fade {
+  opacity: 1;
+  transition: opacity 0.5s ease;
+  /* Adjust the duration and easing as needed */
+}
+
+.tabletitle {
+  font-weight: bold;
+}
+
+@media print {
+  body {
+    zoom: 90%;
+    /* Scale down content */
+  }
+
+  #printableArea {
+    width: 210mm;
+    /* A4 Width */
+    height: 297mm;
+    /* A4 Height */
+    margin: 10mm auto;
+    /* Adjust margins */
+    padding: 10mm;
+
+    /* Ensure spacing inside */
+    page-break-inside: avoid;
+    /* Prevent breaking tables/forms */
+  }
+}
+
+.custom-table th,
+.custom-table td {
+  padding: 4px !important;
+  /* Reduce cell padding */
+  line-height: 0 !important;
+  /* Reduce row height */
+}
