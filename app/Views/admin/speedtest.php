@@ -30,7 +30,7 @@
 
         <form action="<?= base_url('speedtest/importExcel') ?>" method="post" enctype="multipart/form-data">
             <input class="form-control form-control-xl mb-1" type="file" name="excel_file" required>
-            <button type="submit" class="btn btn-secondary btn-sm w-100">Import Excel</button>
+            <button type="submit" class="btn btn-secondary w-100">Import Excel</button>
         </form>
         <button class="btn btn-secondary w-100" id="filterBtn">Filter</button>
         <button class="btn btn-secondary w-100" id="clearFilterBtn">Clear Filter</button>

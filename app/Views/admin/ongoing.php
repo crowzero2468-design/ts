@@ -92,7 +92,7 @@ $this->section('body');
 
                 <!-- Remarks / Action Column -->
               <td>
-                <?php if ($row['status'] === 'Ongoing'): ?>
+                <?php if ($row['status'] === 'Ongoing' && !empty($row['Acknoby'])): ?>
                     <div class="d-flex align-items-center gap-1">
 
                         <!-- DONE WITH REMARKS -->

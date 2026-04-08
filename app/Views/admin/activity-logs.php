@@ -21,11 +21,26 @@ $this->section('body');
 </style>
 
 <div class="container-fluid">
+<div class="card shadow-sm mb-4">
+    <div class="card-body">
+        <!-- Header Section -->
+        <div class="mb-4">
+            <h4 class="fw-bold mb-1">Troubleshoot Activity Logs</h4>
+            <p class="text-muted mb-0">Filter and view all troubleshoot records</p>
+        </div>
 
-    <div class="mb-4">
-        <h4 class="fw-bold">Troubleshoot Activity Logs</h4>
-        <small class="text-muted">Filter and view all troubleshoot records</small>
+        <!-- Stats Section -->
+        <div class="row align-items-center">
+            <div class="col-md-4">
+                <div class="card border-0 bg-light p-3">
+                    <h6 class="text-uppercase text-muted mb-2">Average Completion Time</h6>
+                    <h5 id="avgCompletionTime" class="fw-bold mb-0">Calculating...</h5>
+                </div>
+            </div>
+            <!-- You can add more stats cards here if needed -->
+        </div>
     </div>
+</div>
 
     <!-- FILTER CARD -->
 <div class="card shadow-sm mb-4">
@@ -64,7 +79,7 @@ $this->section('body');
             </div>
 
             <div class="col-md-3">
-                <button type="button" id="filterBtn" class="btn btn-primary w-100">
+                <button type="button" id="filterBtn" class="btn btn-secondary w-100">
                     <i class="fas fa-filter me-1"></i> Filter
                 </button>
             </div>
@@ -129,86 +144,66 @@ $this->section('body');
 <script>
 $(document).ready(function () {
 
-$('#viewFormBtn').click(function () {
-    // Collect filter values
-    const startDate = $('input[name="start_date"]').val();
-    const endDate   = $('input[name="end_date"]').val();
-    const name      = $('input[name="name"]').val() || '';
-    const tsType    = $('#tsTypeSelect').val() || '';
+    $('#viewFormBtn').click(function () {
+        const startDate = $('input[name="start_date"]').val();
+        const endDate   = $('input[name="end_date"]').val();
+        const name      = $('input[name="name"]').val() || '';
+        const tsType    = $('#tsTypeSelect').val() || '';
 
-    // Validate if both dates are selected
-    if (!startDate || !endDate) {
-        Swal.fire({
-            icon: 'warning',
-            title: 'Missing Dates',
-            text: 'Please select both start and end date.',
-            confirmButtonColor: '#3085d6'
+        if (!startDate || !endDate) {
+            Swal.fire({
+                icon: 'warning',
+                title: 'Missing Dates',
+                text: 'Please select both start and end date.',
+                confirmButtonColor: '#3085d6'
+            });
+            return;
+        }
+
+        const start = new Date(startDate);
+        const end   = new Date(endDate);
+        const diffMonths = (end - start) / (1000 * 60 * 60 * 24 * 30);
+
+        if (diffMonths > 6) {
+            Swal.fire({
+                icon: 'error',
+                title: 'Date Range Too Large',
+                text: 'Date range should not exceed 6 months.',
+                confirmButtonColor: '#d33'
+            });
+            return;
+        }
+
+        const params = new URLSearchParams({
+            start_date: startDate,
+            end_date: endDate,
+            name: name,
+            ts_type: tsType
         });
-        return;
-    }
 
-    // Convert to Date objects
-    const start = new Date(startDate);
-    const end   = new Date(endDate);
-
-    // Calculate difference in months
-    const diffTime = end - start;
-    const diffDays = diffTime / (1000 * 60 * 60 * 24);
-    const diffMonths = diffDays / 30;
-
-    // Check if more than 6 months
-    if (diffMonths > 6) {
-        Swal.fire({
-            icon: 'error',
-            title: 'Date Range Too Large',
-            text: 'Date range should not exceed 6 months.',
-            confirmButtonColor: '#d33'
-        });
-        return;
-    }
-
-    // Build URL parameters safely
-    const params = new URLSearchParams({
-        start_date: startDate,
-        end_date: endDate,
-        name: name,
-        ts_type: tsType
+        const url = "<?= base_url('tshistory/printForm') ?>?" + params.toString();
+        window.open(url, '_blank');
     });
 
-    // Open the PDF in a new tab
-    const url = "<?= base_url('tshistory/printForm') ?>?" + params.toString();
-    window.open(url, '_blank');
-});
-
-/* CLEAR FILTERS */
-$('#clearFilterBtn').click(function () {
-    // Reset all input fields in the form
-    $('#filterForm')[0].reset();
-
-    // Reset the TS Type dropdown manually if needed
-    $('#tsTypeSelect').val('');
-
-    // Reload the table without filters
-    table.ajax.reload();
-});
+    $('#clearFilterBtn').click(function () {
+        $('#filterForm')[0].reset();
+        $('#tsTypeSelect').val('');
+        table.ajax.reload();
+    });
 
     let table = $('#activityTable')
     .on('processing.dt', function (e, settings, processing) {
-
         if (processing) {
             Swal.fire({
                 title: 'Loading Records...',
                 text: 'Please wait...',
                 allowOutsideClick: false,
                 allowEscapeKey: false,
-                didOpen: () => {
-                    Swal.showLoading();
-                }
+                didOpen: () => Swal.showLoading()
             });
         } else {
             Swal.close();
         }
-
     })
     .DataTable({
         pageLength: 10,
@@ -226,50 +221,30 @@ $('#clearFilterBtn').click(function () {
             }
         },
         columns: [
-            { 
-                data: null,
-                render: function (data, type, row, meta) {
-                    return meta.row + 1;
-                }
-            },
+            { data: null, render: (data, type, row, meta) => meta.row + 1 },
             { data: 'name' },
             { data: 'location' },
             { data: 'description' },
-            { 
-                data: 'status',
-                render: function(data){
-                    return data === 'Done'
-                        ? '<span class="badge bg-success">Done</span>'
-                        : '<span class="badge bg-warning text-dark">'+data+'</span>';
-                }
+            { data: 'status', render: data => data === 'Done' ? 
+                '<span class="badge bg-success">Done</span>' : 
+                `<span class="badge bg-warning text-dark">${data}</span>` 
             },
             { data: 'personnel' },
             { data: 'personnel_name', defaultContent: '-' },
-            { 
-                data: 'time',
-                render: function(data){
-                    let d = new Date(data);
-                    return d.toLocaleString();
-                }
-            },
-            { 
-                data: 'completion_time',
-                render: function(data) {
-                    if (!data) return '-'; // handle null/empty
-
-                    let d = new Date(data);
-                    if (isNaN(d.getTime())) return '-'; // invalid date
-
-                    return d.toLocaleString();
-                },
-                defaultContent: '-'
-            },
+            { data: 'time', render: data => {
+                if (!data) return '-';
+                const d = new Date(data + ' UTC');
+                return isNaN(d) ? '-' : d.toLocaleString();
+            }},
+            { data: 'completion_time', render: data => {
+                if (!data) return '-';
+                const d = new Date(data + ' UTC');
+                return isNaN(d) ? '-' : d.toLocaleString();
+            }, defaultContent: '-' },
             { data: 'ts_type', defaultContent: '-' }
         ]
     });
 
-
-    /* SWEETALERT LOADING */
     $('#activityTable')
     .on('preXhr.dt', function () {
         Swal.fire({
@@ -282,182 +257,42 @@ $('#clearFilterBtn').click(function () {
         Swal.close();
     });
 
-    /* FILTER */
     $('#filterBtn').click(function () {
         table.ajax.reload();
     });
 
-    /* =====================================
-       PRINT TABLE (ALL FILTERED DATA)
-    ====================================== */
-    $('#printTableBtn').click(function () {
-
-        // Force sort by Time column (index 7) descending
-        table.order([7, 'asc']).draw();
-
-        // Get sorted data (not DOM nodes)
-        let rows = table.rows({ search: 'applied' }).data();
-
-        let html = `
-            <h3 style="margin-bottom:20px;">Activity Logs</h3>
-            <table border="1" cellspacing="0" cellpadding="8" width="100%">
-                <thead>${$('#activityTable thead').html()}</thead>
-                <tbody>
-        `;
-
-        rows.each(function(row, index){
-
-            html += `
-                <tr>
-                    <td>${index + 1}</td>
-                    <td>${row.name}</td>
-                    <td>${row.location}</td>
-                    <td>${row.description}</td>
-                    <td>${row.status}</td>
-                    <td>${row.personnel}</td>
-                    <td>${row.personnel_name ?? '-'}</td>
-                    <td>${new Date(row.time).toLocaleString()}</td>
-                    <td>${new Date(row.completion_time).toLocaleString()}</td>
-                    <td>${row.ts_type ?? '-'}</td>
-                </tr>
-            `;
-        });
-
-        html += "</tbody></table>";
-
-        let printWindow = window.open('', '', 'height=900,width=1200');
-
-        printWindow.document.write(`
-            <html>
-            <head>
-                <title>Print Table</title>
-                <style>
-                    body { font-family: Arial, sans-serif; padding:20px; }
-                    table { border-collapse: collapse; width:100%; }
-                    th { background:#f2f2f2; }
-                    th, td { border:1px solid #000; padding:8px; text-align:left; }
-                </style>
-            </head>
-            <body>${html}</body>
-            </html>
-        `);
-
-        printWindow.document.close();
-
-        setTimeout(function(){
-            printWindow.print();
-        }, 300);
-    });
-
-
-
-    /* =====================================
-       EXPORT EXCEL (ALL FILTERED DATA)
-    ====================================== */
-    $('#exportExcelBtn').click(function () {
-
-        let rows = table.rows({ search: 'applied' }).nodes();
-        let csv = [];
-
-        let header = [];
-        $('#activityTable thead th').each(function(){
-            header.push('"' + $(this).text() + '"');
-        });
-        csv.push(header.join(','));
-
-        $(rows).each(function(){
-            let rowData = [];
-            $(this).find('td').each(function(){
-                rowData.push('"' + $(this).text().replace(/"/g, '""') + '"');
-            });
-            csv.push(rowData.join(','));
-        });
-
-        let csvFile = new Blob([csv.join("\n")], { type: "text/csv" });
-        let downloadLink = document.createElement("a");
-
-        downloadLink.download = "Activity_Logs.csv";
-        downloadLink.href = window.URL.createObjectURL(csvFile);
-        downloadLink.style.display = "none";
-
-        document.body.appendChild(downloadLink);
-        downloadLink.click();
-    });
-
-
-    /* =====================================
-       PRINT COUNT BASED ON CONCERN TYPE
-    ====================================== */
-$('#printCountBtn').click(function () {
-
-    let counts = {};
+    // ============================
+    // Average Completion Time
+    // ============================
+function updateAverageCompletionTime() {
+    let totalMinutes = 0;
+    let validRows = 0;
 
     table.rows({ search: 'applied' }).every(function () {
+        const row = this.data();
 
-        let row = this.data();
-        let type = row.ts_type;
+        // Use time_started if available, otherwise use time
+        const startTimeStr = row.time_started || row.time;
+        const endTimeStr   = row.completion_time;
 
-        // If empty, null, or blank → set as "No Type"
-        if (!type || type.trim() === '') {
-            type = 'No Type';
-        }
+        if (!startTimeStr || !endTimeStr) return; // skip incomplete rows
 
-        if (!counts[type]) counts[type] = 0;
-        counts[type]++;
+        const start = new Date(startTimeStr + ' UTC');
+        const end   = new Date(endTimeStr + ' UTC');
+
+        if (isNaN(start) || isNaN(end) || end < start) return; // skip invalid dates
+
+        const durationMinutes = (end - start) / (1000 * 60); // duration in minutes
+        totalMinutes += durationMinutes;
+        validRows++;
     });
 
-    let sorted = Object.entries(counts).sort((a, b) => b[1] - a[1]);
+    const avgMinutes = validRows ? Math.round(totalMinutes / validRows) : 0;
+    $('#avgCompletionTime').text(avgMinutes + ' min');
+}
 
-    let output = `
-        <h3>Concern Type Summary</h3>
-        <table border="1" cellpadding="8" cellspacing="0" width="100%">
-            <tr>
-                <th>Concern Type</th>
-                <th>Total</th>
-            </tr>
-    `;
-
-    let grandTotal = 0;
-
-    sorted.forEach(([type, total]) => {
-        output += `
-            <tr>
-                <td>${type}</td>
-                <td>${total}</td>
-            </tr>
-        `;
-        grandTotal += total;
-    });
-
-    output += `
-            <tr>
-                <td><strong>Grand Total</strong></td>
-                <td><strong>${grandTotal}</strong></td>
-            </tr>
-        </table>
-    `;
-
-    let printWindow = window.open('', '', 'height=600,width=800');
-
-    printWindow.document.write(`
-        <html>
-        <head>
-            <title>Concern Type Count</title>
-            <style>
-                body { font-family: Arial; padding:20px; }
-                table { border-collapse: collapse; width:100%; }
-                th { background:#f2f2f2; }
-                th, td { padding:8px; text-align:left; }
-            </style>
-        </head>
-        <body>${output}</body>
-        </html>
-    `);
-
-    printWindow.document.close();
-    printWindow.print();
-});
-
+// Update after table loads or redraws
+table.on('xhr.dt draw', updateAverageCompletionTime);
 });
 </script>
 

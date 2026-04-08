@@ -20,32 +20,27 @@ class PmcController extends BaseController
 public function getData()
 {
     $ward = $this->request->getGet('area');       
-    $monthYear = $this->request->getGet('month'); // format: YYYY-MM
+    $start = $this->request->getGet('start'); // YYYY-MM
+    $end   = $this->request->getGet('end');   // YYYY-MM
 
     $data = [];
 
-    if (!empty($ward) && !empty($monthYear)) {
+    if (!empty($ward) && !empty($start) && !empty($end)) {
+
         $model = new PmsModel();
 
-        // Filter by area (ward name)
-        $model->where('area', $ward);
+        // Convert to full datetime range
+        $startDate = $start . '-01 00:00:00';
+        $endDate = date('Y-m-t 23:59:59', strtotime($end . '-01'));
 
-        // Filter by month
-        $startDate = $monthYear . '-01 00:00:00';
-        $endDate = date('Y-m-t 23:59:59', strtotime($startDate));
+        $data = $model->where('area', $ward)
+                      ->where('datetime >=', $startDate)
+                      ->where('datetime <=', $endDate)
+                      ->orderBy('datetime', 'DESC')
+                      ->findAll();
 
-        $model->where('datetime >=', $startDate);
-        $model->where('datetime <=', $endDate);
-
-        $data = $model->orderBy('datetime', 'DESC')->findAll();
-
-        // Log query for debugging
-        $builder = $model->builder();
-        $builder->where('area', $ward);
-        $builder->where('datetime >=', $startDate);
-        $builder->where('datetime <=', $endDate);
-        $builder->orderBy('datetime', 'DESC');
-        log_message('debug', 'Query: ' . $builder->getCompiledSelect());
+        // Debug query
+        log_message('debug', "Filter: $ward | $startDate -> $endDate");
     }
 
     return $this->response->setJSON(['data' => $data]);
@@ -105,21 +100,34 @@ public function savePms()
 public function form()
 {
     $ward = $this->request->getGet('area');
-    $monthYear = $this->request->getGet('month');
+    $start = $this->request->getGet('start'); // YYYY-MM
+    $end   = $this->request->getGet('end');   // YYYY-MM
 
     $model = new \App\Models\PmsModel();
-
     $builder = $model;
 
-    if ($ward) $builder = $builder->where('area', $ward);
-    if ($monthYear) {
-        $startDate = $monthYear . '-01 00:00:00';
-        $endDate = date('Y-m-t 23:59:59', strtotime($startDate));
+    // Filter by area
+    if ($ward) {
+        $builder = $builder->where('area', $ward);
+    }
+
+    // Filter by date range
+    if ($start && $end) {
+        $startDate = $start . '-01 00:00:00';
+        $endDate   = date('Y-m-t 23:59:59', strtotime($end . '-01'));
+
         $builder = $builder->where('datetime >=', $startDate)
                            ->where('datetime <=', $endDate);
     }
 
     $records = $builder->orderBy('datetime', 'ASC')->findAll();
+
+    // Format range text
+    $rangeText = '';
+    if ($start && $end) {
+        $rangeText = date('F Y', strtotime($start . '-01')) . ' - ' . 
+                     date('F Y', strtotime($end . '-01'));
+    }
 
     // ====================== PDF PART ======================
     $mpdf = new \Mpdf\Mpdf([
@@ -130,7 +138,6 @@ public function form()
         'margin_bottom' => 10,
     ]);
 
-    // Header & Styles
     $html = '
     <style>
         body { font-family: Arial, sans-serif; font-size: 12px; }
@@ -149,7 +156,7 @@ public function form()
             <td colspan="3" style="text-align:right;"><b>IM-006-0</b></td>
         </tr>
         <tr>
-            <td style="text-align:left;"><img src="' . FCPATH . 'assets/img/cvmc_logo.png" height="80"></td>
+            <td style="text-align:left;"><img src="' . FCPATH . 'assets/img/cvmc_logo.png" width="90px"></td>
             <td style="text-align:center;">
                 <div class="top-title">Republic of the Philippines</div>
                 <div class="top-title"><strong>DEPARTMENT OF HEALTH</strong></div>
@@ -157,14 +164,18 @@ public function form()
                 <div class="top-title">Regional Tertiary, Teaching, Training, and Research Medical Center</div>
                 <div class="top-title"><strong>IT EQUIPMENT AND DEVICE PREVENTIVE MAINTENANCE CHECKLIST</strong></div>
             </td>
-            <td style="text-align:right;"><img src="' . FCPATH . 'assets/img/DOH_logo.png" height="80"></td>
+            <td style="text-align:right;"><img src="' . FCPATH . 'assets/img/DOH_logo.png" width="90px"></td>
         </tr>
 
         <tr>
-            <td colspan="3" style="text-align:left;">Area/Location: <strong>' . esc($ward) . '</strong></td>
+            <td colspan="3" style="text-align:left;">
+                Area/Location: <strong>' . esc($ward) . '</strong>
+            </td>
         </tr>
         <tr>
-            <td colspan="3" style="text-align:left;">Month & Year: <strong>' . date('F Y', strtotime($monthYear . '-01')) . '</strong></td>
+            <td colspan="3" style="text-align:left;">
+                Period: <strong>' . esc($rangeText) . '</strong>
+            </td>
         </tr>
     </table>
 
@@ -176,8 +187,8 @@ public function form()
                 <th rowspan="2">Computer Label</th>
                 <th colspan="8">Check Points</th>
                 <th rowspan="2">Remarks</th>
-                <th rowspan="2">Performed By:</th>
-                <th rowspan="2">Noted By:</th>
+                <th rowspan="2">Performed By</th>
+                <th rowspan="2">Noted By</th>
             </tr>
             <tr>
                 <th>Keyboard</th>

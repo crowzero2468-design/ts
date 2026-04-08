@@ -116,6 +116,7 @@
         <script src="<?= base_url('assets/js/chart.min.js') ?>"></script>
         <script src="<?= base_url('assets/js/chartjs-plugin-datalabels.min.js') ?>"></script>
         <script src="<?= base_url("assets/js/select2.min.js")?>"></script>
+        
 
         <script>
 // Dark Mode Toggle Functionality

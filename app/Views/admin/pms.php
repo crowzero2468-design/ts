@@ -22,7 +22,7 @@ $this->section('body');
                 </div>
 
                 <!-- AREA SELECT -->
-                <div class="col-md-4 position-relative">
+                <div class="col-md-3 position-relative">
                     <label class="form-label">Office/Area</label>
                     <input type="text" name="location" id="officeInput"
                           class="form-control" autocomplete="off"
@@ -32,10 +32,16 @@ $this->section('body');
                         style="max-height:200px; overflow-y:auto; z-index:1056"></div>
                 </div>
 
-                <!-- MONTH SELECT -->
+                <!-- START MONTH -->
                 <div class="col-md-3">
-                    <label class="form-label mb-1">Month & Year</label>
-                    <input type="month" id="monthSelect" class="form-control">
+                    <label class="form-label mb-1">Start Month</label>
+                    <input type="month" id="startMonth" class="form-control">
+                </div>
+
+                <!-- END MONTH -->
+                <div class="col-md-3">
+                    <label class="form-label mb-1">End Month</label>
+                    <input type="month" id="endMonth" class="form-control">
                 </div>
 
             </div>
@@ -313,76 +319,90 @@ $(document).on('click', function(e) {
     let table;
 
     function loadTable() {
-        const ward = $('#officeInput').val();
-        const monthYear = $('#monthSelect').val();
+    const ward = $('#officeInput').val();
+    const start = $('#startMonth').val();
+    const end = $('#endMonth').val();
 
-        if (!ward || !monthYear) {
-            $('#pmsTable').hide();
-            return;
-        }
-
-        $('#pmsTable').show();
-
-        // Destroy existing table if already initialized
-        if ($.fn.DataTable.isDataTable('#pmsTable')) {
-            table.destroy();
-            $('#pmsTable tbody').empty();
-        }
-
-        Swal.fire({
-            title: 'Loading...',
-            text: 'Fetching data, please wait',
-            allowOutsideClick: false,
-            didOpen: () => Swal.showLoading()
-        });
-
-        table = $('#pmsTable').DataTable({
-            processing: true,
-            ajax: {
-                url: "<?= base_url('pmc/data') ?>",
-                data: { area: ward, month: monthYear },
-                dataSrc: function (json) {
-                    Swal.close();
-                    return json.data;
-                },
-                error: function () {
-                    Swal.fire('Error', 'Failed to load data', 'error');
-                }
-            },
-            columns: [
-                { data: 'datetime', render: d => new Date(d).toLocaleString() },
-                { data: 'computerlabel' },
-                { data: 'keyboard', render: d => d == 1 ? '✔' : '' },
-                { data: 'mouse', render: d => d == 1 ? '✔' : '' },
-                { data: 'display', render: d => d == 1 ? '✔' : '' },
-                { data: 'vga', render: d => d == 1 ? '✔' : '' },
-                { data: 'hdd', render: d => d == 1 ? '✔' : '' },
-                { data: 'ups_avr', render: d => d == 1 ? '✔' : '' },
-                { data: 'connect', render: d => d == 1 ? '✔' : '' },
-                { data: 'powercables', render: d => d == 1 ? '✔' : '' },
-                { data: 'remarks' },
-                { data: 'performedby' },
-                { data: 'notedby' }
-            ],
-            order: [[0, 'desc']]
-        });
+    if (!ward || !start || !end) {
+        $('#pmsTable').hide();
+        return;
     }
 
+    // Validate range
+    if (start > end) {
+        Swal.fire('Warning', 'Start month cannot be later than End month', 'warning');
+        return;
+    }
+
+    $('#pmsTable').show();
+
+    if ($.fn.DataTable.isDataTable('#pmsTable')) {
+        table.destroy();
+        $('#pmsTable tbody').empty();
+    }
+
+    Swal.fire({
+        title: 'Loading...',
+        text: 'Fetching data, please wait',
+        allowOutsideClick: false,
+        didOpen: () => Swal.showLoading()
+    });
+
+    table = $('#pmsTable').DataTable({
+        processing: true,
+        ajax: {
+            url: "<?= base_url('pmc/data') ?>",
+            data: { area: ward, start: start, end: end },
+            dataSrc: function (json) {
+                Swal.close();
+                return json.data;
+            },
+            error: function () {
+                Swal.fire('Error', 'Failed to load data', 'error');
+            }
+        },
+        columns: [
+            { data: 'datetime', render: d => new Date(d).toLocaleString() },
+            { data: 'computerlabel' },
+            { data: 'keyboard', render: d => d == 1 ? '✔' : '' },
+            { data: 'mouse', render: d => d == 1 ? '✔' : '' },
+            { data: 'display', render: d => d == 1 ? '✔' : '' },
+            { data: 'vga', render: d => d == 1 ? '✔' : '' },
+            { data: 'hdd', render: d => d == 1 ? '✔' : '' },
+            { data: 'ups_avr', render: d => d == 1 ? '✔' : '' },
+            { data: 'connect', render: d => d == 1 ? '✔' : '' },
+            { data: 'powercables', render: d => d == 1 ? '✔' : '' },
+            { data: 'remarks' },
+            { data: 'performedby' },
+            { data: 'notedby' }
+        ],
+        order: [[0, 'desc']]
+    });
+}
+
     // Trigger table reload when either filter changes
-    $('#wardSelect, #monthSelect').on('change', loadTable);
+    $('#officeInput, #startMonth, #endMonth').on('change', loadTable);
 
 });
 
 $('#viewFormBtn').click(function () {
     const area = $('#officeInput').val();
-    const month = $('#monthSelect').val();
+    const start = $('#startMonth').val();
+    const end = $('#endMonth').val();
 
-    if (!area || !month) {
-        Swal.fire('Warning', 'Please select Area and Month first', 'warning');
+    // Validation
+    if (!area || !start || !end) {
+        Swal.fire('Warning', 'Please select Area and Date Range first', 'warning');
         return;
     }
 
-    const url = "<?= base_url('pmc/form') ?>?area=" + area + "&month=" + month;
+    // Validate range
+    if (start > end) {
+        Swal.fire('Warning', 'Start month cannot be later than End month', 'warning');
+        return;
+    }
+
+    const url = "<?= base_url('pmc/form') ?>?area=" + area + "&start=" + start + "&end=" + end;
     window.open(url, '_blank');
 });
 </script>

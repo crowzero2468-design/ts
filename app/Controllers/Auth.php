@@ -76,4 +76,48 @@ class Auth extends BaseController
         return redirect()->to('/login');
     }
 
+public function checkUser()
+{
+    $data = $this->request->getJSON();
+    $identity = $data->identity;
+
+    $db = \Config\Database::connect();
+    $user = $db->table('tb_it')
+        ->groupStart()
+            ->where('uname', $identity)
+            ->orWhere('name', $identity)
+        ->groupEnd()
+        ->get()
+        ->getRow();
+
+    if ($user) {
+        return $this->response->setJSON(['status' => 'success']);
+    }
+
+    return $this->response->setJSON(['status' => 'error']);
+}
+
+public function updatePassword()
+{
+    $data = $this->request->getJSON();
+
+    $identity = $data->identity;
+    $password = password_hash($data->password, PASSWORD_DEFAULT);
+
+    $db = \Config\Database::connect();
+
+    $updated = $db->table('tb_it')
+        ->groupStart()
+            ->where('uname', $identity)
+            ->orWhere('name', $identity)
+        ->groupEnd()
+        ->update(['pass' => $password]);
+
+    if ($updated) {
+        return $this->response->setJSON(['status' => 'success']);
+    }
+
+    return $this->response->setJSON(['status' => 'error']);
+}
+
 }

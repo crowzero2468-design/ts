@@ -152,18 +152,50 @@ class TSHistoryController extends BaseController
                         $tableRows = '';
                         if (!empty($records)) {
                             foreach ($records as $row) {
+                                $time = !empty($row['time']) ? date('F j, Y', strtotime($row['time'])) . '<br>' . date('h:i a', strtotime($row['time'])) : '';
+                                $timeStarted = !empty($row['time_started']) ? date('F j, Y', strtotime($row['time_started'])) . '<br>' . date('h:i a', strtotime($row['time_started'])) : '';
+                                
+                                    $completionTime = '';
+                                        if (!empty($row['completion_time'])) {
+                                            $compDT = new \DateTime($row['completion_time']);
+
+                                            // Prioritize time_started if available, else fallback to time
+                                            $startTimeField = !empty($row['time_started']) ? $row['time_started'] : $row['time'];
+                                            $startDT = !empty($startTimeField) ? new \DateTime($startTimeField) : null;
+
+                                            $durationText = '';
+                                            if ($startDT) {
+                                                $diff = $startDT->diff($compDT);
+
+                                                // Build human-readable duration
+                                                $parts = [];
+                                                if ($diff->d > 0) $parts[] = $diff->d . ' day' . ($diff->d > 1 ? 's' : '');
+                                                if ($diff->h > 0) $parts[] = $diff->h . ' hour' . ($diff->h > 1 ? 's' : '');
+                                                if ($diff->i > 0) $parts[] = $diff->i . ' minute' . ($diff->i > 1 ? 's' : '');
+
+                                                $durationText = !empty($parts) ? 'Returned ' . implode(' ', $parts) : 'Returned less than a minute';
+                                            }
+
+                                            // Format completion time
+                                            $completionTime = $compDT->format('F j, Y') . '<br>' . $compDT->format('h:i a');
+                                            if ($durationText) {
+                                                $completionTime .= '<br>' . $durationText;
+                                            }
+                                        }
+
                                 $tableRows .= '
                                 <tr>
-                                    <tdDDD>' . date('F j, Y', strtotime($row['time'])) . '<br>' . date('h:i a', strtotime($row['time'])) . '</td>
-                                    <td>' . esc($row['name']) . '</td>
-                                    <td>' . esc($row['id_num'] ?? '-') . '</td>
-                                    <td>' . esc($row['location'] ?? '-') . '</td>
-                                    <td>' . esc($row['description'] ?? '-') . '</td>
-                                    <td>' . esc($row['remarks'] ?? '-') . '</td>
-                                    <td></td>
-                                    <td>' . esc($row['personnel_name'] ?? $row['personnel'] ?? '-') . '</td>
-                                </tr>
-                                ';
+                                    <td>' . $time . '</td>
+                                    <td>' . esc($row['name'] ?? '') . '</td>
+                                    <td>' . esc($row['id_num'] ?? '') . '</td>
+                                    <td>' . esc($row['location'] ?? '') . '</td>
+                                    <td>' . esc($row['description'] ?? '') . '</td>
+                                    <td>' . esc($row['remarks'] ?? '') . '</td>
+                                    <td>&nbsp;</td>
+                                    <td>'. $timeStarted .'</td>
+                                    <td>' . $completionTime . '</td>
+                                    <td>' . esc($row['personnel_name'] ?? $row['personnel'] ?? '') . '</td>
+                                </tr>';
                             }
                         } else {
                             $tableRows = '<tr><td colspan="8">No data found</td></tr>';
@@ -175,7 +207,7 @@ class TSHistoryController extends BaseController
                             body { font-family: Arial, sans-serif; font-size: 12pt; }
                             table { width: 100%; border-collapse: collapse; margin-top: 10px; }
                             th, td { border: 1px solid #000; padding: 4px; text-align: center; vertical-align: middle; }
-                            th { background-color: #f5f5f5; font-weight: bold; }
+                            th { background-color: #f5f5f5; font-weight: bold; width: 10%; }
                             tr { page-break-inside: avoid; }
                             thead { display: table-header-group; }
                             tfoot { display: table-footer-group; }
@@ -191,6 +223,8 @@ class TSHistoryController extends BaseController
                                     <th>Description of work/Problem</th>
                                     <th>Action Taken</th>
                                     <th>Status/Recommendation</th>
+                                    <th>Time Started</th>
+                                    <th>Completion Time</th>
                                     <th>Processed by</th>
                                 </tr>
                             </thead>

@@ -35,33 +35,48 @@ $this->section('body');
     </button>
     <button id="resetFilters" class="btn btn-secondary me-2">Reset</button>
     <!-- Filters -->
-    <div class="mb-3 mt-3">
-        <div class="row g-2">
+<div class="card shadow-sm mb-3 mt-2">
+    <div class="card-body">
+        <div class="row g-3 align-items-end">
+
             <div class="col-md-2">
-                <input type="text" id="filterType" class="form-control form-control-xl" placeholder="Type">
+                <label class="form-label fw-semibold">Type</label>
+                <input type="text" id="filterType" class="form-control" placeholder="Enter type">
+            </div>
+
+            <div class="col-md-2">
+                <label class="form-label fw-semibold">Model</label>
+                <input type="text" id="filterModel" class="form-control" placeholder="Enter model">
+            </div>
+
+            <div class="col-md-2">
+                <label class="form-label fw-semibold">Area</label>
+                <input type="text" id="filterArea" class="form-control" placeholder="Enter area">
+            </div>
+
+            <div class="col-md-2">
+                <label class="form-label fw-semibold">Acquisition Date Start</label>
+                <input type="date" id="filterAcquisitionStart" class="form-control">
             </div>
             <div class="col-md-2">
-                <input type="text" id="filterModel" class="form-control form-control-xl" placeholder="Model">
+                <label class="form-label fw-semibold">Acquisition Date End</label>
+                <input type="date" id="filterAcquisitionEnd" class="form-control">
             </div>
+
             <div class="col-md-2">
-                <input type="text" id="filterArea" class="form-control form-control-xl" placeholder="Area">
+                <label class="form-label fw-semibold">Life Span</label>
+                <input type="date" id="filterLifeSpan" class="form-control">
             </div>
+
             <div class="col-md-2">
-                <input type="date" id="filterAcquisition" class="form-control form-control-xl" placeholder="Acquisition Date">
+                <label class="form-label fw-semibold">Status</label>
+                <select id="filterStatus" class="form-select">
+                    <option value="">All</option>
+                    <option value="NEW">New</option>
+                    <option value="OLD">Old</option>
+                </select>
             </div>
-            <div class="col-md-2">
-                <input type="date" id="filterLifeSpan" class="form-control form-control-xl" placeholder="Estimated Life Span">
-            </div>
-            <div class="col-md-2">
-                    <select name="status" class="form-control" id="filterStatus">
-                        <option value="" disabled selected>Select Status</option>
-                        <option value="NEW">New</option>
-                        <option value="OLD">Old</option>
-                    </select>
-            </div>
-            <div class="col-md-2">
-                
-            </div>
+
         </div>
     </div>
 </div>
@@ -121,6 +136,21 @@ $this->section('body');
                         <option value="router">Router</option>
                         <option value="switch">Switch</option>
                         <option value="cable">Cable</option>
+                        <option value="scanner">Scanner</option>
+                        <option value="BARCODE READER">Barcode Reader</option>
+                        <option value="THERMAL PRINTER">Thermal Printer</option>
+                            <option value="FLASH DRIVE">Flash Drive</option>
+                            <option value="EXTERNAL HARD DISK DRIVE">External Hard Disk Drive</option>
+                            <option value="NAS">Network Storage</option>
+                            <option value="TV">TV</option>
+                            <option value="DSLR">DSLR</option>
+                            <option value="HDD">HDD</option>
+                            <option value="PHOTOCOPIER">Photocopier</option>
+                            <option value="UPS">UPS/BATTERY PACK</option>
+                            <option value="BIOMETRIC">Biometric Machine</option>
+                            <option value="RJ45">RJ45</option>
+                            <option value="KEYBOARD">Keyboard</option>
+                            <option value="MOUSE">Mouse</option>
                     </select>
             </div>
             <div class="col-md-6">
@@ -190,7 +220,7 @@ $this->section('body');
           <div class="row g-3">
             <div class="col-md-6">
               <label>Type</label>
-              <select name="type" id="editType" class="form-control" required>
+              <select name="type" id="editType" class="form-control">
                   <option value="" disabled>Select Type</option>
                   <option value="laptop">Laptop</option>
                   <option value="desktop">Desktop</option>
@@ -198,6 +228,21 @@ $this->section('body');
                   <option value="router">Router</option>
                   <option value="switch">Switch</option>
                   <option value="cable">Cable</option>
+                  <option value="scanner">Scanner</option>
+                  <option value="BARCODE READER">Barcode Reader</option>
+                   <option value="THERMAL PRINTER">Thermal Printer</option>
+                    <option value="FLASH DRIVE">Flash Drive</option>
+                     <option value="EXTERNAL HARD DISK DRIVE">External Hard Disk Drive</option>
+                      <option value="NAS">Network Storage</option>
+                      <option value="TV">TV</option>
+                      <option value="DSLR">DSLR</option>
+                      <option value="HDD">HDD</option>
+                      <option value="PHOTOCOPIER">Photocopier</option>
+                      <option value="UPS">UPS/BATTERY PACK</option>
+                      <option value="BIOMETRIC">Biometric Machine</option>
+                      <option value="RJ45">RJ45</option>
+                      <option value="KEYBOARD">Keyboard</option>
+                      <option value="MOUSE">Mouse</option>
               </select>
             </div>
             <div class="col-md-6">
@@ -263,14 +308,6 @@ $this->section('body');
               <option value="NEW">New</option>
             </select>
           </div>
-
-          <p class="text-muted">
-            Excel Column Mapping:<br>
-            <strong>A</strong> → Label<br>
-            <strong>B</strong> → Model<br>
-            <strong>C</strong> → Accountable Area<br>
-            <strong>D</strong> → Description
-          </p>
         </div>
         <div class="modal-footer">
           <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
@@ -305,7 +342,8 @@ $(document).ready(function () {
                 d.type = $('#filterType').val();
                 d.model = $('#filterModel').val();
                 d.area = $('#filterArea').val();
-                d.acquisitiondate = $('#filterAcquisition').val();
+                d.acquisition_start = $('#filterAcquisitionStart').val();
+                d.acquisition_end = $('#filterAcquisitionEnd').val();
                 d.estimatedlife = $('#filterLifeSpan').val();
                 d.status = $('#filterStatus').val();
             }
@@ -357,13 +395,13 @@ $(document).ready(function () {
     table.on('xhr.dt', function() { $('#tableLoader').hide(); });
 
     // Filters
-    $('#filterType, #filterModel, #filterArea, #filterAcquisition, #filterLifeSpan, #filterStatus').on('keyup change', function() {
+    $('#filterType, #filterModel, #filterArea, #filterAcquisitionStart, #filterAcquisitionEnd, #filterLifeSpan, #filterStatus').on('keyup change', function() {
         table.ajax.reload(null, false);
     });
 
     // Reset filters
     $('#resetFilters').click(function() {
-        $('#filterType, #filterModel, #filterArea, #filterAcquisition, #filterLifeSpan, #filterStatus').val('');
+        $('#filterType, #filterModel, #filterArea, #filterAcquisitionStart, #filterAcquisitionEnd, #filterLifeSpan, #filterStatus').val('');
         table.ajax.reload(null, false);
     });
 
@@ -373,7 +411,8 @@ $(document).ready(function () {
             type: $('#filterType').val(),
             model: $('#filterModel').val(),
             area: $('#filterArea').val(),
-            acquisitiondate: $('#filterAcquisition').val(),
+            acquisition_start: $('#filterAcquisitionStart').val(),
+            acquisition_end: $('#filterAcquisitionEnd').val(),
             estimatedlife: $('#filterLifeSpan').val(),
             status: $('#filterStatus').val()
         });
@@ -435,63 +474,63 @@ $(document).ready(function () {
     });
 
     // -------------------- ADD EQUIPMENT --------------------
-$('#addEquipmentModal form').submit(function(e){
-    e.preventDefault();
-    let form = $(this);
-    $.ajax({
-        url: form.attr('action'),
-        type: 'POST',
-        data: form.serialize(),
-        dataType: 'json',
-        success: function(resp){
-            if(resp.success){
-                Swal.fire({
-                    icon: 'success',
-                    title: 'Added!',
-                    text: resp.message,
-                    timer: 3000,           // Auto close after 3 seconds
-                    showConfirmButton: false
-                });
-                form[0].reset();
-                $('#addEquipmentModal').modal('hide');
-                $('#equipmentTable').DataTable().ajax.reload(null,false);
-            } else {
-                Swal.fire('Error!', resp.message, 'error');
+    $('#addEquipmentModal form').submit(function(e){
+        e.preventDefault();
+        let form = $(this);
+        $.ajax({
+            url: form.attr('action'),
+            type: 'POST',
+            data: form.serialize(),
+            dataType: 'json',
+            success: function(resp){
+                if(resp.success){
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Added!',
+                        text: resp.message,
+                        timer: 3000,
+                        showConfirmButton: false
+                    });
+                    form[0].reset();
+                    $('#addEquipmentModal').modal('hide');
+                    table.ajax.reload(null,false);
+                } else {
+                    Swal.fire('Error!', resp.message, 'error');
+                }
             }
-        }
+        });
     });
-});
 
     // -------------------- IMPORT EXCEL --------------------
-$('#importExcelModal form').submit(function(e){
-    e.preventDefault();
-    let form = $(this);
-    let formData = new FormData(this); // for file upload
-    $.ajax({
-        url: form.attr('action'),
-        type: 'POST',
-        data: formData,
-        contentType: false,
-        processData: false,
-        dataType: 'json',
-        success: function(resp){
-            if(resp.success){
-                Swal.fire({
-                    icon: 'success',
-                    title: 'Imported!',
-                    text: resp.message,
-                    timer: 3000,           // Auto close after 3 seconds
-                    showConfirmButton: false
-                });
-                form[0].reset();
-                $('#importExcelModal').modal('hide');
-                $('#equipmentTable').DataTable().ajax.reload(null,false);
-            } else {
-                Swal.fire('Error!', resp.message, 'error');
+    $('#importExcelModal form').submit(function(e){
+        e.preventDefault();
+        let form = $(this);
+        let formData = new FormData(this); // for file upload
+        $.ajax({
+            url: form.attr('action'),
+            type: 'POST',
+            data: formData,
+            contentType: false,
+            processData: false,
+            dataType: 'json',
+            success: function(resp){
+                if(resp.success){
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Imported!',
+                        text: resp.message,
+                        timer: 3000,
+                        showConfirmButton: false
+                    });
+                    form[0].reset();
+                    $('#importExcelModal').modal('hide');
+                    table.ajax.reload(null,false);
+                } else {
+                    Swal.fire('Error!', resp.message, 'error');
+                }
             }
-        }
+        });
     });
-});
 
 });
 </script>

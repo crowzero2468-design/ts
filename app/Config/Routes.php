@@ -9,6 +9,8 @@ $routes->get('/', 'Auth::login');
 $routes->get('login', 'Auth::login');
 $routes->post('login', 'Auth::attemptLogin');
 $routes->get('logout', 'LogoutController::logout');
+$routes->post('forgot/checkUser', 'Auth::checkUser');
+$routes->post('forgot/updatePassword', 'Auth::updatePassword');
 
 $routes->get('dashboard', 'DashboardController::index', ['filter' => 'auth']);
 
@@ -118,3 +120,10 @@ $routes->post('speedtest/update', 'SpeedtestController::update');
 $routes->post('speedtest/delete', 'SpeedtestController::delete');         
 $routes->get('speedtest/viewForm', 'SpeedtestController::viewForm');
 $routes->post('speedtest/importExcel', 'SpeedtestController::importExcel');
+
+
+
+
+
+
+$routes->get('dash2', 'Dashboard2Controller::index');

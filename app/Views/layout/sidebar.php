@@ -132,27 +132,34 @@ $current = service('uri')->getSegment(1);
     <div class="sidebar-content">
       <ul class="nav nav-secondary">
 
-        <!-- DASHBOARD -->
-        <li class="nav-item <?= ($current == '' || $current == 'dashboard') ? 'active submenu' : '' ?>">
+       <!-- DASHBOARD -->
+      <li class="nav-item <?= in_array($current, ['', 'dashboard', 'dash2']) ? 'active submenu' : '' ?>">
           <a data-bs-toggle="collapse"
-             href="#dashboard"
-             class="<?= ($current == '' || $current == 'dashboard') ? '' : 'collapsed' ?>"
-             aria-expanded="<?= ($current == '' || $current == 'dashboard') ? 'true' : 'false' ?>">
-            <i class="fas fa-home"></i>
-            <p>Dashboard</p>
-            <span class="caret"></span>
+            href="#dashboard"
+            class="<?= in_array($current, ['', 'dashboard', 'dash2']) ? '' : 'collapsed' ?>"
+            aria-expanded="<?= in_array($current, ['', 'dashboard', 'dash2']) ? 'true' : 'false' ?>">
+              <i class="fas fa-home"></i>
+              <p>Dashboard</p>
+              <span class="caret"></span>
           </a>
 
-          <div class="collapse <?= ($current == '' || $current == 'dashboard') ? 'show' : '' ?>" id="dashboard">
-            <ul class="nav nav-collapse">
-              <li class="<?= ($current == '' || $current == 'dashboard') ? 'active' : '' ?>">
-                <a href="<?= base_url('/dashboard'); ?>">
-                  <span class="sub-item">Troubleshoot</span>
-                </a>
-              </li>
-            </ul>
+          <div class="collapse <?= in_array($current, ['', 'dashboard', 'dash2']) ? 'show' : '' ?>" id="dashboard">
+              <ul class="nav nav-collapse">
+                  <li class="<?= ($current == 'dashboard' || $current == '') ? 'active' : '' ?>">
+                      <a href="<?= base_url('/dashboard'); ?>">
+                          <span class="sub-item">Troubleshoot</span>
+                      </a>
+                  </li>
+                 <?php if (session('role') == 3): ?>
+                      <li class="<?= ($current == 'dash2') ? 'active' : '' ?>">
+                          <a href="<?= base_url('/dash2'); ?>">
+                              <span class="sub-item">Dashboard</span>
+                          </a>
+                      </li>
+                  <?php endif; ?>
+              </ul>
           </div>
-        </li>
+      </li>
 
         <li class="nav-section">
           <span class="sidebar-mini-icon">
@@ -240,12 +247,13 @@ $current = service('uri')->getSegment(1);
 
           <div class="collapse <?= ($current == 'equip' || $current == 'pmc' || $current == 'temp' || $current == 'speedtest') ? 'show' : '' ?>" id="itEquipment">
             <ul class="nav nav-collapse">
-
+              <?php if (session('role') == 3): ?>
               <li class="<?= $current == 'equip' ? 'active' : '' ?>">
                 <a href="<?= base_url('/equip'); ?>">
                   <span class="sub-item">Equipment List</span>
                 </a>
               </li>
+              <?php endif; ?>
 
               <li class="<?= $current == 'pmc' ? 'active' : '' ?>">
                 <a href="<?= base_url('/pmc'); ?>">
