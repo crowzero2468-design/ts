@@ -106,28 +106,32 @@ public function refreshTodayTable()
 }
 
 public function refreshCounts()
-{
-    $db = \Config\Database::connect();
+    {
+        $db = \Config\Database::connect();
 
-    $onDutyCount = $db->table('tb_it')
-        ->where('role', 'user')
-        ->where('status', 'active')
-        ->countAllResults();
+        // Ensure the duty scheduler runs before fetching counts
+        $techController = new \App\Controllers\TechController();
+        $techController->updateDutyStatus();
 
+        // Fetch fresh data
+        $onDutyCount = $db->table('tb_it')
+            ->where('role', 'user')
+            ->where('status', 'active')
+            ->countAllResults();
 
-    $TotalTSCount = $db->table('tbtrouble')
-        ->countAllResults();
+        $TotalTSCount = $db->table('tbtrouble')
+            ->countAllResults();
 
-    $ongoingCount = $db->table('tbtrouble')
-        ->where('status', 'Ongoing')
-        ->countAllResults();
+        $ongoingCount = $db->table('tbtrouble')
+            ->where('status', 'Ongoing')
+            ->countAllResults();
 
-    return $this->response->setJSON([
-        'onDuty'   => $onDutyCount,
-        'totalTS'  => $TotalTSCount,
-        'ongoing'  => $ongoingCount,
-    ]);
-}
+        return $this->response->setJSON([
+            'onDuty'   => $onDutyCount,
+            'totalTS'  => $TotalTSCount,
+            'ongoing'  => $ongoingCount,
+        ]);
+    }
 
 
 }

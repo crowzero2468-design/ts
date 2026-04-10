@@ -120,7 +120,7 @@ class TechController extends BaseController
     /* =========================
        AUTO DUTY SCHEDULER
     ========================== */
-    private function updateDutyStatus()
+    public function updateDutyStatus()
     {
         // stop scheduler if manual override ON
         if (session()->get('manual_override') == 1) {

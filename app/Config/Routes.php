@@ -59,6 +59,7 @@ $routes->get('message/(:any)', 'MessageController::index/$1', ['filter' => 'auth
 
 $routes->get('profile', 'Profile::index' , ['filter' => 'auth']);
 $routes->post('profile/update', 'Profile::update', ['filter' => 'auth']);
+$routes->get('profile/printPdf', 'Profile::printPdf');
 // $routes->post('profile/update-name', 'Profile::updateName');
 // $routes->post('profile/update-password', 'Profile::updatePassword');
 // $routes->post('profile/update-username', 'Profile::updateUsername');
@@ -86,7 +87,7 @@ $routes->get('equip', 'EquipmentController::index');
 $routes->post('equipment/save', 'EquipmentController::save');
 $routes->get('equipment/getData', 'EquipmentController::getData');
 $routes->get('equipment/form', 'EquipmentController::form');
-$routes->post('/equipment/importExcel', 'EquipmentController::importExcel');
+$routes->post('equipment/importExcel', 'EquipmentController::importExcel');
 $routes->get('equipment/get/(:num)', 'EquipmentController::get/$1');
 $routes->post('equipment/update', 'EquipmentController::update');
 $routes->post('equipment/delete', 'EquipmentController::delete');

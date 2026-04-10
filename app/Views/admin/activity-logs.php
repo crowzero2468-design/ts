@@ -89,11 +89,13 @@ $this->section('body');
                     <i class="fas fa-eraser me-1"></i> Clear
                 </button>
             </div>
-            <div class="col-md-3">
-                <button type="button" id="viewFormBtn" class="btn btn-secondary w-100">
-                    <i class="fas fa-file-alt me-1"></i> View as Form
-                </button>
-            </div>
+            <?php if (session()->get('role') == 3): ?>
+                <div class="col-md-3">
+                    <button type="button" id="viewFormBtn" class="btn btn-secondary w-100">
+                        <i class="fas fa-file-alt me-1"></i> Generate PDF
+                    </button>
+                </div>
+            <?php endif; ?>
 
         </form>
     </div>

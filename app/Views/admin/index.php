@@ -570,7 +570,7 @@ function checkNewTrouble() {
 checkNewTrouble();
 
 // Then continue checking every 5 seconds
-setInterval(checkNewTrouble, 5000);
+setInterval(checkNewTrouble, 100000);
 
 
 
@@ -624,7 +624,7 @@ setInterval(function () {
         refreshCounts();
     });
 
-}, 10000);
+}, 100000);
 
 
 // ==============================

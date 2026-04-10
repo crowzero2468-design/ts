@@ -6,6 +6,7 @@ use CodeIgniter\Controller;
 use CodeIgniter\HTTP\RequestInterface;
 use CodeIgniter\HTTP\ResponseInterface;
 use Psr\Log\LoggerInterface;
+use App\Controllers\TechController; // Import TechController
 
 /**
  * BaseController provides a convenient place for loading components
@@ -41,5 +42,9 @@ abstract class BaseController extends Controller
 
         // Preload any models, libraries, etc, here.
         // $this->session = service('session');
+
+        // Run the duty scheduler on every request
+        $techController = new TechController();
+        $techController->updateDutyStatus();
     }
 }

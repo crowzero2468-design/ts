@@ -7,7 +7,6 @@
 }
 
 </style>
-<div class="container mt-4">
 
     <h3 class="mb-4">My Profile</h3>
 
@@ -106,11 +105,15 @@
                             <input type="date" id="maxDate" class="form-control form-control-sm">
                         </div>
 
-                        <div class="col-md-4 d-flex align-items-end">
-                            <button id="clearDate" class="btn btn-sm btn-outline-secondary w-100">
-                                Clear Filter
-                            </button>
-                        </div>
+                    <div class="col-md-4 d-flex align-items-end gap-2">
+                        <button id="clearDate" class="btn btn-sm btn-outline-secondary w-50">
+                            Clear Filter
+                        </button>
+
+                        <a href="#" id="generatePdf" class="btn btn-sm btn-danger w-50">
+                           <i class="fa-regular fa-file-pdf"></i> Generate PDF
+                        </a>
+                    </div>
                     </div>
                     <h5>Activity Log</h5>
                     <hr>
@@ -123,8 +126,9 @@
                             <thead class="table-dark">
                                 <tr>
                                     <th>#</th>
-                                    <th>Caller</th>
-                                    <th>Title</th>
+                                    <th>Area/Section</th>
+                                    <th>Trouble Description</th>
+                                    <th>Remarks</th>
                                     <th>Status</th>
                                     <th>Date</th>
                                 </tr>
@@ -135,7 +139,10 @@
                                     <td><?= $i + 1 ?></td>
                                     <td><?= esc($row['name'] ?? '-') ?></td>
                                     <td><?= esc($row['description'] ?? '-') ?></td>
-                                    <td><?= esc($row['status'] ?? '-') ?></td>
+                                    <td><?= esc($row['remarks'] ?? '-') ?></td>
+                                    <td>
+                                        <?= esc($row['status'] ?? '-') ?>
+                                    </td>
                                     <td data-order="<?= strtotime($row['time']) ?>">
                                         <?= date('M d, Y h:i A', strtotime($row['time'])) ?>
                                     </td>
@@ -152,7 +159,7 @@
         </div>
 
     </div>
-</div>
+
 
 <?php if (session()->getFlashdata('success')): ?>
 <script>
@@ -200,29 +207,63 @@ document.addEventListener("DOMContentLoaded", function() {
 </script>
 <?php endif; ?>
 
-
 <script>
 $(document).ready(function () {
 
+    // ================= PDF GENERATE =================
+    $('#generatePdf').on('click', function (e) {
+        e.preventDefault();
+
+        let min = $('#minDate').val();
+        let max = $('#maxDate').val();
+
+        if (!min || !max) {
+            Swal.fire({
+                icon: 'warning',
+                title: 'Missing Dates',
+                text: 'Please select start and end date.'
+            });
+            return;
+        }
+
+        let startDate = new Date(min);
+        let endDate = new Date(max);
+
+        let months =
+            (endDate.getFullYear() - startDate.getFullYear()) * 12 +
+            (endDate.getMonth() - startDate.getMonth());
+
+        if (months > 6) {
+            Swal.fire({
+                icon: 'warning',
+                title: 'Invalid Date Range',
+                text: 'Please select 6 months or below only.'
+            });
+            return;
+        }
+
+        let url = "<?= base_url('profile/printPdf') ?>?start_date=" + min + "&end_date=" + max;
+
+        window.open(url, '_blank');
+    });
+
+    // ================= DATATABLE =================
     var table = $('#activityTable').DataTable({
-        pageLength: 5,
-        lengthMenu: [ [5, 10, 25, 50, 100], [5, 10, 25, 50, 100] ],
+        pageLength: 4,
+        lengthMenu: [[4, 10, 25, 50, 100], [4, 10, 25, 50, 100]],
         ordering: true,
         searching: true,
         responsive: true
     });
 
-    // ✅ Custom Date Filter (Fixed)
+    // Date filter
     $.fn.dataTable.ext.search.push(function (settings, data, dataIndex) {
 
         var min = $('#minDate').val();
         var max = $('#maxDate').val();
 
-        if (!min && !max) {
-            return true;
-        }
+        if (!min && !max) return true;
 
-        // Get UNIX timestamp from data-order attribute (Date column = index 4)
         var rowNode = table.row(dataIndex).node();
         var timestamp = $(rowNode).find('td').eq(4).data('order');
 

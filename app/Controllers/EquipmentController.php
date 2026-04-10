@@ -287,13 +287,13 @@ public function importExcel()
             $data = [
                 'label' => $row[0] ?? '',
                 'model' => $row[1] ?? '',
-                'AccountableArea' => $row[8] ?? '',
+                // 'AccountableArea' => $row[8] ?? '',
                 'description' => $row[3] ?? '',
                 'acquisitiondate' => $acquisitionDate ?? null,
                 'type' => $row[5] ?? '',
                 'quantity' => $row[6] ?? 1,
                 'inspector' => $row[7] ?? '',
-                'estimatedlife' => $row[9] ?? null,
+                // 'estimatedlife' => $row[9] ?? null,
                 'status' => $status ?? 'NEW',
             ];
 

@@ -21,10 +21,10 @@ class TroubleController extends BaseController
     $loggedUser = session()->get('name'); // 🔥 get logged-in user name
 
     $baseData = [
-        'name'        => $this->request->getPost('name'),
+        'name'        => strtoupper($this->request->getPost('name')),
         'location'    => $this->request->getPost('location'),
         'ts_type'     => $this->request->getPost('ts_type'),
-        'description' => $this->request->getPost('description'),
+        'description' => strtoupper($this->request->getPost('description')),
         'status'      => 'Ongoing',
         'time'        => date('Y-m-d H:i:s'),
         'personnel'  => $loggedUser, // ✅ save who created it
