@@ -123,13 +123,21 @@ document.getElementById('btnTempPDF').addEventListener('click', function() {
                 });
             }
         },
-        columns: [
-            { data: 'date' },
-            { data: 'time' },
-            { data: 'temp', render: d => d + ' ℃' },
-            { data: 'monitor_by' }
-        ],
-        order: [[0, 'desc'], [1, 'desc']]
+       columns: [
+                {
+                    data: 'date',
+                    render: function(data, type, row) {
+                        if (type === 'sort') {
+                            return row.date_sort;
+                        }
+                        return data;
+                    }
+                },
+                { data: 'time' },
+                { data: 'temp', render: d => d + ' ℃' },
+                { data: 'monitor_by' }
+            ],
+            order: [[0, 'desc']]
     });
 
     $('#btnFilter').on('click', function() {

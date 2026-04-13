@@ -255,45 +255,55 @@ public function importExcel()
 
         $model = new \App\Models\EquipmentModel();
 
-        foreach ($sheetData as $index => $row) {
-            if ($index === 0) continue; // skip header if present
+        // ✅ Load wards ONCE
+        $db = \Config\Database::connect();
+        $wards = $db->table('tb_ward')->select('ward')->get()->getResultArray();
 
-            // Normalize the acquisition date
-            $rawDate = $row[4] ?? '';
+        foreach ($sheetData as $index => $row) {
+            if ($index === 0) continue; // skip header
+
+            // ✅ Clean & normalize acquisition date
+            $rawDate = $row[4] ?? null;
             $acquisitionDate = null;
 
-            if ($rawDate) {
-                // If PhpSpreadsheet returned a number (Excel date)
-                if (is_numeric($rawDate)) {
-                    $acquisitionDate = \PhpOffice\PhpSpreadsheet\Shared\Date::excelToDateTimeObject($rawDate)->format('Y-m-d');
-                } else {
-                    // Try parsing various date formats
-                    $formats = ['d-M-y', 'd/m/Y', 'Y-m-d'];
-                    foreach ($formats as $format) {
-                        $dt = \DateTime::createFromFormat($format, $rawDate);
-                        if ($dt) {
-                            $acquisitionDate = $dt->format('Y-m-d');
-                            break;
-                        }
+            if (!empty($rawDate)) {
+                try {
+                    if (is_numeric($rawDate)) {
+                        $dt = \PhpOffice\PhpSpreadsheet\Shared\Date::excelToDateTimeObject($rawDate);
+                    } else {
+                        $dt = new \DateTime($rawDate);
                     }
-                    // Fallback: try strtotime
-                    if (!$acquisitionDate) {
-                        $ts = strtotime($rawDate);
-                        if ($ts !== false) $acquisitionDate = date('Y-m-d', $ts);
-                    }
+
+                    $acquisitionDate = $dt->format('Y-m-d');
+
+                } catch (\Exception $e) {
+                    $acquisitionDate = null;
                 }
+            }
+
+            // ✅ Compute estimated life (+5 years)
+            $estimatedLife = null;
+            if ($acquisitionDate) {
+                $dtLife = new \DateTime($acquisitionDate);
+                $dtLife->modify('+5 years');
+                $estimatedLife = $dtLife->format('Y-m-d');
+            }
+
+            // ✅ Random ward from tb_ward
+            $accountableArea = null;
+            if (!empty($wards)) {
+                $accountableArea = $wards[array_rand($wards)]['ward'];
             }
 
             $data = [
                 'label' => $row[0] ?? '',
                 'model' => $row[1] ?? '',
-                // 'AccountableArea' => $row[8] ?? '',
                 'description' => $row[3] ?? '',
-                'acquisitiondate' => $acquisitionDate ?? null,
-                'type' => $row[5] ?? '',
+                'AccountableArea' => $accountableArea, // ✅ FIXED
+                'acquisitiondate' => $acquisitionDate ?: null,
+                'estimatedlife' => $estimatedLife,
                 'quantity' => $row[6] ?? 1,
                 'inspector' => $row[7] ?? '',
-                // 'estimatedlife' => $row[9] ?? null,
                 'status' => $status ?? 'NEW',
             ];
 
@@ -311,7 +321,6 @@ public function importExcel()
         'message' => 'Invalid Excel file!'
     ]);
 }
-
 
     public function get($id)
 {

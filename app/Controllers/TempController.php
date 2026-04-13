@@ -34,19 +34,21 @@ class TempController extends BaseController
             $builder->like('temp', $searchTemp);
         }
 
-        $data = $builder->get()->getResultArray();
+            $data = $builder->get()->getResultArray();
 
-        $result = [];
-        foreach ($data as $row) {
-            $result[] = [
-                'date' => date('F j, Y', strtotime($row['datetime'])),
-                'time' => date('g:i A', strtotime($row['datetime'])),
-                'temp' => $row['temp'],
-                'monitor_by' => $row['monitor_by'],
-            ];
-        }
+            $result = [];
 
-        return $this->response->setJSON(['data' => $result]);
+            foreach ($data as $row) {
+                $result[] = [
+                    'date_sort' => date('Y-m-d', strtotime($row['datetime'])),
+                    'date' => date('F j, Y', strtotime($row['datetime'])),
+                    'time' => date('g:i A', strtotime($row['datetime'])),
+                    'temp' => $row['temp'],
+                    'monitor_by' => $row['monitor_by'],
+                ];
+            }
+
+            return $this->response->setJSON(['data' => $result]);
     }
 
      public function add()

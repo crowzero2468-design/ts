@@ -265,7 +265,7 @@ $(document).ready(function () {
         if (!min && !max) return true;
 
         var rowNode = table.row(dataIndex).node();
-        var timestamp = $(rowNode).find('td').eq(4).data('order');
+        var timestamp = $(rowNode).find('td').eq(5).data('order');
 
         if (!timestamp) return true;
 

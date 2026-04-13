@@ -492,6 +492,7 @@ $(document).ready(function () {
 
 let table = $('#activityTable').DataTable({
     pageLength: 10,
+     lengthMenu: [[10, 20, 30, 100], [10, 20, 30, 100]],
     order: [[5, 'desc']],
     responsive: true,
     processing: true,
@@ -570,7 +571,7 @@ function checkNewTrouble() {
 checkNewTrouble();
 
 // Then continue checking every 5 seconds
-setInterval(checkNewTrouble, 100000);
+setInterval(checkNewTrouble, 5000);
 
 
 
