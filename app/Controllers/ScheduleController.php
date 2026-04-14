@@ -90,130 +90,127 @@ private function updateDutyStatus()
 
 
     public function import()
-    {
-        $file = $this->request->getFile('excel_file');
+{
+    $file = $this->request->getFile('excel_file');
 
-        if (!$file || !$file->isValid()) {
-            return redirect()->back()->with('error', 'Invalid file.');
-        }
-
-        $spreadsheet = IOFactory::load($file->getTempName());
-        $sheet       = $spreadsheet->getActiveSheet();
-        $rows        = $sheet->toArray();
-
-        if (count($rows) < 3) {
-            return redirect()->back()->with('error', 'Excel format is invalid.');
-        }
-
-        $db = \Config\Database::connect();
-        $db->transStart();
-
-        $dateRow  = $rows[1];   // Row with day numbers
-        $year     = date('Y');
-        $month    = date('m');
-        $inserted = 0;
-        $skippedNoTech = 0;
-
-        foreach ($rows as $rowIndex => $row) {
-
-            if ($rowIndex < 2) continue;
-            if (!isset($row[0])) continue;
-
-            // Clean technician name
-            $excelName = trim(preg_replace('/\s+/', ' ', $row[0]));
-            if ($excelName === '') continue;
-
-            // Clean technician name (AGGRESSIVE CLEAN)
-                $excelName = trim($row[1]);
-
-                // Remove invisible unicode characters
-                $excelName = preg_replace('/[\x{00A0}\x{200B}-\x{200D}\x{FEFF}]/u', '', $excelName);
-
-                // Normalize spaces
-                $excelName = preg_replace('/\s+/', ' ', $excelName);
-
-                // Convert to lowercase
-                $excelName = mb_strtolower($excelName);
-
-                // Now match
-                $tech = $db->query("
-                    SELECT * FROM tb_it
-                    WHERE LOWER(REPLACE(REPLACE(name, CHAR(160), ''), '  ', ' ')) = ?
-                    LIMIT 1
-                ", [$excelName])->getRow();
-
-            if (!$tech) {
-                $skippedNoTech++;
-                continue;
-            }
-
-            for ($col = 1; $col < count($row); $col++) {
-
-                $shift = isset($row[$col]) ? trim($row[$col]) : '';
-                $shift = strtoupper(str_replace(' ', '', $shift));
-
-                $dayNumber = isset($dateRow[$col]) ? trim($dateRow[$col]) : '';
-
-                if ($shift === '' || $shift === 'OFF') continue;
-                if ($dayNumber === '') continue;
-
-                $dayNumber = (int) filter_var($dayNumber, FILTER_SANITIZE_NUMBER_INT);
-                if ($dayNumber <= 0) continue;
-
-                $fullDate = sprintf('%04d-%02d-%02d', $year, $month, $dayNumber);
-
-                switch ($shift) {
-
-                    case '8-5':
-                        $start_time = '08:00:00';
-                        $end_time   = '17:00:00';
-                        break;
-
-                    case '7-4':
-                        $start_time = '07:00:00';
-                        $end_time   = '16:00:00';
-                        break;
-
-                    case '3-11':
-                        $start_time = '15:00:00';
-                        $end_time   = '23:00:00';
-                        break;
-
-                    case '11-7':
-                        $start_time = '23:00:00';
-                        $end_time   = '07:00:00';
-                        break;
-
-                    default:
-                        continue 2;
-                }
-
-                // Check duplicate
-                $exists = $db->query("
-                    SELECT id FROM tb_schedule
-                    WHERE tech_id = ?
-                    AND schedule_date = ?
-                    LIMIT 1
-                ", [$tech->id, $fullDate])->getRow();
-
-                if ($exists) continue;
-
-                $db->table('tb_schedule')->insert([
-                    'tech_id'       => $tech->id,
-                    'schedule_date' => $fullDate,
-                    'start_time'    => $start_time,
-                    'end_time'      => $end_time
-                ]);
-
-                $inserted++;
-            }
-        }
-
-        $db->transComplete();
-
-        return redirect()->back()->with(
-            'success',
-            "Schedule imported. Rows inserted: {$inserted} | Skipped (no tech match): {$skippedNoTech}"
-        );
+    if (!$file || !$file->isValid()) {
+        return redirect()->back()->with('error', 'Invalid file.');
     }
+
+    $spreadsheet = IOFactory::load($file->getTempName());
+    $sheet       = $spreadsheet->getActiveSheet();
+    $rows        = $sheet->toArray();
+
+    if (count($rows) < 3) {
+        return redirect()->back()->with('error', 'Excel format is invalid.');
+    }
+
+    $db = \Config\Database::connect();
+    $db->transStart();
+
+    $dateRow  = $rows[1];
+    $year     = date('Y');
+    $month    = date('m');
+    $inserted = 0;
+    $skippedNoTech = 0;
+
+    foreach ($rows as $rowIndex => $row) {
+
+        if ($rowIndex < 2) continue;
+        if (empty($row[1])) continue;
+
+        // ✅ CLEAN TECH NAME (FIXED)
+        $excelName = trim($row[1]);
+
+        $excelName = preg_replace('/[\x{00A0}\x{200B}-\x{200D}\x{FEFF}]/u', '', $excelName);
+        $excelName = preg_replace('/\s+/', ' ', $excelName);
+        $excelName = mb_strtolower($excelName);
+
+        // match tech
+        $tech = $db->query("
+            SELECT * FROM tb_it
+            WHERE LOWER(REPLACE(REPLACE(name, CHAR(160), ''), '  ', ' ')) = ?
+            LIMIT 1
+        ", [$excelName])->getRow();
+
+        if (!$tech) {
+            $skippedNoTech++;
+            continue;
+        }
+
+        for ($col = 1; $col < count($row); $col++) {
+
+            $shift = isset($row[$col]) ? trim($row[$col]) : '';
+            $shift = strtoupper(str_replace(' ', '', $shift));
+
+            $dayNumber = isset($dateRow[$col]) ? trim($dateRow[$col]) : '';
+
+            if ($shift === '' || $shift === 'OFF') continue;
+            if ($dayNumber === '') continue;
+
+            $dayNumber = (int) filter_var($dayNumber, FILTER_SANITIZE_NUMBER_INT);
+            if ($dayNumber <= 0) continue;
+
+            $fullDate = sprintf('%04d-%02d-%02d', $year, $month, $dayNumber);
+
+            switch ($shift) {
+
+                case '8-5':
+                    $start_time = '08:00:00';
+                    $end_time   = '17:00:00';
+                    break;
+
+                case '7-4':
+                    $start_time = '07:00:00';
+                    $end_time   = '16:00:00';
+                    break;
+
+                case '7-6':   // ✅ ADDED
+                    $start_time = '07:00:00';
+                    $end_time   = '18:00:00';
+                    break;
+
+                case '3-11':
+                    $start_time = '15:00:00';
+                    $end_time   = '23:00:00';
+                    break;
+
+                case '11-7':
+                    $start_time = '23:00:00';
+                    $end_time   = '07:00:00';
+                    break;
+
+                default:
+                    continue 2;
+            }
+
+            // duplicate check
+            $exists = $db->query("
+                SELECT id FROM tb_schedule
+                WHERE tech_id = ?
+                AND schedule_date = ?
+                LIMIT 1
+            ", [$tech->id, $fullDate])->getRow();
+
+            if ($exists) continue;
+
+            $db->table('tb_schedule')->insert([
+                'tech_id'       => $tech->id,
+                'schedule_date' => $fullDate,
+                'start_time'    => $start_time,
+                'end_time'      => $end_time
+            ]);
+
+            $inserted++;
+        }
+    }
+
+    $db->transComplete();
+
+    return redirect()->back()->with(
+        'success',
+        "Schedule imported. Rows inserted: {$inserted} | Skipped (no tech match): {$skippedNoTech}"
+    );
+}
+
 }

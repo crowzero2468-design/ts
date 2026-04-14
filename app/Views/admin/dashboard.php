@@ -3,6 +3,47 @@ $this->extend('layout/main');
 $this->section('body');
 ?>
 
+<style>
+.timeline { position: relative; padding-left: 5px; }
+
+/* Each item */
+.timeline-item {
+    position: relative;
+    padding-bottom: 20px;
+    display: flex;
+}
+
+
+/* Icon */
+.timeline-icon {
+    width: 40px;
+    height: 40px;
+    font-size: 14px;
+    flex-shrink: 0;
+}
+
+/* REMOVE ANY VERTICAL TIMELINE LINE */
+.timeline::before {
+    display: none !important;
+    content: none !important;
+}
+
+.timeline {
+    border-left: none !important;
+}
+
+.timeline-item::before {
+    content: '';
+    position: absolute;
+    left: 19px; /* aligns with icon center */
+    top: 40px;  /* starts below icon */
+    width: 2px;
+    height: calc(100% - 20px);
+    background: #ddd;
+}
+
+</style>
+
           <div class="page-inner">
             <div
               class="d-flex align-items-left align-items-md-center flex-column flex-md-row pt-2 pb-4"
@@ -110,22 +151,22 @@ $this->section('body');
 
 
 <div class="row g-4">
-    <div class="col-12">
+
+    <!-- LEFT: LINE CHART -->
+    <div class="col-md-6">
         <div class="card shadow-sm rounded-4 h-100">
-            
+
             <!-- Header -->
             <div class="card-header bg-white border-bottom d-flex align-items-center justify-content-between">
-                
-                <!-- LEFT: Title + Total -->
+
                 <div class="d-flex align-items-center">
-                    <h5 class="mb-0 fw-bold me-2">Trouble Statistics</h5>
-                    
+                    <h5 class="mb-0 fw-bold me-2">Trouble Statistics (Line)</h5>
+
                     <span class="badge bg-primary rounded-pill px-3 py-1">
                         <?= $totalTroubleshoots ?? 0 ?>
                     </span>
                 </div>
 
-                <!-- RIGHT: Date Range -->
                 <small class="text-muted">
                     <?= $startDate ?> - <?= $endDate ?>
                 </small>
@@ -140,462 +181,131 @@ $this->section('body');
 
         </div>
     </div>
+
+    <!-- RIGHT: BAR CHART -->
+    <div class="col-md-6">
+        <div class="card shadow-sm rounded-4 h-100">
+
+            <!-- Header -->
+            <div class="card-header bg-white border-bottom d-flex align-items-center justify-content-between">
+
+                <div class="d-flex align-items-center">
+                    <h5 class="mb-0 fw-bold me-2">Most Frequent Trouble Statistics (10+)</h5>
+
+                    <span class="badge bg-success rounded-pill px-3 py-1">
+                        <?= $totalTroubleshoots ?? 0 ?>
+                    </span>
+                </div>
+
+                <small class="text-muted">
+                    <?= $startDate ?> - <?= $endDate ?>
+                </small>
+            </div>
+
+            <!-- Body -->
+            <div class="card-body p-3">
+                <div style="min-height: 380px;">
+                    <canvas id="statisticsBarChart"></canvas>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <div class="row g-4 mt-1">
+
+    <!-- TIMELINE CARD -->
+<div class="col-md-6">
+    <div class="card shadow-sm rounded-4 h-100">
+
+        <div class="card-header bg-white border-bottom">
+            <h5 class="mb-0 fw-bold">Most Active Technicians</h5>
+        </div>
+
+        <div class="card-body">
+
+            <!-- SCROLL CONTAINER -->
+            <div class="timeline" style="max-height: 320px; overflow-y: auto;">
+
+                <?php foreach ($techActivities as $tech): ?>
+
+                    <?php
+                        // ✅ FIX: use ID (matches updated controller)
+                        $id = $tech->tech_id ?? $tech->person ?? null;
+
+                        $list = $techTroubleMap[$id] ?? [];
+                    ?>
+
+                    <div class="timeline-item d-flex align-items-start justify-content-between mb-4 w-100">
+
+                        <!-- LEFT SIDE -->
+                        <div class="d-flex">
+
+                            <div class="timeline-icon bg-primary text-white rounded-circle d-flex align-items-center justify-content-center me-3">
+                                <i class="fa fa-user"></i>
+                            </div>
+
+                            <div>
+                                <div class="fw-bold">
+                                    <?= strtoupper($tech->name ?? 'Unknown') ?>
+                                </div>
+
+                                <div>
+                                    Handled <?= $tech->total ?> trouble(s)
+                                </div>
+                            </div>
+
+                        </div>
+
+                              <!-- RIGHT SIDE (LIST) -->
+                              <div class="text-end" style="max-width: 45%;">
+
+                                  <?php if (!empty($list)): ?>
+
+                                      <?php foreach ($list as $item): ?>
+                                          <span class="badge bg-secondary me-1 mb-1">
+                                              <?= esc($item) ?>
+                                          </span>
+                                      <?php endforeach; ?>
+
+                                  <?php else: ?>
+                                      <span class="text-muted small">No breakdown data</span>
+                                  <?php endif; ?>
+
+                              </div>
+
+                    </div>
+
+                <?php endforeach; ?>
+
+            </div>
+
+        </div>
+    </div>
 </div>
 
+</div>
 
-<!-- 
-            <div class="row">
-              <div class="col-md-12">
-                <div class="card card-round">
-                  <div class="card-header">
-                    <div class="card-head-row card-tools-still-right">
-                      <h4 class="card-title">Users Geolocation</h4>
-                      <div class="card-tools">
-                        <button
-                          class="btn btn-icon btn-link btn-primary btn-xs"
-                        >
-                          <span class="fa fa-angle-down"></span>
-                        </button>
-                        <button
-                          class="btn btn-icon btn-link btn-primary btn-xs btn-refresh-card"
-                        >
-                          <span class="fa fa-sync-alt"></span>
-                        </button>
-                        <button
-                          class="btn btn-icon btn-link btn-primary btn-xs"
-                        >
-                          <span class="fa fa-times"></span>
-                        </button>
-                      </div>
-                    </div>
-                    <p class="card-category">
-                      Map of the distribution of users around the world
-                    </p>
-                  </div>
-                  <div class="card-body">
-                    <div class="row">
-                      <div class="col-md-6">
-                        <div class="table-responsive table-hover table-sales">
-                          <table class="table">
-                            <tbody>
-                              <tr>
-                                <td>
-                                  <div class="flag">
-                                    <img
-                                      src="assets/img/flags/id.png"
-                                      alt="indonesia"
-                                    />
-                                  </div>
-                                </td>
-                                <td>Indonesia</td>
-                                <td class="text-end">2.320</td>
-                                <td class="text-end">42.18%</td>
-                              </tr>
-                              <tr>
-                                <td>
-                                  <div class="flag">
-                                    <img
-                                      src="assets/img/flags/us.png"
-                                      alt="united states"
-                                    />
-                                  </div>
-                                </td>
-                                <td>USA</td>
-                                <td class="text-end">240</td>
-                                <td class="text-end">4.36%</td>
-                              </tr>
-                              <tr>
-                                <td>
-                                  <div class="flag">
-                                    <img
-                                      src="assets/img/flags/au.png"
-                                      alt="australia"
-                                    />
-                                  </div>
-                                </td>
-                                <td>Australia</td>
-                                <td class="text-end">119</td>
-                                <td class="text-end">2.16%</td>
-                              </tr>
-                              <tr>
-                                <td>
-                                  <div class="flag">
-                                    <img
-                                      src="assets/img/flags/ru.png"
-                                      alt="russia"
-                                    />
-                                  </div>
-                                </td>
-                                <td>Russia</td>
-                                <td class="text-end">1.081</td>
-                                <td class="text-end">19.65%</td>
-                              </tr>
-                              <tr>
-                                <td>
-                                  <div class="flag">
-                                    <img
-                                      src="assets/img/flags/cn.png"
-                                      alt="china"
-                                    />
-                                  </div>
-                                </td>
-                                <td>China</td>
-                                <td class="text-end">1.100</td>
-                                <td class="text-end">20%</td>
-                              </tr>
-                              <tr>
-                                <td>
-                                  <div class="flag">
-                                    <img
-                                      src="assets/img/flags/br.png"
-                                      alt="brazil"
-                                    />
-                                  </div>
-                                </td>
-                                <td>Brasil</td>
-                                <td class="text-end">640</td>
-                                <td class="text-end">11.63%</td>
-                              </tr>
-                            </tbody>
-                          </table>
-                        </div>
-                      </div>
-                      <div class="col-md-6">
-                        <div class="mapcontainer">
-                          <div
-                            id="world-map"
-                            class="w-100"
-                            style="height: 300px"
-                          ></div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-
-
-            <div class="row">
-              <div class="col-md-4">
-                <div class="card card-round">
-                  <div class="card-body">
-                    <div class="card-head-row card-tools-still-right">
-                      <div class="card-title">New Customers</div>
-                      <div class="card-tools">
-                        <div class="dropdown">
-                          <button
-                            class="btn btn-icon btn-clean me-0"
-                            type="button"
-                            id="dropdownMenuButton"
-                            data-bs-toggle="dropdown"
-                            aria-haspopup="true"
-                            aria-expanded="false"
-                          >
-                            <i class="fas fa-ellipsis-h"></i>
-                          </button>
-                          <div
-                            class="dropdown-menu"
-                            aria-labelledby="dropdownMenuButton"
-                          >
-                            <a class="dropdown-item" href="#">Action</a>
-                            <a class="dropdown-item" href="#">Another action</a>
-                            <a class="dropdown-item" href="#"
-                              >Something else here</a
-                            >
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                    <div class="card-list py-4">
-                      <div class="item-list">
-                        <div class="avatar">
-                          <img
-                            src="assets/img/jm_denis.jpg"
-                            alt="..."
-                            class="avatar-img rounded-circle"
-                          />
-                        </div>
-                        <div class="info-user ms-3">
-                          <div class="username">Jimmy Denis</div>
-                          <div class="status">Graphic Designer</div>
-                        </div>
-                        <button class="btn btn-icon btn-link op-8 me-1">
-                          <i class="far fa-envelope"></i>
-                        </button>
-                        <button class="btn btn-icon btn-link btn-danger op-8">
-                          <i class="fas fa-ban"></i>
-                        </button>
-                      </div>
-                      <div class="item-list">
-                        <div class="avatar">
-                          <span
-                            class="avatar-title rounded-circle border border-white"
-                            >CF</span
-                          >
-                        </div>
-                        <div class="info-user ms-3">
-                          <div class="username">Chandra Felix</div>
-                          <div class="status">Sales Promotion</div>
-                        </div>
-                        <button class="btn btn-icon btn-link op-8 me-1">
-                          <i class="far fa-envelope"></i>
-                        </button>
-                        <button class="btn btn-icon btn-link btn-danger op-8">
-                          <i class="fas fa-ban"></i>
-                        </button>
-                      </div>
-                      <div class="item-list">
-                        <div class="avatar">
-                          <img
-                            src="assets/img/talha.jpg"
-                            alt="..."
-                            class="avatar-img rounded-circle"
-                          />
-                        </div>
-                        <div class="info-user ms-3">
-                          <div class="username">Talha</div>
-                          <div class="status">Front End Designer</div>
-                        </div>
-                        <button class="btn btn-icon btn-link op-8 me-1">
-                          <i class="far fa-envelope"></i>
-                        </button>
-                        <button class="btn btn-icon btn-link btn-danger op-8">
-                          <i class="fas fa-ban"></i>
-                        </button>
-                      </div>
-                      <div class="item-list">
-                        <div class="avatar">
-                          <img
-                            src="assets/img/chadengle.jpg"
-                            alt="..."
-                            class="avatar-img rounded-circle"
-                          />
-                        </div>
-                        <div class="info-user ms-3">
-                          <div class="username">Chad</div>
-                          <div class="status">CEO Zeleaf</div>
-                        </div>
-                        <button class="btn btn-icon btn-link op-8 me-1">
-                          <i class="far fa-envelope"></i>
-                        </button>
-                        <button class="btn btn-icon btn-link btn-danger op-8">
-                          <i class="fas fa-ban"></i>
-                        </button>
-                      </div>
-                      <div class="item-list">
-                        <div class="avatar">
-                          <span
-                            class="avatar-title rounded-circle border border-white bg-primary"
-                            >H</span
-                          >
-                        </div>
-                        <div class="info-user ms-3">
-                          <div class="username">Hizrian</div>
-                          <div class="status">Web Designer</div>
-                        </div>
-                        <button class="btn btn-icon btn-link op-8 me-1">
-                          <i class="far fa-envelope"></i>
-                        </button>
-                        <button class="btn btn-icon btn-link btn-danger op-8">
-                          <i class="fas fa-ban"></i>
-                        </button>
-                      </div>
-                      <div class="item-list">
-                        <div class="avatar">
-                          <span
-                            class="avatar-title rounded-circle border border-white bg-secondary"
-                            >F</span
-                          >
-                        </div>
-                        <div class="info-user ms-3">
-                          <div class="username">Farrah</div>
-                          <div class="status">Marketing</div>
-                        </div>
-                        <button class="btn btn-icon btn-link op-8 me-1">
-                          <i class="far fa-envelope"></i>
-                        </button>
-                        <button class="btn btn-icon btn-link btn-danger op-8">
-                          <i class="fas fa-ban"></i>
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-              <div class="col-md-8">
-                <div class="card card-round">
-                  <div class="card-header">
-                    <div class="card-head-row card-tools-still-right">
-                      <div class="card-title">Transaction History</div>
-                      <div class="card-tools">
-                        <div class="dropdown">
-                          <button
-                            class="btn btn-icon btn-clean me-0"
-                            type="button"
-                            id="dropdownMenuButton"
-                            data-bs-toggle="dropdown"
-                            aria-haspopup="true"
-                            aria-expanded="false"
-                          >
-                            <i class="fas fa-ellipsis-h"></i>
-                          </button>
-                          <div
-                            class="dropdown-menu"
-                            aria-labelledby="dropdownMenuButton"
-                          >
-                            <a class="dropdown-item" href="#">Action</a>
-                            <a class="dropdown-item" href="#">Another action</a>
-                            <a class="dropdown-item" href="#"
-                              >Something else here</a
-                            >
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                  <div class="card-body p-0">
-                    <div class="table-responsive">
-                      
-                      <table class="table align-items-center mb-0">
-                        <thead class="thead-light">
-                          <tr>
-                            <th scope="col">Payment Number</th>
-                            <th scope="col" class="text-end">Date & Time</th>
-                            <th scope="col" class="text-end">Amount</th>
-                            <th scope="col" class="text-end">Status</th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                          <tr>
-                            <th scope="row">
-                              <button
-                                class="btn btn-icon btn-round btn-success btn-sm me-2"
-                              >
-                                <i class="fa fa-check"></i>
-                              </button>
-                              Payment from #10231
-                            </th>
-                            <td class="text-end">Mar 19, 2020, 2.45pm</td>
-                            <td class="text-end">$250.00</td>
-                            <td class="text-end">
-                              <span class="badge badge-success">Completed</span>
-                            </td>
-                          </tr>
-                          <tr>
-                            <th scope="row">
-                              <button
-                                class="btn btn-icon btn-round btn-success btn-sm me-2"
-                              >
-                                <i class="fa fa-check"></i>
-                              </button>
-                              Payment from #10231
-                            </th>
-                            <td class="text-end">Mar 19, 2020, 2.45pm</td>
-                            <td class="text-end">$250.00</td>
-                            <td class="text-end">
-                              <span class="badge badge-success">Completed</span>
-                            </td>
-                          </tr>
-                          <tr>
-                            <th scope="row">
-                              <button
-                                class="btn btn-icon btn-round btn-success btn-sm me-2"
-                              >
-                                <i class="fa fa-check"></i>
-                              </button>
-                              Payment from #10231
-                            </th>
-                            <td class="text-end">Mar 19, 2020, 2.45pm</td>
-                            <td class="text-end">$250.00</td>
-                            <td class="text-end">
-                              <span class="badge badge-success">Completed</span>
-                            </td>
-                          </tr>
-                          <tr>
-                            <th scope="row">
-                              <button
-                                class="btn btn-icon btn-round btn-success btn-sm me-2"
-                              >
-                                <i class="fa fa-check"></i>
-                              </button>
-                              Payment from #10231
-                            </th>
-                            <td class="text-end">Mar 19, 2020, 2.45pm</td>
-                            <td class="text-end">$250.00</td>
-                            <td class="text-end">
-                              <span class="badge badge-success">Completed</span>
-                            </td>
-                          </tr>
-                          <tr>
-                            <th scope="row">
-                              <button
-                                class="btn btn-icon btn-round btn-success btn-sm me-2"
-                              >
-                                <i class="fa fa-check"></i>
-                              </button>
-                              Payment from #10231
-                            </th>
-                            <td class="text-end">Mar 19, 2020, 2.45pm</td>
-                            <td class="text-end">$250.00</td>
-                            <td class="text-end">
-                              <span class="badge badge-success">Completed</span>
-                            </td>
-                          </tr>
-                          <tr>
-                            <th scope="row">
-                              <button
-                                class="btn btn-icon btn-round btn-success btn-sm me-2"
-                              >
-                                <i class="fa fa-check"></i>
-                              </button>
-                              Payment from #10231
-                            </th>
-                            <td class="text-end">Mar 19, 2020, 2.45pm</td>
-                            <td class="text-end">$250.00</td>
-                            <td class="text-end">
-                              <span class="badge badge-success">Completed</span>
-                            </td>
-                          </tr>
-                          <tr>
-                            <th scope="row">
-                              <button
-                                class="btn btn-icon btn-round btn-success btn-sm me-2"
-                              >
-                                <i class="fa fa-check"></i>
-                              </button>
-                              Payment from #10231
-                            </th>
-                            <td class="text-end">Mar 19, 2020, 2.45pm</td>
-                            <td class="text-end">$250.00</td>
-                            <td class="text-end">
-                              <span class="badge badge-success">Completed</span>
-                            </td>
-                          </tr>
-                        </tbody>
-                      </table>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div> -->
 
 
 
 <script>
 $(document).ready(function() {
-    const ctx = document.getElementById('statisticsChart').getContext('2d');
-    const labels = <?= json_encode($troubleLabels) ?>;
-    const data = <?= json_encode($troubleData) ?>;
 
-    new Chart(ctx, {
+    // ======================
+    // LINE CHART (ts_type - unchanged)
+    // ======================
+    const labels = <?= json_encode($troubleLabels) ?>;
+    const data   = <?= json_encode($troubleData) ?>;
+
+    const lineCtx = document.getElementById('statisticsChart').getContext('2d');
+
+    new Chart(lineCtx, {
         type: 'line',
         data: {
             labels: labels,
             datasets: [{
-                label: 'Responsed Troubleshoots',
+                label: 'Responded Troubleshoots',
                 data: data,
                 fill: false,
                 borderColor: 'rgba(75, 192, 192, 1)',
@@ -622,8 +332,7 @@ $(document).ready(function() {
                 y: {
                     beginAtZero: true,
                     title: {
-                        display: true,
-                        
+                        display: true
                     }
                 },
                 x: {
@@ -635,6 +344,56 @@ $(document).ready(function() {
             }
         }
     });
+
+    // ======================
+    // BAR CHART (description > 1 ONLY)
+    // ======================
+    const barLabels = <?= json_encode($barLabels) ?>;
+    const barData   = <?= json_encode($barData) ?>;
+
+    const barCtx = document.getElementById('statisticsBarChart').getContext('2d');
+
+    new Chart(barCtx, {
+        type: 'bar',
+        data: {
+            labels: barLabels,
+            datasets: [{
+                label: 'Repeated Trouble Descriptions',
+                data: barData,
+                backgroundColor: 'rgba(54, 162, 235, 0.7)',
+                borderColor: 'rgba(54, 162, 235, 1)',
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: {
+                    display: true,
+                    position: 'top'
+                },
+                tooltip: {
+                    mode: 'index',
+                    intersect: false
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    title: {
+                        display: true
+                    }
+                },
+                x: {
+                    title: {
+                        display: true,
+                        text: 'Description (Repeated Only)'
+                    }
+                }
+            }
+        }
+    });
+
 });
 </script>
 
