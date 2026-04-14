@@ -119,8 +119,8 @@ $this->section('body');
                             <th>Status</th>
                             <th>Response Input by</th>
                             <th>Name of Personnel</th>
-                            <th>Time</th>
-                            <th>Completion Time</th>
+                            <th>Date and Time Called</th>
+                            <th>Completion Date and Time</th>
                             <th>TS Type</th>
                         </tr>
                     </thead>
@@ -233,16 +233,50 @@ $(document).ready(function () {
             },
             { data: 'personnel' },
             { data: 'personnel_name', defaultContent: '-' },
-            { data: 'time', render: data => {
+            {
+                data: 'time',
+               render: data => {
                 if (!data) return '-';
-                const d = new Date(data + ' UTC');
-                return isNaN(d) ? '-' : d.toLocaleString();
-            }},
-            { data: 'completion_time', render: data => {
-                if (!data) return '-';
-                const d = new Date(data + ' UTC');
-                return isNaN(d) ? '-' : d.toLocaleString();
-            }, defaultContent: '-' },
+
+                const d = new Date(data.replace(' ', 'T'));
+
+                return isNaN(d)
+                    ? '-'
+                    : d.toLocaleString('en-US', {
+                        timeZone: 'Asia/Manila',
+                        year: 'numeric',
+                        month: 'short',
+                        day: '2-digit',
+                        hour: '2-digit',
+                        minute: '2-digit',
+                        
+                        hour12: true
+                    });
+            },
+                defaultContent: '-'
+            },
+           {
+                data: 'completion_time',
+                render: data => {
+                    if (!data) return '-';
+
+                    const d = new Date(data.replace(' ', 'T'));
+
+                    return isNaN(d)
+                        ? '-'
+                        : d.toLocaleString('en-US', {
+                            timeZone: 'Asia/Manila',
+                            year: 'numeric',
+                            month: 'short',
+                            day: '2-digit',
+                            hour: '2-digit',
+                            minute: '2-digit',
+                            
+                            hour12: true
+                        });
+                },
+                defaultContent: '-'
+            },
             { data: 'ts_type', defaultContent: '-' }
         ]
     });
@@ -273,24 +307,37 @@ function updateAverageCompletionTime() {
     table.rows({ search: 'applied' }).every(function () {
         const row = this.data();
 
-        // Use time_started if available, otherwise use time
         const startTimeStr = row.time_started || row.time;
         const endTimeStr   = row.completion_time;
 
-        if (!startTimeStr || !endTimeStr) return; // skip incomplete rows
+        if (!startTimeStr || !endTimeStr) return;
 
         const start = new Date(startTimeStr + ' UTC');
         const end   = new Date(endTimeStr + ' UTC');
 
-        if (isNaN(start) || isNaN(end) || end < start) return; // skip invalid dates
+        if (isNaN(start) || isNaN(end) || end < start) return;
 
-        const durationMinutes = (end - start) / (1000 * 60); // duration in minutes
+        const durationMinutes = (end - start) / (1000 * 60);
         totalMinutes += durationMinutes;
         validRows++;
     });
 
     const avgMinutes = validRows ? Math.round(totalMinutes / validRows) : 0;
-    $('#avgCompletionTime').text(avgMinutes + ' min');
+
+    // ✅ Convert to hours + minutes if >= 60
+    let displayText = '';
+
+    if (avgMinutes >= 60) {
+        const hours = Math.floor(avgMinutes / 60);
+        const minutes = avgMinutes % 60;
+
+        displayText = `${hours} hr${hours > 1 ? 's' : ''}` +
+                      (minutes ? ` ${minutes} min` : '');
+    } else {
+        displayText = `${avgMinutes} min`;
+    }
+
+    $('#avgCompletionTime').text(displayText);
 }
 
 // Update after table loads or redraws

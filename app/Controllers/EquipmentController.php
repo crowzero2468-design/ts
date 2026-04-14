@@ -47,63 +47,95 @@ class EquipmentController extends BaseController
     }
 
     public function getData()
-    {
-        $db = \Config\Database::connect();
-        $builder = $db->table('tb_tools');
+{
+    $db = \Config\Database::connect();
+    $builder = $db->table('tb_tools');
 
-        $draw = intval($this->request->getGet('draw'));
-        $start = intval($this->request->getGet('start'));
-        $length = intval($this->request->getGet('length'));
-        $search = $this->request->getGet('search')['value'] ?? '';
+    $draw   = intval($this->request->getGet('draw'));
+    $start  = intval($this->request->getGet('start'));
+    $length = intval($this->request->getGet('length'));
 
-        // Custom filters
-        $type = $this->request->getGet('type');
-        $model = $this->request->getGet('model');
-        $area = $this->request->getGet('area');
-        $status = $this->request->getGet('status');
-        $acqStart = $this->request->getGet('acquisition_start');
-        $acqEnd   = $this->request->getGet('acquisition_end');
-        $lifeSpan = $this->request->getGet('estimatedlife');
+    $search = $this->request->getGet('search')['value'] ?? '';
 
-        // Total records
-        $recordsTotal = $builder->countAllResults(false);
+    // Custom filters
+    $type      = $this->request->getGet('type');
+    $model     = $this->request->getGet('model');
+    $area      = $this->request->getGet('area');
+    $status    = $this->request->getGet('status');
+    $acqStart  = $this->request->getGet('acquisition_start');
+    $acqEnd    = $this->request->getGet('acquisition_end');
+    $lifeSpan  = $this->request->getGet('estimatedlife');
 
-        // Apply filters and search
-        if ($search || $type || $model || $area || $status || $acqStart || $acqEnd || $lifeSpan) {
-            $builder->groupStart();
-
-            if ($search) {
-                $builder->like('type', $search)
-                        ->orLike('model', $search)
-                        ->orLike('label', $search)
-                        ->orLike('AccountableArea', $search)
-                        ->orLike('description', $search)
-                        ->orLike('remarks', $search)
-                        ->orLike('status', $search);
-            }
-
-            if ($type) $builder->like('type', $type);
-            if ($model) $builder->like('model', $model);
-            if ($area) $builder->like('AccountableArea', $area);
-            if ($status) $builder->where('status', $status);
-            if ($lifeSpan) $builder->where('estimatedlife', $lifeSpan);
-            if ($acqStart) $builder->where('acquisitiondate >=', $acqStart);
-            if ($acqEnd)   $builder->where('acquisitiondate <=', $acqEnd);
-
-            $builder->groupEnd();
-        }
-
-        $recordsFiltered = $builder->countAllResults(false);
-
-        $data = $builder->limit($length, $start)->get()->getResult();
-
-        return $this->response->setJSON([
-            'draw' => $draw,
-            'recordsTotal' => $recordsTotal,
-            'recordsFiltered' => $recordsFiltered,
-            'data' => $data
-        ]);
+    // Normalize dates (IMPORTANT)
+    if ($acqStart) {
+        $acqStart = date('Y-m-d', strtotime($acqStart));
     }
+    if ($acqEnd) {
+        $acqEnd = date('Y-m-d', strtotime($acqEnd));
+    }
+
+    // Total records (no filters)
+    $recordsTotal = $builder->countAllResults(false);
+
+    // ================= SEARCH (OR BLOCK ONLY) =================
+    if ($search) {
+        $builder->groupStart()
+            ->like('type', $search)
+            ->orLike('model', $search)
+            ->orLike('label', $search)
+            ->orLike('AccountableArea', $search)
+            ->orLike('description', $search)
+            ->orLike('remarks', $search)
+            ->orLike('status', $search)
+        ->groupEnd();
+    }
+
+    // ================= FILTERS (AND CONDITIONS) =================
+    if ($type) {
+        $builder->like('type', $type);
+    }
+
+    if ($model) {
+        $builder->like('model', $model);
+    }
+
+    if ($area) {
+        $builder->like('AccountableArea', $area);
+    }
+
+    if ($status) {
+        $builder->where('status', $status);
+    }
+
+    if ($lifeSpan) {
+        $builder->where('estimatedlife', $lifeSpan);
+    }
+
+    // ================= DATE FILTER (FIXED LOGIC) =================
+    if ($acqStart && $acqEnd) {
+        $builder->where('acquisitiondate >=', $acqStart);
+        $builder->where('acquisitiondate <=', $acqEnd);
+    } elseif ($acqStart) {
+        $builder->where('acquisitiondate >=', $acqStart);
+    } elseif ($acqEnd) {
+        $builder->where('acquisitiondate <=', $acqEnd);
+    }
+
+    // ================= COUNT FILTERED =================
+    $recordsFiltered = $builder->countAllResults(false);
+
+    // ================= DATA =================
+    $data = $builder->limit($length, $start)
+                    ->get()
+                    ->getResult();
+
+    return $this->response->setJSON([
+        'draw' => $draw,
+        'recordsTotal' => $recordsTotal,
+        'recordsFiltered' => $recordsFiltered,
+        'data' => $data
+    ]);
+}
 
    public function Form()
 {
@@ -185,9 +217,6 @@ class EquipmentController extends BaseController
             $acq = (empty($eq['acquisitiondate']) || $eq['acquisitiondate'] == '0000-00-00') 
                 ? '-' 
                 : (new \DateTime($eq['acquisitiondate']))->format('F j, Y');
-            $life = (empty($eq['estimatedlife']) || $eq['estimatedlife'] == '0000-00-00') 
-                ? '-' 
-                : (new \DateTime($eq['estimatedlife']))->format('F j, Y');
 
             $tableRows .= '
             <tr>
@@ -198,7 +227,7 @@ class EquipmentController extends BaseController
                 <td>' . esc($eq['AccountableArea']) . '</td>
                 <td>' . esc($eq['description']) . '</td>
                 <td>' . $acq . '</td>
-                <td>' . $life . '</td>
+                <td>' .esc($eq['estimatedlife']) . '</td>
                 <td>' . esc($eq['remarks']) . '</td>
             </tr>';
         }
@@ -250,75 +279,89 @@ public function importExcel()
     $status = $this->request->getPost('status');
 
     if ($file && $file->isValid()) {
+
         $spreadsheet = \PhpOffice\PhpSpreadsheet\IOFactory::load($file->getTempName());
-        $sheetData = $spreadsheet->getActiveSheet()->toArray();
+        $sheet = $spreadsheet->getActiveSheet();
+        $rows = $sheet->getHighestRow();
 
         $model = new \App\Models\EquipmentModel();
 
-        // ✅ Load wards ONCE
-        $db = \Config\Database::connect();
-        $wards = $db->table('tb_ward')->select('ward')->get()->getResultArray();
+        for ($i = 2; $i <= $rows; $i++) {
 
-        foreach ($sheetData as $index => $row) {
-            if ($index === 0) continue; // skip header
-
-            // ✅ Clean & normalize acquisition date
-            $rawDate = $row[4] ?? null;
+            // ================= DATE FIX =================
+            $rawDate = $sheet->getCell('E' . $i)->getValue();
             $acquisitionDate = null;
 
-            if (!empty($rawDate)) {
-                try {
-                    if (is_numeric($rawDate)) {
-                        $dt = \PhpOffice\PhpSpreadsheet\Shared\Date::excelToDateTimeObject($rawDate);
-                    } else {
-                        $dt = new \DateTime($rawDate);
+            if ($rawDate) {
+
+                // Excel numeric date (most reliable)
+                if (is_numeric($rawDate)) {
+                    $acquisitionDate = \PhpOffice\PhpSpreadsheet\Shared\Date::excelToDateTimeObject($rawDate)
+                        ->format('Y-m-d');
+
+                } else {
+
+                    // Try strict formats (DD/MM/YYYY safe)
+                    $formats = ['d/m/Y', 'd-M-y', 'Y-m-d'];
+
+                    foreach ($formats as $format) {
+                        $dt = \DateTime::createFromFormat($format, $rawDate);
+                        if ($dt) {
+                            $acquisitionDate = $dt->format('Y-m-d');
+                            break;
+                        }
                     }
 
-                    $acquisitionDate = $dt->format('Y-m-d');
-
-                } catch (\Exception $e) {
-                    $acquisitionDate = null;
+                    // Fallback
+                    if (!$acquisitionDate) {
+                        $ts = strtotime($rawDate);
+                        if ($ts !== false) {
+                            $acquisitionDate = date('Y-m-d', $ts);
+                        }
+                    }
                 }
             }
 
-            // ✅ Compute estimated life (+5 years)
-            $estimatedLife = null;
-            if ($acquisitionDate) {
-                $dtLife = new \DateTime($acquisitionDate);
-                $dtLife->modify('+5 years');
-                $estimatedLife = $dtLife->format('Y-m-d');
-            }
+            // ================= QUANTITY FIX =================
+            $quantityRaw = $sheet->getCell('G' . $i)->getValue();
+            $quantity = is_numeric($quantityRaw)
+                ? $quantityRaw
+                : (int) filter_var($quantityRaw, FILTER_SANITIZE_NUMBER_INT);
 
-            // ✅ Random ward from tb_ward
-            $accountableArea = null;
-            if (!empty($wards)) {
-                $accountableArea = $wards[array_rand($wards)]['ward'];
-            }
+            if (!$quantity) $quantity = 1;
 
+            // ================= DATA =================
             $data = [
-                'label' => $row[0] ?? '',
-                'model' => $row[1] ?? '',
-                'description' => $row[3] ?? '',
-                'AccountableArea' => $accountableArea, // ✅ FIXED
-                'acquisitiondate' => $acquisitionDate ?: null,
-                'estimatedlife' => $estimatedLife,
-                'quantity' => $row[6] ?? 1,
-                'inspector' => $row[7] ?? '',
+                'label' => trim($sheet->getCell('A' . $i)->getValue()),
+                'model' => trim($sheet->getCell('B' . $i)->getValue()),
+                'description' => trim($sheet->getCell('D' . $i)->getValue()),
+                'acquisitiondate' => $acquisitionDate ?? date('Y-m-d'),
+                'type' => trim($sheet->getCell('F' . $i)->getValue()),
+                'quantity' => $quantity,
+                'inspector' => trim($sheet->getCell('H' . $i)->getValue()) ?: 'N/A',
+                'AccountableArea' => trim($sheet->getCell('I' . $i)->getValue()),
+                'estimatedlife' => trim($sheet->getCell('J' . $i)->getValue()) ?: 'N/A',
+                'remarks' => '', // REQUIRED FIELD
                 'status' => $status ?? 'NEW',
             ];
+
+            // ================= DEBUG (optional) =================
+            // if (!$model->insert($data)) {
+            //     dd($model->errors(), $data);
+            // }
 
             $model->insert($data);
         }
 
         return $this->response->setJSON([
             'success' => true,
-            'message' => 'Excel imported successfully!'
+            'message' => 'Excel imported successfully!',
         ]);
     }
 
     return $this->response->setJSON([
         'success' => false,
-        'message' => 'Invalid Excel file!'
+        'message' => 'Invalid Excel file!',
     ]);
 }
 

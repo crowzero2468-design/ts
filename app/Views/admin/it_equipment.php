@@ -362,12 +362,13 @@ $(document).ready(function () {
                     return date.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
                 }
             },
-            {
+           {
                 data: 'estimatedlife',
-                render: function(data) {
-                    if (!data || data === '0000-00-00') return '-';
-                    let date = new Date(data);
-                    return date.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
+                render: function(data, type, row) {
+                    if (data === null || data === '' || data === '0000-00-00') {
+                        return '-';
+                    }
+                    return data;
                 }
             },
             { data: 'remarks' },
