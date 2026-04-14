@@ -35,11 +35,16 @@ $this->section('body');
 .timeline-item::before {
     content: '';
     position: absolute;
-    left: 19px; /* aligns with icon center */
-    top: 40px;  /* starts below icon */
+    left: 19px;
+    top: 40px;
     width: 2px;
-    height: calc(100% - 20px);
+    height: 100%;
     background: #ddd;
+}
+
+/* ❌ REMOVE line for last item */
+.timeline-item:last-child::before {
+    display: none;
 }
 
 </style>
@@ -53,95 +58,125 @@ $this->section('body');
               </div>
             </div>
 
-<div class="d-flex flex-row flex-wrap gap-3 justify-content-between">
+<div class="row g-3">
 
     <!-- Total Users -->
-    <div class="card flex-fill p-3 shadow-sm" style="background-color: #1E90FF; color: #fff; min-width: 180px;">
-        <div class="d-flex align-items-center">
-            <div class="me-3" style="font-size: 2rem;">
-                <i class="fas fa-users"></i>
-            </div>
-            <div>
-                <p class="mb-1" style="opacity: 0.8;">Total Users</p>
-                <h4 class="mb-0"><?= isset($totalUsers) ? $totalUsers : 0 ?></h4>
+    <div class="col-md-3 col-sm-6">
+        <div class="card p-3 shadow-sm text-white" style="background-color: #1E90FF;">
+            <div class="d-flex align-items-center">
+                <div class="me-3 fs-3">
+                    <i class="fas fa-users"></i>
+                </div>
+                <div>
+                    <p class="mb-1 opacity-75">Total Users</p>
+                    <h4 class="mb-0"><?= $totalUsers ?? 0 ?></h4>
+                </div>
             </div>
         </div>
     </div>
 
     <!-- Total Admin -->
-    <div class="card flex-fill p-3 shadow-sm" style="background-color: #FF6B6B; color: #fff; min-width: 180px;">
-        <div class="d-flex align-items-center">
-            <div class="me-3" style="font-size: 2rem;">
-                <i class="fas fa-user-shield"></i>
-            </div>
-            <div>
-                <p class="mb-1" style="opacity: 0.8;">Total Admin Accounts</p>
-                <h4 class="mb-0"><?= isset($totalAdmin) ? $totalAdmin : 0 ?></h4>
+    <div class="col-md-3 col-sm-6">
+        <div class="card p-3 shadow-sm text-white" style="background-color: #FF6B6B;">
+            <div class="d-flex align-items-center">
+                <div class="me-3 fs-3">
+                    <i class="fas fa-user-shield"></i>
+                </div>
+                <div>
+                    <p class="mb-1 opacity-75">Total Admin</p>
+                    <h4 class="mb-0"><?= $totalAdmin ?? 0 ?></h4>
+                </div>
             </div>
         </div>
     </div>
 
     <!-- Active Technicians -->
-    <div class="card flex-fill p-3 shadow-sm" style="background-color: #20B2AA; color: #fff; min-width: 180px;">
-        <div class="d-flex align-items-center">
-            <div class="me-3" style="font-size: 2rem;">
-                <i class="fa-solid fa-user-gear"></i>
-            </div>
-            <div>
-                <p class="mb-1" style="opacity: 0.8;">Active Technicians</p>
-                <h4 class="mb-0"><?= isset($totalTech) ? $totalTech : 0 ?></h4>
+    <div class="col-md-3 col-sm-6">
+        <div class="card p-3 shadow-sm text-white" style="background-color: #20B2AA;">
+            <div class="d-flex align-items-center">
+                <div class="me-3 fs-3">
+                    <i class="fa-solid fa-user-gear"></i>
+                </div>
+                <div>
+                    <p class="mb-1 opacity-75">Active Techs</p>
+                    <h4 class="mb-0"><?= $totalTech ?? 0 ?></h4>
+                </div>
             </div>
         </div>
     </div>
 
     <!-- Off Duty -->
-    <div class="card flex-fill p-3 shadow-sm" style="background-color: #4DA6FF; color: #fff; min-width: 180px;">
-        <div class="d-flex align-items-center">
-            <div class="me-3" style="font-size: 2rem;">
-                <i class="fa-solid fa-user-xmark"></i>
-            </div>
-            <div>
-                <p class="mb-1" style="opacity: 0.8;">Off Duty</p>
-                <h4 class="mb-0"><?= isset($offDuty) ? $offDuty : 0 ?></h4>
+    <div class="col-md-3 col-sm-6">
+        <div class="card p-3 shadow-sm text-white" style="background-color: #4DA6FF;">
+            <div class="d-flex align-items-center">
+                <div class="me-3 fs-3">
+                    <i class="fa-solid fa-user-xmark"></i>
+                </div>
+                <div>
+                    <p class="mb-1 opacity-75">Off Duty</p>
+                    <h4 class="mb-0"><?= $offDuty ?? 0 ?></h4>
+                </div>
             </div>
         </div>
     </div>
 
     <!-- Average Ping -->
-    <div class="card flex-fill p-3 shadow-sm" style="background-color: #32CD32; color: #fff; min-width: 180px;">
-        <div class="d-flex align-items-center">
-            <div class="me-3" style="font-size: 2rem;">
-                <i class="fa-solid fa-network-wired"></i>
-            </div>
-            <div>
-                <p class="mb-1" style="opacity: 0.8;">Average Ping</p>
-                <h4 class="mb-0"><?= isset($avgPing) ? $avgPing . ' ms' : '0 ms' ?></h4>
+    <div class="col-md-3 col-sm-6">
+        <div class="card p-3 shadow-sm text-white" style="background-color: #32CD32;">
+            <div class="d-flex align-items-center">
+                <div class="me-3 fs-3">
+                    <i class="fa-solid fa-network-wired"></i>
+                </div>
+                <div>
+                    <p class="mb-1 opacity-75">Avg Ping</p>
+                    <h4 class="mb-0"><?= $avgPing ?? 0 ?> ms</h4>
+                </div>
             </div>
         </div>
     </div>
 
     <!-- Avg Server Temp -->
-    <div class="card flex-fill p-3 shadow-sm" style="background-color: #6A5ACD; color: #fff; min-width: 180px;">
-        <div class="d-flex align-items-center">
-            <div class="me-3" style="font-size: 2rem;">
-                <i class="fa-solid fa-temperature-arrow-down"></i>
-            </div>
-            <div>
-                <p class="mb-1" style="opacity: 0.8;">Avg Server Temp</p>
-                <h4 class="mb-0"><?= isset($avgTemp) ? $avgTemp . ' °C' : '0 °C' ?></h4>
+    <div class="col-md-3 col-sm-6">
+        <div class="card p-3 shadow-sm text-white" style="background-color: #6A5ACD;">
+            <div class="d-flex align-items-center">
+                <div class="me-3 fs-3">
+                    <i class="fa-solid fa-temperature-arrow-down"></i>
+                </div>
+                <div>
+                    <p class="mb-1 opacity-75">Avg Temp</p>
+                    <h4 class="mb-0"><?= $avgTemp ?? 0 ?> °C</h4>
+                </div>
             </div>
         </div>
     </div>
 
     <!-- IT Equipment Inspected -->
-    <div class="card flex-fill p-3 shadow-sm" style="background-color: #FFA500; color: #fff; min-width: 180px;">
-        <div class="d-flex align-items-center">
-            <div class="me-3" style="font-size: 2rem;">
-                <i class="fas fa-desktop"></i>
+    <div class="col-md-3 col-sm-6">
+        <div class="card p-3 shadow-sm text-white" style="background-color: #FFA500;">
+            <div class="d-flex align-items-center">
+                <div class="me-3 fs-3">
+                    <i class="fas fa-desktop"></i>
+                </div>
+                <div>
+                    <p class="mb-1 opacity-75">Inspected</p>
+                    <h4 class="mb-0"><?= $totalInspected ?? 0 ?></h4>
+                </div>
             </div>
-            <div>
-                <p class="mb-1" style="opacity: 0.8;">IT Equipment Inspected</p>
-                <h4 class="mb-0"><?= isset($totalInspected) ? $totalInspected : 0 ?></h4>
+        </div>
+    </div>
+
+    <!-- Total Trouble Done (NEW COLOR) -->
+    <div class="col-md-3 col-sm-6">
+        <div class="card p-3 shadow-sm text-white"
+            style="background: linear-gradient(135deg, #ff512f, #dd2476); color: #fff; min-width: 200px;">
+            <div class="d-flex align-items-center">
+                <div class="me-3 fs-3">
+                    <i class="fa-solid fa-screwdriver-wrench"></i>
+                </div>
+                <div>
+                    <p class="mb-1 opacity-75">Trouble Done</p>
+                    <h4 class="mb-0"><?= $totalTroubleshoots ?? 0 ?></h4>
+                </div>
             </div>
         </div>
     </div>
@@ -160,11 +195,11 @@ $this->section('body');
             <div class="card-header bg-white border-bottom d-flex align-items-center justify-content-between">
 
                 <div class="d-flex align-items-center">
-                    <h5 class="mb-0 fw-bold me-2">Trouble Statistics (Line)</h5>
+                    <h5 class="mb-0 fw-bold me-2">Trouble Statistics (Type)</h5>
 
-                    <span class="badge bg-primary rounded-pill px-3 py-1">
+                    <!-- <span class="badge bg-primary rounded-pill px-3 py-1">
                         <?= $totalTroubleshoots ?? 0 ?>
-                    </span>
+                    </span> -->
                 </div>
 
                 <small class="text-muted">
@@ -192,9 +227,9 @@ $this->section('body');
                 <div class="d-flex align-items-center">
                     <h5 class="mb-0 fw-bold me-2">Most Frequent Trouble Statistics (10+)</h5>
 
-                    <span class="badge bg-success rounded-pill px-3 py-1">
+                    <!-- <span class="badge bg-success rounded-pill px-3 py-1">
                         <?= $totalTroubleshoots ?? 0 ?>
-                    </span>
+                    </span> -->
                 </div>
 
                 <small class="text-muted">

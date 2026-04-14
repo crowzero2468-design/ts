@@ -69,47 +69,105 @@ class Dashboard2Controller extends BaseController
         }
 
         // ====== MOST ACTIVE TECHNICIANS ======
-        $techActivities = $db->table('tbtrouble t')
-            ->select('i.id as tech_id, i.name, COUNT(t.id) as total, MAX(t.time) as latest_time')
-            ->join('tb_it i', 'i.id = t.person', 'left')
-            ->where('t.status', 'Done')
-            ->where('i.name IS NOT NULL')
-            ->where('i.name !=', '')
-            ->groupBy('t.person')
-            ->having('COUNT(t.id) >', 10)   // ✅ ONLY MORE THAN 10
-            ->orderBy('total', 'DESC')
-            ->get()
-            ->getResult();
+            $techActivities = $db->query("
+                SELECT 
+                    i.id AS tech_id,
+                    i.name,
+                    SUM(x.cnt) AS total,
+                    MAX(x.latest_time) AS latest_time
+                FROM (
+
+                    -- PERSON (ID based)
+                    SELECT 
+                        t.person AS tech_id,
+                        NULL AS tech_name,
+                        t.time AS latest_time,
+                        1 AS cnt
+                    FROM tbtrouble t
+                    WHERE t.status = 'Done'
+
+                    UNION ALL
+
+                    -- PERSONNEL (NAME based)
+                    SELECT 
+                        NULL AS tech_id,
+                        t.personnel AS tech_name,
+                        t.time AS latest_time,
+                        CASE 
+                            WHEN t.person = (
+                                SELECT i2.id 
+                                FROM tb_it i2 
+                                WHERE i2.name = t.personnel 
+                                LIMIT 1
+                            )
+                            THEN 0
+                            ELSE 1
+                        END AS cnt
+                    FROM tbtrouble t
+                    WHERE t.status = 'Done'
+
+                ) x
+
+                LEFT JOIN tb_it i 
+                    ON i.id = x.tech_id 
+                    OR i.name = x.tech_name
+
+                WHERE i.id IS NOT NULL
+                GROUP BY i.id, i.name
+                ORDER BY total DESC
+            ")->getResult();
 
         // ====== TECH TROUBLE BREAKDOWN (FIXED) ======
-        $techTroublesRaw = $db->table('tbtrouble t')
-            ->select('t.person, i.name, t.description, COUNT(*) as total')
-            ->join('tb_it i', 'i.id = t.person', 'left')
-            ->where('t.status', 'Done')
-            ->where('i.name IS NOT NULL')
-            ->where('i.name !=', '')
-            ->groupBy(['t.person', 't.description'])
-            ->having('COUNT(*) >', 10)   // ✅ SAME FILTER
-            ->orderBy('total', 'DESC')
-            ->get()
-            ->getResult();
+$techTroublesRaw = $db->query("
+    SELECT 
+        i.id AS tech_id,
+        i.name,
+        x.description,
+        COUNT(*) AS total
+    FROM (
 
-        $techTroubleMap = [];
+        -- PERSON (handler)
+        SELECT 
+            t.person AS tech_id,
+            t.description
+        FROM tbtrouble t
+        WHERE t.status = 'Done'
 
-        foreach ($techTroublesRaw as $row) {
+        UNION ALL
 
-            $key = $row->person; // ✅ FIX: use ID instead of name
+        -- PERSONNEL (encoder → name to ID)
+        SELECT 
+            i2.id AS tech_id,
+            t.description
+        FROM tbtrouble t
+        JOIN tb_it i2 ON i2.name = t.personnel
+        WHERE t.status = 'Done'
 
-            if (!isset($techTroubleMap[$key])) {
-                $techTroubleMap[$key] = [];
-            }
+    ) x
 
-            $techTroubleMap[$key][] =
-                $row->description . ' (' . $row->total . ')';
-        }
+    JOIN tb_it i ON i.id = x.tech_id
+
+    GROUP BY i.id, i.name, x.description
+    HAVING COUNT(*) > 10
+    ORDER BY total DESC
+")->getResult();
+
+       $techTroubleMap = [];
+
+foreach ($techTroublesRaw as $row) {
+
+    $key = $row->tech_id;
+
+    if (!isset($techTroubleMap[$key])) {
+        $techTroubleMap[$key] = [];
+    }
+
+    $techTroubleMap[$key][] =
+        $row->description . ' (' . $row->total . ')';
+}
 
         // ====== OTHER STATS ======
-        $totalTroubleshoots = $db->table('tbtrouble')->countAllResults();
+        $totalTroubleshoots = $db->table('tbtrouble')->where('status', 'Done')->countAllResults();
         $totalInspected = $db->table('tb_tools')->countAllResults();
 
         $firstTrouble = $db->table('tbtrouble')
