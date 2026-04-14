@@ -29,15 +29,36 @@ $this->section('body');
             <p class="text-muted mb-0">Filter and view all troubleshoot records</p>
         </div>
 
-        <!-- Stats Section -->
-        <div class="row align-items-center">
-            <div class="col-md-4">
-                <div class="card border-0 bg-light p-3">
-                    <h6 class="text-uppercase text-muted mb-2">Average Completion Time</h6>
-                    <h5 id="avgCompletionTime" class="fw-bold mb-0">Calculating...</h5>
+        <div class="row g-3">
+            <div class="col-md-6">
+                <div class="card p-3 shadow-sm" style="background-color: #1E90FF; color: #fff;">
+                    <div class="d-flex align-items-center">
+                        <div class="me-3" style="font-size: 2rem;">
+                            <i class="fa-regular fa-clock"></i>
+                        </div>
+                        <div>
+                            <p class="mb-1" style="opacity: 0.8;">Average Completion Time</p>
+                            <h5 id="avgCompletionTime" class="mb-0">Calculating...</h5>
+                        </div>
+                    </div>
                 </div>
             </div>
-            <!-- You can add more stats cards here if needed -->
+
+            <div class="col-md-6">
+                <div class="card p-3 shadow-sm" style="background-color: #FF6B6B; color: #fff;">
+                    <div class="d-flex align-items-center">
+                        <div class="me-3" style="font-size: 2rem;">
+                            <i class="fa-solid fa-screwdriver-wrench"></i>
+                        </div>
+                        <div>
+                            <p class="mb-1" style="opacity: 0.8;">Most Frequent Trouble</p>
+                            <h5 id="mostFrequentTrouble" class="mb-0">Calculating...</h5>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         </div>
     </div>
 </div>
@@ -300,48 +321,84 @@ $(document).ready(function () {
     // ============================
     // Average Completion Time
     // ============================
-function updateAverageCompletionTime() {
-    let totalMinutes = 0;
-    let validRows = 0;
+$(document).ready(function () {
 
-    table.rows({ search: 'applied' }).every(function () {
-        const row = this.data();
+    // ============================
+    // FUNCTIONS FIRST
+    // ============================
+    function updateAverageCompletionTime() {
+        let totalMinutes = 0;
+        let validRows = 0;
 
-        const startTimeStr = row.time_started || row.time;
-        const endTimeStr   = row.completion_time;
+        table.rows({ search: 'applied' }).every(function () {
+            const row = this.data();
 
-        if (!startTimeStr || !endTimeStr) return;
+            const startTimeStr = row.time_started || row.time;
+            const endTimeStr   = row.completion_time;
 
-        const start = new Date(startTimeStr + ' UTC');
-        const end   = new Date(endTimeStr + ' UTC');
+            if (!startTimeStr || !endTimeStr) return;
 
-        if (isNaN(start) || isNaN(end) || end < start) return;
+            const start = new Date(startTimeStr + ' UTC');
+            const end   = new Date(endTimeStr + ' UTC');
 
-        const durationMinutes = (end - start) / (1000 * 60);
-        totalMinutes += durationMinutes;
-        validRows++;
-    });
+            if (isNaN(start) || isNaN(end) || end < start) return;
 
-    const avgMinutes = validRows ? Math.round(totalMinutes / validRows) : 0;
+            const durationMinutes = (end - start) / (1000 * 60);
+            totalMinutes += durationMinutes;
+            validRows++;
+        });
 
-    // ✅ Convert to hours + minutes if >= 60
-    let displayText = '';
+        const avgMinutes = validRows ? Math.round(totalMinutes / validRows) : 0;
 
-    if (avgMinutes >= 60) {
-        const hours = Math.floor(avgMinutes / 60);
-        const minutes = avgMinutes % 60;
+        let displayText = avgMinutes >= 60
+            ? `${Math.floor(avgMinutes / 60)} hr${Math.floor(avgMinutes / 60) > 1 ? 's' : ''} ${avgMinutes % 60} min`
+            : `${avgMinutes} min`;
 
-        displayText = `${hours} hr${hours > 1 ? 's' : ''}` +
-                      (minutes ? ` ${minutes} min` : '');
-    } else {
-        displayText = `${avgMinutes} min`;
+        $('#avgCompletionTime').text(displayText);
     }
 
-    $('#avgCompletionTime').text(displayText);
-}
+    function updateMostFrequentTrouble() {
+        let troubleCount = {};
 
-// Update after table loads or redraws
-table.on('xhr.dt draw', updateAverageCompletionTime);
+        table.rows({ search: 'applied' }).every(function () {
+            const row = this.data();
+            let desc = row.description;
+
+            if (!desc) return;
+
+            desc = desc.trim().toLowerCase();
+            troubleCount[desc] = (troubleCount[desc] || 0) + 1;
+        });
+
+        let mostFrequent = '-';
+        let maxCount = 0;
+
+        for (let key in troubleCount) {
+            if (troubleCount[key] > maxCount) {
+                maxCount = troubleCount[key];
+                mostFrequent = key;
+            }
+        }
+
+        if (mostFrequent !== '-') {
+            mostFrequent = mostFrequent.toUpperCase();
+        }
+
+        $('#mostFrequentTrouble').text(
+            maxCount > 0 ? `${mostFrequent} (${maxCount})` : '-'
+        );
+    }
+
+
+    // ============================
+    // EVENTS AFTER INIT
+    // ============================
+    table.on('xhr.dt draw', function () {
+        updateAverageCompletionTime();
+        updateMostFrequentTrouble();
+    });
+
+});
 });
 </script>
 
