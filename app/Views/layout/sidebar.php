@@ -145,18 +145,22 @@ $current = service('uri')->getSegment(1);
 
           <div class="collapse <?= in_array($current, ['', 'dashboard', 'dash2']) ? 'show' : '' ?>" id="dashboard">
               <ul class="nav nav-collapse">
-                  <li class="<?= ($current == 'dashboard' || $current == '') ? 'active' : '' ?>">
-                      <a href="<?= base_url('/dashboard'); ?>">
-                          <span class="sub-item">Troubleshoot</span>
-                      </a>
-                  </li>
-                 <?php if (session('role') == 3): ?>
+                
+              <?php if (session('role') == 3): ?>
                       <li class="<?= ($current == 'dash2') ? 'active' : '' ?>">
                           <a href="<?= base_url('/dash2'); ?>">
                               <span class="sub-item">Dashboard</span>
                           </a>
                       </li>
-                  <?php endif; ?>
+              <?php endif; ?>
+
+
+                  <li class="<?= ($current == 'dashboard' || $current == '') ? 'active' : '' ?>">
+                      <a href="<?= base_url('/dashboard'); ?>">
+                          <span class="sub-item">Troubleshoot</span>
+                      </a>
+                  </li>
+                 
               </ul>
           </div>
       </li>

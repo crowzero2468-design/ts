@@ -13,11 +13,12 @@ class Dashboard2Controller extends BaseController
         // ====== Technicians ======
         $totalTech = $db->table('tb_it')
             ->where('status', 'active')
-            ->where('role', 'user')
+            ->whereIn('role', ['user', 'admin', '3'])
             ->countAllResults();
 
         $offDuty = $db->table('tb_it')
             ->where('status', 'inactive')
+            ->whereIn('role', ['user', 'admin', '3'])
             ->countAllResults();
 
         // ====== Average Ping ======
@@ -69,53 +70,66 @@ class Dashboard2Controller extends BaseController
         }
 
         // ====== MOST ACTIVE TECHNICIANS ======
-            $techActivities = $db->query("
-                SELECT 
-                    i.id AS tech_id,
-                    i.name,
-                    SUM(x.cnt) AS total,
-                    MAX(x.latest_time) AS latest_time
-                FROM (
+           $techActivitiesUser = $db->query("
+    SELECT 
+        i.id AS tech_id,
+        i.name,
+        SUM(x.cnt) AS total,
+        MAX(x.latest_time) AS latest_time
+    FROM (
+        SELECT 
+            t.person AS tech_id,
+            t.time AS latest_time,
+            1 AS cnt
+        FROM tbtrouble t
+        WHERE t.status = 'Done'
 
-                    -- PERSON (ID based)
-                    SELECT 
-                        t.person AS tech_id,
-                        NULL AS tech_name,
-                        t.time AS latest_time,
-                        1 AS cnt
-                    FROM tbtrouble t
-                    WHERE t.status = 'Done'
+        UNION ALL
 
-                    UNION ALL
+        SELECT 
+            i2.id AS tech_id,
+            t.time AS latest_time,
+            1 AS cnt
+        FROM tbtrouble t
+        LEFT JOIN tb_it i2 ON i2.name = t.personnel
+        WHERE t.status = 'Done'
+    ) x
+    JOIN tb_it i ON i.id = x.tech_id
+    WHERE i.role IN ('user', '3')
+    AND i.name != 'admin'
+    GROUP BY i.id, i.name
+    ORDER BY total DESC
+")->getResult();
 
-                    -- PERSONNEL (NAME based)
-                    SELECT 
-                        NULL AS tech_id,
-                        t.personnel AS tech_name,
-                        t.time AS latest_time,
-                        CASE 
-                            WHEN t.person = (
-                                SELECT i2.id 
-                                FROM tb_it i2 
-                                WHERE i2.name = t.personnel 
-                                LIMIT 1
-                            )
-                            THEN 0
-                            ELSE 1
-                        END AS cnt
-                    FROM tbtrouble t
-                    WHERE t.status = 'Done'
+$techActivitiesAdmin = $db->query("
+    SELECT 
+        i.id AS tech_id,
+        i.name,
+        SUM(x.cnt) AS total,
+        MAX(x.latest_time) AS latest_time
+    FROM (
+        SELECT 
+            t.person AS tech_id,
+            t.time AS latest_time,
+            1 AS cnt
+        FROM tbtrouble t
+        WHERE t.status = 'Done'
 
-                ) x
+        UNION ALL
 
-                LEFT JOIN tb_it i 
-                    ON i.id = x.tech_id 
-                    OR i.name = x.tech_name
-
-                WHERE i.id IS NOT NULL
-                GROUP BY i.id, i.name
-                ORDER BY total DESC
-            ")->getResult();
+        SELECT 
+            i2.id AS tech_id,
+            t.time AS latest_time,
+            1 AS cnt
+        FROM tbtrouble t
+        LEFT JOIN tb_it i2 ON i2.name = t.personnel
+        WHERE t.status = 'Done'
+    ) x
+    JOIN tb_it i ON i.id = x.tech_id
+    WHERE i.role = 'admin'
+    GROUP BY i.id, i.name
+    ORDER BY total DESC
+")->getResult();
 
         // ====== TECH TROUBLE BREAKDOWN (FIXED) ======
 $techTroublesRaw = $db->query("
@@ -207,7 +221,8 @@ foreach ($techTroublesRaw as $row) {
             'barLabels' => $barLabels,
             'barData'   => $barData,
 
-            'techActivities'  => $techActivities,
+            'techActivitiesUser'  => $techActivitiesUser,
+            'techActivitiesAdmin' => $techActivitiesAdmin,
             'techTroubleMap'  => $techTroubleMap,
 
             'startDate' => $startDate,

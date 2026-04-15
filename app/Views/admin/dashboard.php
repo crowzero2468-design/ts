@@ -68,7 +68,7 @@ $this->section('body');
                     <i class="fas fa-users"></i>
                 </div>
                 <div>
-                    <p class="mb-1 opacity-75">Total Users</p>
+                    <p class="mb-1 opacity-75">Total Users Accounts</p>
                     <h4 class="mb-0"><?= $totalUsers ?? 0 ?></h4>
                 </div>
             </div>
@@ -83,7 +83,7 @@ $this->section('body');
                     <i class="fas fa-user-shield"></i>
                 </div>
                 <div>
-                    <p class="mb-1 opacity-75">Total Admin</p>
+                    <p class="mb-1 opacity-75">Total Admin Accounts</p>
                     <h4 class="mb-0"><?= $totalAdmin ?? 0 ?></h4>
                 </div>
             </div>
@@ -98,7 +98,7 @@ $this->section('body');
                     <i class="fa-solid fa-user-gear"></i>
                 </div>
                 <div>
-                    <p class="mb-1 opacity-75">Active Techs</p>
+                    <p class="mb-1 opacity-75">Active Techs (User,Admin,SuperAdmin)</p>
                     <h4 class="mb-0"><?= $totalTech ?? 0 ?></h4>
                 </div>
             </div>
@@ -107,7 +107,7 @@ $this->section('body');
 
     <!-- Off Duty -->
     <div class="col-md-3 col-sm-6">
-        <div class="card p-3 shadow-sm text-white" style="background-color: #4DA6FF;">
+        <div class="card p-3 shadow-sm text-white" style="background-color: #000000;">
             <div class="d-flex align-items-center">
                 <div class="me-3 fs-3">
                     <i class="fa-solid fa-user-xmark"></i>
@@ -174,7 +174,7 @@ $this->section('body');
                     <i class="fa-solid fa-screwdriver-wrench"></i>
                 </div>
                 <div>
-                    <p class="mb-1 opacity-75">Trouble Done</p>
+                    <p class="mb-1 opacity-75">Completed Troubleshoots</p>
                     <h4 class="mb-0"><?= $totalTroubleshoots ?? 0 ?></h4>
                 </div>
             </div>
@@ -247,10 +247,8 @@ $this->section('body');
         </div>
     </div>
 
-    <div class="row g-4 mt-1">
-
     <!-- TIMELINE CARD -->
-<div class="col-md-6">
+<div class="col-md-12">
     <div class="card shadow-sm rounded-4 h-100">
 
         <div class="card-header bg-white border-bottom">
@@ -258,67 +256,112 @@ $this->section('body');
         </div>
 
         <div class="card-body">
+            <div class="row">
 
-            <!-- SCROLL CONTAINER -->
-            <div class="timeline" style="max-height: 320px; overflow-y: auto;">
+                <!-- ================= USER SIDE ================= -->
+                <div class="col-md-6 border-end">
 
-                <?php foreach ($techActivities as $tech): ?>
+                    <h6 class="fw-bold mb-3">BOYS</h6>
 
-                    <?php
-                        // ✅ FIX: use ID (matches updated controller)
-                        $id = $tech->tech_id ?? $tech->person ?? null;
+                    <div class="timeline" style="max-height: 320px; overflow-y: auto;">
 
-                        $list = $techTroubleMap[$id] ?? [];
-                    ?>
+                        <?php foreach ($techActivitiesUser as $tech): ?>
 
-                    <div class="timeline-item d-flex align-items-start justify-content-between mb-4 w-100">
+                            <?php
+                                $id = $tech->tech_id ?? null;
+                                $list = $techTroubleMap[$id] ?? [];
+                            ?>
 
-                        <!-- LEFT SIDE -->
-                        <div class="d-flex">
+                            <div class="timeline-item d-flex align-items-start justify-content-between mb-4 w-100">
 
-                            <div class="timeline-icon bg-primary text-white rounded-circle d-flex align-items-center justify-content-center me-3">
-                                <i class="fa fa-user"></i>
-                            </div>
+                                <div class="d-flex">
+                                    <div class="timeline-icon bg-primary text-white rounded-circle d-flex align-items-center justify-content-center me-3">
+                                        <i class="fa fa-user"></i>
+                                    </div>
 
-                            <div>
-                                <div class="fw-bold">
-                                    <?= strtoupper($tech->name ?? 'Unknown') ?>
+                                    <div>
+                                        <div class="fw-bold">
+                                            <?= strtoupper($tech->name ?? 'Unknown') ?>
+                                        </div>
+                                        <div>
+                                            Handled <?= $tech->total ?> trouble(s)
+                                        </div>
+                                    </div>
                                 </div>
 
-                                <div>
-                                    Handled <?= $tech->total ?> trouble(s)
+                                <div class="text-end" style="max-width: 45%;">
+                                    <?php if (!empty($list)): ?>
+                                        <?php foreach ($list as $item): ?>
+                                            <span class="badge bg-secondary me-1 mb-1">
+                                                <?= esc($item) ?>
+                                            </span>
+                                        <?php endforeach; ?>
+                                    <?php else: ?>
+                                        <span class="text-muted small">No breakdown data</span>
+                                    <?php endif; ?>
                                 </div>
+
                             </div>
 
-                        </div>
-
-                              <!-- RIGHT SIDE (LIST) -->
-                              <div class="text-end" style="max-width: 45%;">
-
-                                  <?php if (!empty($list)): ?>
-
-                                      <?php foreach ($list as $item): ?>
-                                          <span class="badge bg-secondary me-1 mb-1">
-                                              <?= esc($item) ?>
-                                          </span>
-                                      <?php endforeach; ?>
-
-                                  <?php else: ?>
-                                      <span class="text-muted small">No breakdown data</span>
-                                  <?php endif; ?>
-
-                              </div>
+                        <?php endforeach; ?>
 
                     </div>
+                </div>
 
-                <?php endforeach; ?>
+                <!-- ================= ADMIN SIDE ================= -->
+                <div class="col-md-6">
+
+                    <h6 class="fw-bold mb-3">GIRLS</h6>
+
+                    <div class="timeline" style="max-height: 320px; overflow-y: auto;">
+
+                        <?php foreach ($techActivitiesAdmin as $tech): ?>
+
+                            <?php
+                                $id = $tech->tech_id ?? null;
+                                $list = $techTroubleMap[$id] ?? [];
+                            ?>
+
+                            <div class="timeline-item d-flex align-items-start justify-content-between mb-4 w-100">
+
+                                <div class="d-flex">
+                                    <div class="timeline-icon bg-dark text-white rounded-circle d-flex align-items-center justify-content-center me-3">
+                                        <i class="fa fa-user-shield"></i>
+                                    </div>
+
+                                    <div>
+                                        <div class="fw-bold">
+                                            <?= strtoupper($tech->name ?? 'Unknown') ?>
+                                        </div>
+                                        <div>
+                                            Handled <?= $tech->total ?> trouble(s)
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="text-end" style="max-width: 45%;">
+                                    <?php if (!empty($list)): ?>
+                                        <?php foreach ($list as $item): ?>
+                                            <span class="badge bg-secondary me-1 mb-1">
+                                                <?= esc($item) ?>
+                                            </span>
+                                        <?php endforeach; ?>
+                                    <?php else: ?>
+                                        <span class="text-muted small">No breakdown data</span>
+                                    <?php endif; ?>
+                                </div>
+
+                            </div>
+
+                        <?php endforeach; ?>
+
+                    </div>
+                </div>
 
             </div>
-
         </div>
-    </div>
-</div>
 
+    </div>
 </div>
 
 
