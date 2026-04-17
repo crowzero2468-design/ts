@@ -67,8 +67,12 @@ $routes->get('profile/printPdf', 'Profile::printPdf');
 
 $routes->post('schedule/import', 'ScheduleController::import');
 $routes->get('sched', 'ScheduleController::index', ['filter' => 'auth']);
+$routes->get('schedule/download-template', 'ScheduleController::downloadTemplate');
+
 
 $routes->post('tech/store', 'TechController::store');
+
+
 
 // ============================
 // SCHEDULER OVERRIDE SWITCH

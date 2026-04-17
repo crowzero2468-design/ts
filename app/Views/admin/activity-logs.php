@@ -399,6 +399,179 @@ $(document).ready(function () {
     });
 
 });
+
+
+
+    /* =====================================
+       PRINT TABLE (ALL FILTERED DATA)
+    ====================================== */
+    $('#printTableBtn').click(function () {
+
+        // Force sort by Time column (index 7) descending
+        table.order([7, 'asc']).draw();
+
+        // Get sorted data (not DOM nodes)
+        let rows = table.rows({ search: 'applied' }).data();
+
+        let html = `
+            <h3 style="margin-bottom:20px;">Activity Logs</h3>
+            <table border="1" cellspacing="0" cellpadding="8" width="100%">
+                <thead>${$('#activityTable thead').html()}</thead>
+                <tbody>
+        `;
+
+        rows.each(function(row, index){
+
+            html += `
+                <tr>
+                    <td>${index + 1}</td>
+                    <td>${row.name}</td>
+                    <td>${row.location}</td>
+                    <td>${row.description}</td>
+                    <td>${row.status}</td>
+                    <td>${row.personnel}</td>
+                    <td>${row.personnel_name ?? '-'}</td>
+                    <td>${new Date(row.time).toLocaleString()}</td>
+                    <td>${new Date(row.completion_time).toLocaleString()}</td>
+                    <td>${row.ts_type ?? '-'}</td>
+                </tr>
+            `;
+        });
+
+        html += "</tbody></table>";
+
+        let printWindow = window.open('', '', 'height=900,width=1200');
+
+        printWindow.document.write(`
+            <html>
+            <head>
+                <title>Print Table</title>
+                <style>
+                    body { font-family: Arial, sans-serif; padding:20px; }
+                    table { border-collapse: collapse; width:100%; }
+                    th { background:#f2f2f2; }
+                    th, td { border:1px solid #000; padding:8px; text-align:left; }
+                </style>
+            </head>
+            <body>${html}</body>
+            </html>
+        `);
+
+        printWindow.document.close();
+
+        setTimeout(function(){
+            printWindow.print();
+        }, 300);
+    });
+
+
+
+    /* =====================================
+       EXPORT EXCEL (ALL FILTERED DATA)
+    ====================================== */
+    $('#exportExcelBtn').click(function () {
+
+        let rows = table.rows({ search: 'applied' }).nodes();
+        let csv = [];
+
+        let header = [];
+        $('#activityTable thead th').each(function(){
+            header.push('"' + $(this).text() + '"');
+        });
+        csv.push(header.join(','));
+
+        $(rows).each(function(){
+            let rowData = [];
+            $(this).find('td').each(function(){
+                rowData.push('"' + $(this).text().replace(/"/g, '""') + '"');
+            });
+            csv.push(rowData.join(','));
+        });
+
+        let csvFile = new Blob([csv.join("\n")], { type: "text/csv" });
+        let downloadLink = document.createElement("a");
+
+        downloadLink.download = "Activity_Logs.csv";
+        downloadLink.href = window.URL.createObjectURL(csvFile);
+        downloadLink.style.display = "none";
+
+        document.body.appendChild(downloadLink);
+        downloadLink.click();
+    });
+
+
+    /* =====================================
+       PRINT COUNT BASED ON CONCERN TYPE
+    ====================================== */
+$('#printCountBtn').click(function () {
+
+    let counts = {};
+
+    table.rows({ search: 'applied' }).every(function () {
+
+        let row = this.data();
+        let type = row.ts_type;
+
+        // If empty, null, or blank → set as "No Type"
+        if (!type || type.trim() === '') {
+            type = 'No Type';
+        }
+
+        if (!counts[type]) counts[type] = 0;
+        counts[type]++;
+    });
+
+    let sorted = Object.entries(counts).sort((a, b) => b[1] - a[1]);
+
+    let output = `
+        <h3>Concern Type Summary</h3>
+        <table border="1" cellpadding="8" cellspacing="0" width="100%">
+            <tr>
+                <th>Concern Type</th>
+                <th>Total</th>
+            </tr>
+    `;
+
+    let grandTotal = 0;
+
+    sorted.forEach(([type, total]) => {
+        output += `
+            <tr>
+                <td>${type}</td>
+                <td>${total}</td>
+            </tr>
+        `;
+        grandTotal += total;
+    });
+
+    output += `
+            <tr>
+                <td><strong>Grand Total</strong></td>
+                <td><strong>${grandTotal}</strong></td>
+            </tr>
+        </table>
+    `;
+
+    let printWindow = window.open('', '', 'height=600,width=800');
+
+    printWindow.document.write(`
+        <html>
+        <head>
+            <title>Concern Type Count</title>
+            <style>
+                body { font-family: Arial; padding:20px; }
+                table { border-collapse: collapse; width:100%; }
+                th { background:#f2f2f2; }
+                th, td { padding:8px; text-align:left; }
+            </style>
+        </head>
+        <body>${output}</body>
+        </html>
+    `);
+
+    printWindow.document.close();
+    printWindow.print();
+});
 });
 </script>
 

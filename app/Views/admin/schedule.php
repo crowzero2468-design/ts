@@ -28,7 +28,12 @@ $this->section('body');
         <i class="fa fa-calendar me-2"></i>
         Technician Schedule Calendar
     </h1>
-
+<?php if (session('role') == 3 || session('role')== 'admin'): ?>
+    <a href="<?= base_url('schedule/download-template') ?>" class="btn btn-outline-primary fw-semibold">
+        <i class="bi bi-download me-1"></i>
+        Download Format
+    </a>
+<?php endif; ?>
     <form action="<?= base_url('schedule/import') ?>" method="post" enctype="multipart/form-data">
     
         <div class="mb-3">

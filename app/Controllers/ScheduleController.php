@@ -8,7 +8,7 @@ class ScheduleController extends BaseController
 {
 
     protected $db;
-    protected $table = 'tb_it'; // ✅ use ONE table only
+    protected $table = 'tb_it';
 
     public function __construct()
     {
@@ -211,6 +211,13 @@ private function updateDutyStatus()
         'success',
         "Schedule imported. Rows inserted: {$inserted} | Skipped (no tech match): {$skippedNoTech}"
     );
+}
+
+public function downloadTemplate()
+{
+    $filePath = WRITEPATH . 'templates/technician_schedule_template.xlsx';
+
+    return $this->response->download($filePath, null);
 }
 
 }

@@ -16,8 +16,8 @@ class App extends BaseConfig
      *
      * E.g., http://example.com/
      */
-    public string $baseURL = 'http://ts.cvmc.local/';
-    // public string $baseURL = 'http://localhost:8080/';
+    // public string $baseURL = 'http://tsv2.cvmc.local/';
+    public string $baseURL = 'http://localhost:8080/';
     // public string $baseURL = 'http://192.168.0.97:8080/';
 
     /**
