@@ -121,18 +121,7 @@ $this->section('body');
 </button>
 
 
-<div class="form-check form-switch">
-    <input 
-        class="form-check-input" 
-        type="checkbox" 
-        role="switch" 
-        id="overrideSwitch"
-        <?= $override ? 'checked' : '' ?>
-    >
-    <label class="form-check-label fw-semibold" for="overrideSwitch">
-        Manual Active/Inactive
-    </label>
-</div>
+
 
 <?php endif; ?>
 
@@ -197,7 +186,7 @@ $this->section('body');
                 <button 
                 type="submit" 
                 class="btn btn-sm btn-success"
-                <?= $override ? '' : 'disabled' ?>
+                
                 >
                 Active
                 </button>
@@ -207,7 +196,7 @@ $this->section('body');
                 <button 
                 type="submit" 
                 class="btn btn-sm btn-danger"
-                <?= $override ? '' : 'disabled' ?>
+                
                 >
                 Inactive
                 </button>
@@ -234,7 +223,7 @@ $this->section('body');
             </form>
 
         </div>
-        <?php else: echo 'No actions allowed for this user'; endif; ?>
+        <?php else: echo ''; endif; ?>
     </td>
 </tr>
 <?php endif; ?>
@@ -285,7 +274,7 @@ $this->section('body');
                 <button 
                 type="submit" 
                 class="btn btn-sm btn-success"
-                <?= $override ? '' : 'disabled' ?>
+                
                 >
                 Active
                 </button>
@@ -295,7 +284,7 @@ $this->section('body');
                 <button 
                 type="submit" 
                 class="btn btn-sm btn-danger"
-                <?= $override ? '' : 'disabled' ?>
+                
                 >
                 Inactive
                 </button>
@@ -322,7 +311,7 @@ $this->section('body');
             </form>
 
         </div>
-        <?php else: echo 'No actions allowed for this user'; endif; ?>
+        <?php else: echo ''; endif; ?>
     </td>
 </tr>
 <?php endif; ?>
@@ -373,7 +362,7 @@ $this->section('body');
                 <button 
                 type="submit" 
                 class="btn btn-sm btn-success"
-                <?= $override ? '' : 'disabled' ?>
+                
                 >
                 Active
                 </button>
@@ -383,7 +372,7 @@ $this->section('body');
                 <button 
                 type="submit" 
                 class="btn btn-sm btn-danger"
-                <?= $override ? '' : 'disabled' ?>
+                
                 >
                 Inactive
                 </button>
@@ -410,7 +399,7 @@ $this->section('body');
             </form>
 
         </div>
-        <?php else: echo 'No actions allowed for this user'; endif; ?>
+        <?php else: echo ''; endif; ?>
     </td>
 </tr>
 <?php endif; ?>
@@ -670,30 +659,6 @@ Swal.fire({
 
 });
 
-$('#overrideSwitch').on('change', function(){
-
-    let status = $(this).is(':checked') ? 1 : 0;
-
-    Swal.fire({
-        title: 'Change Scheduler Mode?',
-        icon: 'question',
-        showCancelButton: true,
-        confirmButtonText: 'Yes'
-    }).then((result)=>{
-
-        if(result.isConfirmed){
-
-            window.location.href = "<?= base_url('tech/setOverride/') ?>" + status;
-
-        }else{
-
-            location.reload();
-
-        }
-
-    });
-
-});
 </script>
 
 

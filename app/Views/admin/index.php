@@ -395,6 +395,32 @@ $.get('<?= site_url("/search/technician") ?>', { q }, function (data) {
 
 });
 
+
+$('body').on('keyup', '.tech-input', function () {
+    let q = $(this).val();
+    let $dropdown = $(this).siblings('.techList');
+    
+    if (q.length < 1) {
+        $dropdown.addClass('d-none');
+        return;
+    }
+
+    $.get('<?= site_url("/search/technician") ?>', { q }, function (data) {
+        let list = '';
+        data.forEach(item => {
+            list += `<button type="button"
+                     class="list-group-item list-group-item-action table-tech-item"
+                     data-id="${item.id}"
+                     data-name="${item.name}">
+                     ${item.name}
+                     </button>`;
+        });
+
+        $dropdown.html(list).removeClass('d-none');
+    });
+});
+
+
 // endorse here uses single select for simplicity, adjust if you want multiple
 $('#endorseTechInput').on('keyup', function () {
 
@@ -474,13 +500,43 @@ $(document).on('click', '.tech-item', function () {
     $('#techList').addClass('d-none'); // 👈 close after select
 });
 
-$(document).on('click', '.remove-tech', function () {
+$(document).on('click', '.table-tech-item', function () {
+    let id = $(this).data('id');
+    let name = $(this).data('name');
+    let $container = $(this).closest('.position-relative');
+    let troubleId = $container.data('trouble-id');
 
-    let id = parseInt($(this).data('id'));
+    // Hide input and dropdown
+    $container.find('.tech-input').hide();
+    $container.find('.techList').addClass('d-none');
 
-    selectedTechIds = selectedTechIds.filter(t => t !== id);
-
-    $(this).closest('.tech-badge').remove();
+    // AJAX call to assign tech using endorse endpoint
+    $.post('<?= site_url("trouble/endorse") ?>', {
+        id: troubleId,
+        person_id: id
+    }, function(response) {
+        if (response.success) {
+            // Show success SweetAlert
+            Swal.fire({
+                icon: 'success',
+                title: 'Technician Assigned',
+                text: name + ' has been assigned to this troubleshoot.',
+                timer: 2000,
+                showConfirmButton: false
+            });
+            
+            // Optionally refresh the table or update the row
+            setTimeout(function() {
+                location.reload();
+            }, 2000);
+        }
+    }).fail(function() {
+        Swal.fire({
+            icon: 'error',
+            title: 'Error',
+            text: 'Failed to assign technician. Please try again.'
+        });
+    });
 });
 
 

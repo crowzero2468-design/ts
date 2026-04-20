@@ -78,7 +78,7 @@ $routes->post('tech/store', 'TechController::store');
 // SCHEDULER OVERRIDE SWITCH
 // ============================
 
-$routes->get('tech/setOverride/(:num)', 'TechController::setOverride/$1');
+// $routes->get('tech/setOverride/(:num)', 'TechController::setOverride/$1');
 $routes->post('trouble/startNow', 'TroubleController::startNow');
 $routes->post('trouble/saveAck', 'TroubleController::saveAck');
 

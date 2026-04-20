@@ -27,22 +27,31 @@ class TroubleController extends BaseController
         'description' => strtoupper($this->request->getPost('description')),
         'status'      => 'Ongoing',
         'time'        => date('Y-m-d H:i:s'),
-        'personnel'  => $loggedUser, // ✅ save who created it
+        'personnel'  => $loggedUser, 
     ];
 
     if (
         empty($baseData['name']) ||
         empty($baseData['location']) ||
-        empty($baseData['description']) ||
-        empty($personnels)
+        empty($baseData['description']) 
+        // empty($personnels)
     ) {
         return redirect()->back()->with('error', 'Please complete all required fields');
     }
 
-    foreach ($personnels as $techId) {
+    // ✅ CASE 1: If personnel selected → loop insert
+    if (!empty($personnels)) {
+        foreach ($personnels as $techId) {
+            $data = $baseData;
+            $data['person'] = $techId;
 
+            $db->table('tbtrouble')->insert($data);
+        }
+    } 
+    // ✅ CASE 2: No personnel selected → insert once with NULL
+    else {
         $data = $baseData;
-        $data['person'] = $techId;
+        $data['person'] = null; // or 0 if your DB requires
 
         $db->table('tbtrouble')->insert($data);
     }
@@ -90,6 +99,11 @@ public function endorse()
            'status' => 'Ongoing',
            'person' => $person
        ]);
+
+    // Check if it's an AJAX request
+    if ($this->request->isAJAX()) {
+        return $this->response->setJSON(['success' => true, 'message' => 'Technician assigned successfully.']);
+    }
 
     return redirect()->back()->with('success', 'Troubleshoot endorsed successfully.');
 }

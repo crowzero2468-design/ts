@@ -22,7 +22,28 @@
             <?= esc($row['status']) ?>
         </span>
     </td>
-    <td><?= esc($row['tech_name'] ?? '-') ?></td>
+   <td>
+    <?php if (empty($row['tech_name'])): ?>
+
+        <!-- SHOW SELECT UI -->
+        <div class="position-relative" data-trouble-id="<?= $row['id'] ?>">
+            <input type="text"
+                class="form-control tech-input"
+                autocomplete="off"
+                placeholder="Search IT technical">
+
+            <div class="techList list-group position-absolute w-100 d-none"
+                style="max-height:200px; overflow-y:auto; z-index:1056;">
+            </div>
+        </div>
+
+    <?php else: ?>
+
+        <!-- SHOW NAME -->
+        <?= esc($row['tech_name']) ?>
+
+    <?php endif; ?>
+</td>
     <td>
         <?php if (empty($row['time_started']) && $row['status'] === 'Ongoing'): ?>
             

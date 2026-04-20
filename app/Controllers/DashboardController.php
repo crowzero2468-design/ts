@@ -21,13 +21,13 @@ class DashboardController extends BaseController
           $data['persons'] = $personModel->findAll();
           $data['acknos'] = $acknoModel->findAll();
 
-        // ✅ ON DUTY IT (role is VARCHAR = 'admin')
+
         $onDutyCount = $db->table('tb_it')
-            ->where('role', 'user')
             ->where('status', 'active')
+            ->wherein('role', ['user','admin'])
             ->countAllResults();
 
-        // ✅ ONGOING TROUBLE
+
         $ongoingCount = $db->table('tbtrouble')
             ->where('status', 'Ongoing')
             ->countAllResults();
@@ -35,7 +35,7 @@ class DashboardController extends BaseController
         $TotalTSCount = $db->table('tbtrouble')
             ->countAllResults();
 
-        // ✅ TODAY TROUBLES (SAFE DATE FILTER)
+
         $todayTroubles = $db->table('tbtrouble t')
             ->select('t.*, p.name as tech_name')
             ->join('tb_it p', 'p.id = t.person', 'left')
@@ -70,7 +70,7 @@ public function checkNewTrouble()
     $newRecords = $model
         ->where('time >=', $todayStart)
         ->where('time <=', $todayEnd)
-        ->where('id >', $lastId) // 🔥 THIS IS THE FIX
+        ->where('id >', $lastId) 
         ->orderBy('id', 'ASC')
         ->findAll();
 
@@ -111,12 +111,11 @@ public function refreshCounts()
 
         // Ensure the duty scheduler runs before fetching counts
         $techController = new \App\Controllers\TechController();
-        $techController->updateDutyStatus();
 
         // Fetch fresh data
         $onDutyCount = $db->table('tb_it')
-            ->where('role', 'user')
             ->where('status', 'active')
+            ->wherein('role', ['user','admin'])
             ->countAllResults();
 
         $TotalTSCount = $db->table('tbtrouble')

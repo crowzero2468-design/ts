@@ -44,7 +44,7 @@ abstract class BaseController extends Controller
         // $this->session = service('session');
 
         // Run the duty scheduler on every request
-        $techController = new TechController();
-        $techController->updateDutyStatus();
+        // $techController = new TechController();
+        // $techController->updateDutyStatus();
     }
 }

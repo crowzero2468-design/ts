@@ -20,7 +20,7 @@ class ScheduleController extends BaseController
     ========================== */
     public function index()
     {
-         $this->updateDutyStatus();
+         // $this->updateDutyStatus();
 
         $data['records'] = $this->db
             ->table($this->table)

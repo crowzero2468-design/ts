@@ -22,9 +22,9 @@ class TechController extends BaseController
     public function index()
     {
         // Run scheduler only if override OFF
-        if (session()->get('manual_override') != 1) {
-            $this->updateDutyStatus();
-        }
+        // if (session()->get('manual_override') != 1) {
+        //     $this->updateDutyStatus();
+        // }
 
         $data['records'] = $this->db
             ->table($this->table)
@@ -40,7 +40,7 @@ class TechController extends BaseController
             ->getResultArray();
 
         // send override state to view
-        $data['override'] = session()->get('manual_override') ?? 0;
+        // $data['override'] = session()->get('manual_override') ?? 0;
 
         return view('admin/tech', $data);
     }
@@ -49,24 +49,23 @@ class TechController extends BaseController
        TOGGLE STATUS (MANUAL)
     ========================== */
     public function toggleStatus($id)
-    {
-        $builder = $this->db->table($this->table);
+{
+    $builder = $this->db->table($this->table);
 
-        $user = $builder->where('id', $id)->get()->getRow();
+    $user = $builder->where('id', $id)->get()->getRow();
 
-        if (!$user) {
-            return redirect()->back()->with('error', 'Record not found.');
-        }
-
-        $newStatus = ($user->status === 'active') ? 'inactive' : 'active';
-
-        $builder->where('id', $id)->update([
-            'status' => $newStatus,
-            'manual_override' => 1
-        ]);
-
-        return redirect()->back()->with('success', 'Status updated successfully.');
+    if (!$user) {
+        return redirect()->back()->with('error', 'Record not found.');
     }
+
+    $newStatus = ($user->status === 'active') ? 'inactive' : 'active';
+
+    $this->db->table($this->table)
+        ->where('id', $id)
+        ->update(['status' => $newStatus]);
+
+    return redirect()->back()->with('success', 'Status updated successfully.');
+}
 
     /* =========================
        UPDATE RECORD
@@ -120,60 +119,60 @@ class TechController extends BaseController
     /* =========================
        AUTO DUTY SCHEDULER
     ========================== */
-    public function updateDutyStatus()
-    {
-        // stop scheduler if manual override ON
-        if (session()->get('manual_override') == 1) {
-            return;
-        }
+    // public function updateDutyStatus()
+    // {
+    //     // stop scheduler if manual override ON
+    //     if (session()->get('manual_override') == 1) {
+    //         return;
+    //     }
 
-        $db = \Config\Database::connect();
+    //     $db = \Config\Database::connect();
 
-        date_default_timezone_set('Asia/Manila');
+    //     date_default_timezone_set('Asia/Manila');
 
-        $nowDate = date('Y-m-d');
-        $nowTime = date('H:i:s');
+    //     $nowDate = date('Y-m-d');
+    //     $nowTime = date('H:i:s');
 
-        // Set everyone inactive first (only automatic techs)
-        $db->table('tb_it')
-            ->where('manual_override', 0)
-            ->update(['status' => 'inactive']);
+    //     // Set everyone inactive first (only automatic techs)
+    //     $db->table('tb_it')
+    //         ->where('manual_override', 0)
+    //         ->update(['status' => 'inactive']);
 
-        // Get technicians scheduled today
-        $schedules = $db->table('tb_schedule')
-            ->where('schedule_date', $nowDate)
-            ->get()
-            ->getResult();
+    //     // Get technicians scheduled today
+    //     $schedules = $db->table('tb_schedule')
+    //         ->where('schedule_date', $nowDate)
+    //         ->get()
+    //         ->getResult();
 
-        foreach ($schedules as $schedule) {
+    //     foreach ($schedules as $schedule) {
 
-            // activate 30 minutes before shift
-            $start = date('H:i:s', strtotime('-30 minutes', strtotime($schedule->start_time)));
-            $end   = $schedule->end_time;
+    //         // activate 30 minutes before shift
+    //         $start = date('H:i:s', strtotime('-30 minutes', strtotime($schedule->start_time)));
+    //         $end   = $schedule->end_time;
 
-            $isOnDuty = false;
+    //         $isOnDuty = false;
 
-            // Normal shift
-            if ($start < $end) {
-                if ($nowTime >= $start && $nowTime <= $end) {
-                    $isOnDuty = true;
-                }
-            }
-            // Night shift
-            else {
-                if ($nowTime >= $start || $nowTime <= $end) {
-                    $isOnDuty = true;
-                }
-            }
+    //         // Normal shift
+    //         if ($start < $end) {
+    //             if ($nowTime >= $start && $nowTime <= $end) {
+    //                 $isOnDuty = true;
+    //             }
+    //         }
+    //         // Night shift
+    //         else {
+    //             if ($nowTime >= $start || $nowTime <= $end) {
+    //                 $isOnDuty = true;
+    //             }
+    //         }
 
-            if ($isOnDuty) {
-                $db->table('tb_it')
-                    ->where('id', $schedule->tech_id)
-                    ->where('manual_override', 0)
-                    ->update(['status' => 'active']);
-            }
-        }
-    }
+    //         if ($isOnDuty) {
+    //             $db->table('tb_it')
+    //                 ->where('id', $schedule->tech_id)
+    //                 ->where('manual_override', 0)
+    //                 ->update(['status' => 'active']);
+    //         }
+    //     }
+    // }
 
     /* =========================
        ADD TECHNICIAN
@@ -201,22 +200,22 @@ class TechController extends BaseController
     /* =========================
        GLOBAL SCHEDULER SWITCH
     ========================== */
-    public function setOverride($status)
-{
-    session()->set('manual_override', $status);
+//     public function setOverride($status)
+// {
+//     session()->set('manual_override', $status);
 
-    // If switching back to automatic scheduler
-    if ($status == 0) {
+//     // If switching back to automatic scheduler
+//     if ($status == 0) {
 
-        // Reset all manual overrides
-        $this->db->table('tb_it')->update([
-            'manual_override' => 0
-        ]);
+//         // Reset all manual overrides
+//         $this->db->table('tb_it')->update([
+//             'manual_override' => 0
+//         ]);
 
-    }
+//     }
 
-    return redirect()->back()->with('success', 'Scheduler mode updated');
-}
+//     return redirect()->back()->with('success', 'Scheduler mode updated');
+// }
 
 
 }

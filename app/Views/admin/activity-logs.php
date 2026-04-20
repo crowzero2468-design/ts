@@ -79,12 +79,12 @@ $this->section('body');
 
             <div class="col-md-3">
                 <label class="form-label">Start Date & Time</label>
-                <input type="datetime-local" name="start_date" class="form-control">
+                <input type="date" name="start_date" class="form-control">
             </div>
 
             <div class="col-md-3">
                 <label class="form-label">End Date & Time</label>
-                <input type="datetime-local" name="end_date" class="form-control">
+                <input type="date" name="end_date" class="form-control">
             </div>
 
             <div class="col-md-3">
@@ -168,8 +168,14 @@ $this->section('body');
 $(document).ready(function () {
 
     $('#viewFormBtn').click(function () {
-        const startDate = $('input[name="start_date"]').val();
-        const endDate   = $('input[name="end_date"]').val();
+       let startDate = $('input[name="start_date"]').val();
+        let endDate   = $('input[name="end_date"]').val();
+
+        // Add default times
+        if (startDate) startDate += ' 00:01:00'; // 12:01 AM
+        if (endDate)   endDate   += ' 23:59:00'; // 11:59 PM
+
+
         const name      = $('input[name="name"]').val() || '';
         const tsType    = $('#tsTypeSelect').val() || '';
 
@@ -237,10 +243,14 @@ $(document).ready(function () {
             url: "<?= base_url('tshistory/getData') ?>",
             type: "GET",
             data: function (d) {
-                d.start_date = $('input[name="start_date"]').val();
-                d.end_date   = $('input[name="end_date"]').val();
-                d.name       = $('input[name="name"]').val();
-                d.ts_type    = $('#tsTypeSelect').val(); 
+                let start = $('input[name="start_date"]').val();
+                let end   = $('input[name="end_date"]').val();
+
+                d.start_date = start ? start + ' 00:01:00' : '';
+                d.end_date   = end   ? end   + ' 23:59:00' : '';
+
+                d.name    = $('input[name="name"]').val();
+                d.ts_type = $('#tsTypeSelect').val(); 
             }
         },
         columns: [
