@@ -125,7 +125,7 @@
             <div><b>As of:</b> <?= date('F, Y') ?></div>
           </td>
           <td style="border: none; text-align: right;">
-            <img src="<?= base_url('assets/img/DOH_logo.png') ?>" height="80">
+            <img src="<?= base_url('assets/img/DOH_Logo.png') ?>" height="80">
           </td>
         </tr>
       </table>

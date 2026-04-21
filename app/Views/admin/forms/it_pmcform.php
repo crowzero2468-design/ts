@@ -104,7 +104,7 @@
       <div class="top-title"><strong>CAGAYAN VALLEY MEDICAL CENTER</strong></div>
       <div class="top-title">Regional Tertiary, Teaching, Training, and Research Medical Center</div>
     </td>
-    <td style="border: none; text-align: right;" rowspan="4"><img src="<?= base_url('assets/img/DOH_logo.png') ?>" alt="DOH Logo"></td>
+    <td style="border: none; text-align: right;" rowspan="4"><img src="<?= base_url('assets/img/DOH_Logo.png') ?>" alt="DOH Logo"></td>
     <td style="border: none; text-align: right;"><b>IM-006-0</b></td>
   </tr>
   <tr>
@@ -146,7 +146,7 @@
               <div class="title top-title">IT EQUIPMENT AND DEVICE PREVENTIVE MAINTENANCE CHECKLIST</div>
             </td>
             <td style="border: none; text-align: right;">
-              <img src="<?= base_url('assets/img/DOH_logo.png') ?>" alt="DOH Logo" height="80">
+              <img src="<?= base_url('assets/img/DOH_Logo.png') ?>" alt="DOH Logo" height="80">
               
             </td>
           </tr>

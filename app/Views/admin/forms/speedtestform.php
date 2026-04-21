@@ -130,7 +130,7 @@
             </td>
             <td style="border: none; text-align: right;">
 
-              <img src="<?= base_url('assets/img/DOH_logo.png') ?>" alt="DOH Logo" height="80"><br>
+              <img src="<?= base_url('assets/img/DOH_Logo.png') ?>" alt="DOH Logo" height="80"><br>
 
                 
             </td>

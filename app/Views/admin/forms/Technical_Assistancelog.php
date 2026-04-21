@@ -67,7 +67,7 @@ $headerHTML = '
         <strong>CAGAYAN VALLEY MEDICAL CENTER</strong><br>
         Regional Tertiary, Teaching, Training, and Research Medical Center
     </td>
-    <td width="15%"><img src="' . base_url('assets/img/DOH_logo.png', true) . '" height="60"></td>
+    <td width="15%"><img src="' . base_url('assets/img/DOH_Logo.png', true) . '" height="60"></td>
 </tr>
 <tr>
     <td colspan="3" style="text-align:right;">

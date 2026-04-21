@@ -125,7 +125,7 @@ class TempController extends BaseController
                 Regional Tertiary, Teaching, Training, and Research Medical Center<br>
                 <strong>SERVER ROOM TEMPERATURE MONITORING</strong><br>
             </td>
-            <td style="border:none; text-align:right;"><img src="' . FCPATH . 'assets/img/DOH_logo.png" height="80"></td>
+            <td style="border:none; text-align:right;"><img src="' . FCPATH . 'assets/img/DOH_Logo.png" height="80"></td>
         </tr>
     </table>';
     $mpdf->SetHTMLHeader($header);

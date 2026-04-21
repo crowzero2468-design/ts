@@ -263,7 +263,7 @@ public function printPdf()
                                     Regional Tertiary, Teaching, Training, and Research Medical Center<br>
                                     Dalan na Padday, Carig Sur, Tuguegarao City, Cagayan
                                 </td>
-                                <td width="15%" style="border:none;"><img src="' . FCPATH . 'assets/img/DOH_logo.png" height="80"></td>
+                                <td width="15%" style="border:none;"><img src="' . FCPATH . 'assets/img/DOH_Logo.png" height="80"></td>
                             </tr>
                             <tr>
                                 <td colspan="3" style="text-align:center;"><h3>Technical Assistance Support Log</h3></td>

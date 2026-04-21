@@ -164,7 +164,7 @@ public function form()
                 <div class="top-title">Regional Tertiary, Teaching, Training, and Research Medical Center</div>
                 <div class="top-title"><strong>IT EQUIPMENT AND DEVICE PREVENTIVE MAINTENANCE CHECKLIST</strong></div>
             </td>
-            <td style="text-align:right;"><img src="' . FCPATH . 'assets/img/DOH_logo.png" width="90px"></td>
+            <td style="text-align:right;"><img src="' . FCPATH . 'assets/img/DOH_Logo.png" width="90px"></td>
         </tr>
 
         <tr>
