@@ -71,50 +71,76 @@
         </td>
     
     <td>
-        <?php if ($row['status'] === 'Ongoing' && !empty($row['Acknoby'])):?>
+    <?php if ($row['status'] === 'Ongoing' && !empty($row['Acknoby'])): ?>
 
-            <?php if (empty($row['time_started'])): ?>
-                
-                
-                <span class="text-muted">Start first</span>
+        <?php if (empty($row['time_started'])): ?>
+            <span class="text-muted">Start first</span>
 
-            <?php else: ?>
+        <?php else: ?>
 
-                
-                <form action="<?= site_url('trouble/markDone') ?>" method="post" class="d-flex gap-2">
-                    <?= csrf_field() ?>
-                    <input type="hidden" name="id" value="<?= $row['id'] ?>">
+            <form action="<?= site_url('trouble/markDone') ?>"
+                  method="post"
+                  enctype="multipart/form-data"
+                  class="d-flex gap-2">
 
-                    <div class="d-flex flex-column">
-                        <input type="text"
-                            name="remarks"
-                            data-id="<?= $row['id'] ?>"
-                            class="form-control form-control-xl mb-2"
-                            placeholder="Enter remarks">
+                <?= csrf_field() ?>
+                <input type="hidden" name="id" value="<?= $row['id'] ?>">
 
-                        <div class="d-flex justify-content-center gap-2">
-                            <button class="btn btn-success btn-xl">
-                                ✔
-                            </button>
+                <div class="d-flex flex-column w-100">
 
-                            <button
-                                type="button"
+                    <input type="text"
+                           name="remarks"
+                           class="form-control form-control-xl mb-2"
+                           placeholder="Enter remarks">
+
+                    <!-- 📸 Upload image -->
+                   <input type="file"
+                    name="proof_image"
+                    id="proof_image_<?= $row['id'] ?>"
+                    class="d-none"
+                    accept="image/*">
+
+        <button type="button"
+                class="btn btn-primary btn-sm mb-2"
+                onclick="document.getElementById('proof_image_<?= $row['id'] ?>').click();">
+            📸 Upload Image
+        </button>
+
+
+                    <div class="d-flex justify-content-center gap-2">
+                        <button class="btn btn-success btn-xl">
+                            ✔
+                        </button>
+
+                        <button type="button"
                                 class="btn btn-danger btn-xl endorse-btn"
                                 data-bs-toggle="modal"
                                 data-bs-target="#endorseModal"
                                 data-id="<?= $row['id'] ?>">
-                                <i class="fa-solid fa-arrows-rotate"></i>
-                            </button>
-                        </div>
+                            <i class="fa-solid fa-arrows-rotate"></i>
+                        </button>
                     </div>
-                </form>
+                </div>
+            </form>
 
-            <?php endif; ?>
-
-        <?php else: ?>
-            <?= esc($row['remarks'] ?? '-') ?>
         <?php endif; ?>
-    </td>
+
+<?php else: ?>
+    <div>
+        <?= esc($row['remarks'] ?? '-') ?>
+
+        <?php if (!empty($row['image'])): ?>
+            <br>
+
+           <a href="<?= base_url('assets/img/uploads/' . $row['image']) ?>" 
+               target="_blank"
+               class="text-primary small">
+                <u>See Attached Image </u>
+            </a>
+        <?php endif; ?>
+    </div>
+<?php endif; ?>
+</td>
 
     <td>
         <?php
@@ -140,43 +166,44 @@
 
 <td>
     <?php if (!empty($row['Acknoby'])): ?>
-        <?php 
-            $ackPerson = null;
-            foreach ($acknos as $a) {
-                if ($a['id'] == $row['Acknoby']) {
-                    $ackPerson = $a;
-                    break;
-                }
-            }
-        ?>
-        <?php if ($ackPerson): ?>
-            <div class="mb-1"><strong>ID Number:</strong> <?= esc($ackPerson['id_num']) ?></div>
-            <div><strong>Full Name:</strong> <?= esc($ackPerson['full_name']) ?></div>
-        <?php endif; ?>
+
+        <div class="mb-1">
+            <strong>ID Number:</strong> <?= esc($row['ack_id_num']) ?>
+        </div>
+
+        <div>
+            <strong>Full Name:</strong> <?= esc($row['ack_full_name']) ?>
+        </div>
+
+        <div class="mb-1">
+            <strong>Remarks:</strong><br>
+            <?= !empty($row['ack_remarks']) ? esc($row['ack_remarks']) : 'No remarks' ?>
+        </div>
+
     <?php else: ?>
         <form action="<?= site_url('trouble/saveAck') ?>" method="post">
             <?= csrf_field() ?>
 
-            <!-- Hidden field for trouble ID -->
             <input type="hidden" name="id" value="<?= $row['id'] ?>">
 
-            <!-- ID Number -->
             <input type="text" 
                    name="id_num"
-                   data-id="<?= $row['id'] ?>" 
                    class="form-control form-control-sm mb-1" 
                    placeholder="ID Number" 
                    required>
 
-            <!-- Full Name -->
             <input type="text" 
                    name="full_name"
-                   data-id="<?= $row['id'] ?>" 
                    class="form-control form-control-sm mb-1" 
                    placeholder="Full Name" 
                    required>
 
-            <!-- Save Button -->
+            <input type="text" 
+                   name="remarks"
+                   class="form-control form-control-sm mb-1" 
+                   placeholder="Remarks" 
+                   >
+
             <button type="submit" class="btn btn-primary btn-sm w-100">
                 Save
             </button>

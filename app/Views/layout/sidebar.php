@@ -214,12 +214,12 @@ $current = service('uri')->getSegment(1);
           </a>
         </li> -->
 
-        <li class="nav-item <?= $current == 'sched' ? 'active' : '' ?>">
+        <!-- <li class="nav-item <?= $current == 'sched' ? 'active' : '' ?>">
           <a href="<?= base_url('/sched'); ?>">
             <i class="fa-solid fa-calendar"></i>
             <p>Schedule</p>
           </a>
-        </li>
+        </li> -->
 
         <!-- IT Equipment -->
         <!-- <li class="nav-item <?= $current == 'equip' ? 'active' : '' ?>">

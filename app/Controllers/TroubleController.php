@@ -62,28 +62,30 @@ class TroubleController extends BaseController
 
 public function markDone()
 {
+    $troubleModel = new Tbtrouble();
+
     $id = $this->request->getPost('id');
 
-    $tbTrouble = new Tbtrouble();
-    $row = $tbTrouble->find($id);
+    $file = $this->request->getFile('proof_image');
 
-    if (!$row) {
-        return redirect()->back()->with('error', 'Record not found');
-    }
-
-    // ❌ BLOCK if not started
-    if (empty($row['time_started'])) {
-        return redirect()->back()->with('error', 'Cannot mark as done. Start the task first.');
-    }
-
-    // ✅ Proceed
-    $tbTrouble->update($id, [
-        'status' => 'Done',
+    $data = [
         'remarks' => $this->request->getPost('remarks'),
-        'completion_time' => date('Y-m-d H:i:s')
-    ]);
+        'status'  => 'Done',
+	    'completion_time' => date('Y-m-d H:i:s')
+    ];
 
-    return redirect()->back()->with('success', 'Marked as done');
+    // only update image if file is uploaded
+    if ($file && $file->isValid() && !$file->hasMoved() && $file->getName() !== '') {
+
+        $imageName = $file->getRandomName();
+        $file->move(FCPATH . 'assets/img/uploads', $imageName);
+
+        $data['image'] = $imageName;
+    }
+
+    $troubleModel->update($id, $data);
+
+    return redirect()->back()->with('success', 'Marked as done successfully.');
 }
 
 public function endorse()
@@ -99,11 +101,6 @@ public function endorse()
            'status' => 'Ongoing',
            'person' => $person
        ]);
-
-    // Check if it's an AJAX request
-    if ($this->request->isAJAX()) {
-        return $this->response->setJSON(['success' => true, 'message' => 'Technician assigned successfully.']);
-    }
 
     return redirect()->back()->with('success', 'Troubleshoot endorsed successfully.');
 }
@@ -129,28 +126,63 @@ public function saveAck()
 {
     $db = \Config\Database::connect();
 
-    $troubleId = $this->request->getPost('id');          // trouble record ID
-    $idNum = trim($this->request->getPost('id_num'));    // person ID number
-    $fullName = trim($this->request->getPost('full_name')); // person full name
+    $troubleId = $this->request->getPost('id');
+    $idNum     = trim($this->request->getPost('id_num'));
+    $fullName  = trim($this->request->getPost('full_name'));
+    $remarks   = trim($this->request->getPost('remarks'));
 
+    // Basic validation
     if (!$troubleId || !$idNum || !$fullName) {
         return redirect()->back()->with('error', 'Invalid data');
     }
 
-    $ackTable = $db->table('tb_AcknowledgedBy');
+    $ackTable     = $db->table('tb_AcknowledgedBy');
+    $remarksTable = $db->table('tb_AcknowledgedByRemarks');
 
-    // Check if person already exists by id_num
+    // Check if person already exists
     $existing = $ackTable->where('id_num', $idNum)->get()->getRowArray();
 
     if ($existing) {
-        $ackId = $existing['id']; // use existing primary id
+        $ackId = $existing['id'];
+
+        // Optional: update full name if changed
+        if ($existing['full_name'] !== $fullName) {
+            $ackTable->where('id', $ackId)->update([
+                'full_name' => $fullName
+            ]);
+        }
+
     } else {
         // Insert new person
         $ackTable->insert([
-            'id_num' => $idNum,
-            'full_name' => $fullName
+            'id_num'    => $idNum,
+            'full_name' => $fullName,
         ]);
+
         $ackId = $db->insertID();
+    }
+
+    // ✅ Prevent duplicate remarks for same trouble + person
+    $existingRemark = $remarksTable
+        ->where('id_ack', $ackId)
+        ->where('trouble_id', $troubleId)
+        ->get()
+        ->getRowArray();
+
+    if ($existingRemark) {
+        // Update existing remark instead of inserting duplicate
+        $remarksTable
+            ->where('id', $existingRemark['id'])
+            ->update([
+                'remarks' => $remarks
+            ]);
+    } else {
+        // Insert new remark
+        $remarksTable->insert([
+            'id_ack'     => $ackId,
+            'trouble_id' => $troubleId,
+            'remarks'    => $remarks
+        ]);
     }
 
     // Update tbtrouble with the Acknoby ID
