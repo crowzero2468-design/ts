@@ -42,7 +42,7 @@ $this->section('body');
                             class="btn btn-secondary w-100"
                             data-bs-toggle="modal" 
                             data-bs-target="#addTempModal">
-                        + Add Temperature
+                        Add Temperature
                     </button>
                 </div>
 
