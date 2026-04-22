@@ -100,7 +100,7 @@ $this->section('body');
                             <?= csrf_field() ?>
                             <input type="hidden" name="id" value="<?= $row['id'] ?>">
                             <!-- Remarks input -->
-                            <input type="text" name="remarks" class="form-control form-control-sm" placeholder="Add remarks" style="width:150px;">
+                            <textarea name="remarks" class="form-control form-control-sm" placeholder="Describe the action performed" style="width:150px;"></textarea>
                             <!-- Done button -->
                             <button class="btn btn-success btn-sm" title="Done">✔</button>
                         </form>
@@ -156,50 +156,51 @@ $this->section('body');
                 <!-- Acknowledged By Column -->
                 
                     <td>
-                        <?php if (!empty($row['Acknoby'])): ?>
-                            <?php 
-                                $ackPerson = null;
-                                foreach ($acknos as $a) {
-                                    if ($a['id'] == $row['Acknoby']) {
-                                        $ackPerson = $a;
-                                        break;
-                                    }
-                                }
-                            ?>
-                            <?php if ($ackPerson): ?>
-                                <div class="mb-1"><strong>ID Number:</strong> <?= esc($ackPerson['id_num']) ?></div>
-                                <div><strong>Full Name:</strong> <?= esc($ackPerson['full_name']) ?></div>
-                            <?php endif; ?>
-                        <?php else: ?>
-                            <form action="<?= site_url('trouble/saveAck') ?>" method="post">
-                                <?= csrf_field() ?>
+    <?php if (!empty($row['Acknoby'])): ?>
 
-                                <!-- Hidden field for trouble ID -->
-                                <input type="hidden" name="id" value="<?= $row['id'] ?>">
+        <div class="mb-1">
+            <strong>ID Number:</strong> <?= esc($row['ack_id_num']) ?>
+        </div>
 
-                                <!-- ID Number -->
-                                <input type="text" 
-                                    name="id_num"
-                                    data-id="<?= $row['id'] ?>" 
-                                    class="form-control form-control-sm mb-1" 
-                                    placeholder="ID Number" 
-                                    required>
+        <div class="mb-1">
+            <strong>Full Name:</strong> <?= esc($row['ack_full_name']) ?>
+        </div>
 
-                                <!-- Full Name -->
-                                <input type="text" 
-                                    name="full_name"
-                                    data-id="<?= $row['id'] ?>" 
-                                    class="form-control form-control-sm mb-1" 
-                                    placeholder="Full Name" 
-                                    required>
+        <div class="mb-1">
+            <strong>Remarks:</strong><br>
+            <?= !empty($row['ack_remarks']) ? esc($row['ack_remarks']) : 'No remarks' ?>
+        </div>
 
-                                <!-- Save Button -->
-                                <button type="submit" class="btn btn-primary btn-sm w-100">
-                                    Save
-                                </button>
-                            </form>
-                        <?php endif; ?>
-                    </td>
+    <?php else: ?>
+        <form action="<?= site_url('trouble/saveAck') ?>" method="post">
+            <?= csrf_field() ?>
+
+            <input type="hidden" name="id" value="<?= $row['id'] ?>">
+
+            <input type="text" 
+                   name="id_num"
+                   class="form-control form-control-sm mb-1" 
+                   placeholder="ID Number" 
+                   required>
+
+            <input type="text" 
+                   name="full_name"
+                   class="form-control form-control-sm mb-1" 
+                   placeholder="Full Name" 
+                   required>
+
+            <textarea
+                name="remarks"
+                class="form-control form-control-sm mb-1"
+                placeholder="Enter caller remarks"
+                rows="3"></textarea>
+
+            <button type="submit" class="btn btn-primary btn-sm w-100">
+                Save
+            </button>
+        </form>
+    <?php endif; ?>
+</td>
             </tr>
             <?php endforeach; ?>
             </tbody>

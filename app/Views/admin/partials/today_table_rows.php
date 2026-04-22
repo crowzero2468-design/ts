@@ -88,12 +88,13 @@
 
                 <div class="d-flex flex-column w-100">
 
-                    <input type="text"
-                           name="remarks"
-                           class="form-control form-control-xl mb-2"
-                           placeholder="Enter remarks">
+                <textarea
+                    name="remarks"
+                    class="form-control form-control-xl mb-2"
+                    placeholder="Describe the action performed"
+                    rows="3"></textarea>
 
-                    <!-- 📸 Upload image -->
+                   
                    <input type="file"
                     name="proof_image"
                     id="proof_image_<?= $row['id'] ?>"
@@ -101,9 +102,9 @@
                     accept="image/*">
 
         <button type="button"
-                class="btn btn-primary btn-sm mb-2"
+                class="btn btn-outline-primary btn-sm mb-2"
                 onclick="document.getElementById('proof_image_<?= $row['id'] ?>').click();">
-            📸 Upload Image
+             Upload Image
         </button>
 
 
@@ -198,12 +199,12 @@
                    placeholder="Full Name" 
                    required>
 
-            <input type="text" 
-                   name="remarks"
-                   class="form-control form-control-sm mb-1" 
-                   placeholder="Remarks" 
-                   >
-
+            <textarea
+                name="remarks"
+                class="form-control form-control-sm mb-1"
+                placeholder="Enter caller remarks"
+                rows="3"></textarea>
+                
             <button type="submit" class="btn btn-primary btn-sm w-100">
                 Save
             </button>

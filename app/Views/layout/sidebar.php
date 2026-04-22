@@ -289,7 +289,6 @@ $current = service('uri')->getSegment(1);
                 </a>
               </li>
               <?php endif; ?>
-              
             </ul>
           </div>
         </li>
