@@ -4,27 +4,59 @@ $this->section('body');
 ?>
 
 <div class="container mt-4">
-    <h3>Server Room Temperature Monitoring</h3>
+    <h3 class="mb-3">Server Room Temperature Monitoring</h3>
 
-    <div class="row mb-3">
-        <div class="col-md-3">
-            <input type="date" id="filterDate" class="form-control" placeholder="Date">
-        </div>
-        <div class="col-md-3">
-            <input type="text" id="filterMonitor" class="form-control" placeholder="Monitored By">
-        </div>
-        <div class="col-md-3">
-            <input type="text" id="filterTemp" class="form-control" placeholder="Temperature">
-        </div>
-        <div class="col-md-3 d-flex flex-column gap-2">
-            <button id="btnFilter" class="btn btn-secondary w-100">Filter</button>
-            <button id="btnClearFilter" class="btn btn-secondary w-100">Clear Filter</button>
-            <button id="btnAddTemp" class="btn btn-secondary w-100" data-bs-toggle="modal" data-bs-target="#addTempModal">
-                Add Temperature
-            </button>
-            <button id="btnTempPDF" class="btn btn-secondary">Generate PDF</button>
+    <div class="card shadow-sm">
+        <div class="card-body">
+
+            <!-- FILTERS -->
+            <div class="row g-3 align-items-end mb-3">
+
+                <div class="col-md-3">
+                    <label class="form-label small text-muted">Date</label>
+                    <input type="date" id="filterDate" class="form-control">
+                </div>
+
+                <div class="col-md-3">
+                    <label class="form-label small text-muted">Monitored By</label>
+                    <input type="text" id="filterMonitor" class="form-control" placeholder="Enter name">
+                </div>
+
+                <div class="col-md-3">
+                    <label class="form-label small text-muted">Temperature</label>
+                    <input type="text" id="filterTemp" class="form-control" placeholder="e.g. 22°C">
+                </div>
+
+                <div class="col-md-3 d-flex gap-2">
+                    <button id="btnFilter" class="btn btn-secondary w-100">Filter</button>
+                    <button id="btnClearFilter" class="btn btn-secondary w-100">Clear</button>
+                </div>
+
+            </div>
+
+            <!-- ACTIONS -->
+            <div class="row g-3">
+
+                <div class="col-md-6">
+                    <button id="btnAddTemp" 
+                            class="btn btn-secondary w-100"
+                            data-bs-toggle="modal" 
+                            data-bs-target="#addTempModal">
+                        + Add Temperature
+                    </button>
+                </div>
+
+                <div class="col-md-6">
+                    <button id="btnTempPDF" class="btn btn-secondary w-100">
+                        Generate PDF
+                    </button>
+                </div>
+
+            </div>
+
         </div>
     </div>
+
 
     <table id="tempTable" class="table table-bordered table-striped">
         <thead>

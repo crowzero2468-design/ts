@@ -238,18 +238,18 @@ $current = service('uri')->getSegment(1);
         </li> -->
 
         <!-- IT EQUIPMENT GROUP -->
-        <li class="nav-item <?= ($current == 'equip' || $current == 'pmc' || $current == 'temp' || $current == 'speedtest') ? 'active submenu' : '' ?>">
+        <li class="nav-item <?= ($current == 'equip' || $current == 'pmc' || $current == 'temp' || $current == 'speedtest' || $current == 'SMC' || $current == 'SInvent') ? 'active submenu' : '' ?>">
           <a data-bs-toggle="collapse"
             href="#itEquipment"
-            class="<?= ($current == 'equip' || $current == 'pmc' || $current == 'temp' || $current == 'speedtest') ? '' : 'collapsed' ?>"
-            aria-expanded="<?= ($current == 'equip' || $current == 'pmc' || $current == 'temp' || $current == 'speedtest') ? 'true' : 'false' ?>">
+            class="<?= ($current == 'equip' || $current == 'pmc' || $current == 'temp' || $current == 'speedtest' || $current == 'SMC' || $current == 'SInvent') ? '' : 'collapsed' ?>"
+            aria-expanded="<?= ($current == 'equip' || $current == 'pmc' || $current == 'temp' || $current == 'speedtest' || $current == 'SMC' || $current == 'SInvent') ? 'true' : 'false' ?>">
 
             <i class="fa-solid fa-laptop"></i>
             <p>Monitoring and Inspection</p>
             <span class="caret"></span>
           </a>
 
-          <div class="collapse <?= ($current == 'equip' || $current == 'pmc' || $current == 'temp' || $current == 'speedtest') ? 'show' : '' ?>" id="itEquipment">
+          <div class="collapse <?= ($current == 'equip' || $current == 'pmc' || $current == 'temp' || $current == 'speedtest' || $current == 'SMC' || $current == 'SInvent') ? 'show' : '' ?>" id="itEquipment">
             <ul class="nav nav-collapse">
               <?php if (session('role') == 3): ?>
               <li class="<?= $current == 'equip' ? 'active' : '' ?>">
@@ -276,7 +276,20 @@ $current = service('uri')->getSegment(1);
                   <span class="sub-item">Speed Test</span>
                 </a>
               </li>
-
+              <?php if (session('role') == 3): ?>
+              <li class="<?= $current == 'SMC' ? 'active' : '' ?>">
+                <a href="<?= base_url('/SMC'); ?>">
+                  <span class="sub-item">Server Management Checklist</span>
+                </a>
+              </li>
+              
+              <li class="<?= $current == 'SInvent' ? 'active' : '' ?>">
+                <a href="<?= base_url('/SInvent'); ?>">
+                  <span class="sub-item">Server Inventory</span>
+                </a>
+              </li>
+              <?php endif; ?>
+              
             </ul>
           </div>
         </li>

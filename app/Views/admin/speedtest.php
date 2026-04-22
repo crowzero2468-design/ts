@@ -4,40 +4,78 @@
 <div class="container mt-4">
 <h3>Speedtest Monitoring</h3>
 
-<div class="row mb-3">
-    <div class="col-md-3">
-        <input type="date" id="filterDate" class="form-control" placeholder="Date">
-        <div class="card text-center shadow-sm p-3 mt-3">
-            <small class="text-muted">Average Ping</small>
-            <h4 id="avgPing" class="mb-0">0 ms</h4>
-        </div>
-    </div>
-    <div class="col-md-3">
-        <input type="text" id="filterNode" class="form-control" placeholder="Location / Node">
-        <div class="card text-center shadow-sm p-3 mt-3">
-            <small class="text-muted">Average Download</small>
-            <h4 id="avgDownload" class="mb-0">0 Mbps</h4>
-        </div>
-    </div>
-    <div class="col-md-3">
-        <input type="text" id="filterBy" class="form-control" placeholder="Monitored By">
-        <div class="card text-center shadow-sm p-3 mt-3">
-            <small class="text-muted">Average Upload</small>
-            <h4 id="avgUpload" class="mb-0">0 Mbps</h4>
-        </div>
-    </div>
-    <div class="col-md-3 d-flex flex-column gap-2">
+<div class="card shadow-sm mb-3">
+    <div class="card-body">
 
-        <form action="<?= base_url('speedtest/importExcel') ?>" method="post" enctype="multipart/form-data">
-            <input class="form-control form-control-xl mb-1" type="file" name="excel_file" required>
-            <button type="submit" class="btn btn-secondary w-100">Import Excel</button>
-        </form>
-        <button class="btn btn-secondary w-100" id="filterBtn">Filter</button>
-        <button class="btn btn-secondary w-100" id="clearFilterBtn">Clear Filter</button>
-        <button class="btn btn-secondary w-100" id="addSpeedtestBtn">Add Speedtest</button>
-        <button class="btn btn-secondary w-100" id="viewFormBtn">Generate PDF</button>
-    </div>
+        <!-- FILTER ROW -->
+        <div class="row g-3 align-items-end mb-3">
 
+            <div class="col-md-3">
+                <label class="form-label small text-muted">Date</label>
+                <input type="date" id="filterDate" class="form-control">
+            </div>
+
+            <div class="col-md-3">
+                <label class="form-label small text-muted">Location / Node</label>
+                <input type="text" id="filterNode" class="form-control">
+            </div>
+
+            <div class="col-md-3">
+                <label class="form-label small text-muted">Monitored By</label>
+                <input type="text" id="filterBy" class="form-control">
+            </div>
+
+            <div class="col-md-3 d-flex gap-2">
+                <button class="btn btn-secondary w-100" id="filterBtn">Filter</button>
+                <button class="btn btn-secondary w-100" id="clearFilterBtn">Clear</button>
+            </div>
+
+        </div>
+
+        <!-- STATS CARDS -->
+        <div class="row g-3 mb-3 text-center">
+
+            <div class="col-md-4">
+                <div class="card border-0 shadow-sm p-3">
+                    <small class="text-muted">Average Ping</small>
+                    <h4 id="avgPing" class="mb-0 text-primary">0 ms</h4>
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <div class="card border-0 shadow-sm p-3">
+                    <small class="text-muted">Average Download</small>
+                    <h4 id="avgDownload" class="mb-0 text-success">0 Mbps</h4>
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <div class="card border-0 shadow-sm p-3">
+                    <small class="text-muted">Average Upload</small>
+                    <h4 id="avgUpload" class="mb-0 text-warning">0 Mbps</h4>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- ACTIONS ROW -->
+        <div class="row g-3 align-items-center">
+
+            <div class="col-md-4">
+                <form action="<?= base_url('speedtest/importExcel') ?>" method="post" enctype="multipart/form-data" class="d-flex gap-2">
+                    <input class="form-control" type="file" name="excel_file" required>
+                    <button type="submit" class="btn btn-secondary">Import</button>
+                </form>
+            </div>
+
+            <div class="col-md-8 d-flex justify-content-end gap-2">
+                <button class="btn btn-secondary" id="addSpeedtestBtn">Add Speedtest</button>
+                <button class="btn btn-secondary" id="viewFormBtn">Generate PDF</button>
+            </div>
+
+        </div>
+
+    </div>
 </div>
 
     <table id="speedtestTable" class="table table-striped table-bordered" style="width:100%">

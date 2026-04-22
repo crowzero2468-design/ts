@@ -17,11 +17,11 @@ $routes->get('dashboard', 'DashboardController::index', ['filter' => 'auth']);
 $routes->get('search/ward', 'SearchController::ward');
 $routes->get('search/technician', 'SearchController::technician');
 
-$routes->post('trouble/saveResponse', 'TroubleController::saveResponse');
-$routes->post('trouble/markDone', 'TroubleController::markDone');
-$routes->get('dashboard/check-new', 'DashboardController::checkNewTrouble');
+$routes->post('trouble/saveResponse', 'TroubleController::saveResponse', ['filter' => 'auth']);
+$routes->post('trouble/markDone', 'TroubleController::markDone', ['filter' => 'auth']);
+$routes->get('dashboard/check-new', 'DashboardController::checkNewTrouble', ['filter' => 'auth']);
 $routes->get('actlog', 'TSHistoryController::index', ['filter' => 'auth']);
-$routes->get('tshistory/getData', 'TSHistoryController::getData');
+$routes->get('tshistory/getData', 'TSHistoryController::getData', ['filter' => 'auth']);
 $routes->get('tech', 'TechController::index', ['filter' => 'auth']);
 $routes->post('tech/toggleStatus/(:num)', 'TechController::toggleStatus/$1');
 $routes->post('tech/update/(:num)', 'TechController::update/$1');
@@ -87,7 +87,7 @@ $routes->post('trouble/saveAck', 'TroubleController::saveAck');
 // New Updates
 // ============================
 
-$routes->get('equip', 'EquipmentController::index');
+$routes->get('equip', 'EquipmentController::index', ['filter' => 'auth']);
 $routes->post('equipment/save', 'EquipmentController::save');
 $routes->get('equipment/getData', 'EquipmentController::getData');
 $routes->get('equipment/form', 'EquipmentController::form');
@@ -97,7 +97,7 @@ $routes->post('equipment/update', 'EquipmentController::update');
 $routes->post('equipment/delete', 'EquipmentController::delete');
 
 
-$routes->get('pmc', 'PmcController::index');
+$routes->get('pmc', 'PmcController::index', ['filter' => 'auth']);
 $routes->get('pmc/data', 'PmcController::getData');
 $routes->get('pmc/wards', 'PmcController::getWards');
 $routes->post('savePms', 'PmcController::savePms');
@@ -105,7 +105,7 @@ $routes->get('pmc/form', 'PmcController::form');
 
 
 
-$routes->get('temp', 'TempController::index');
+$routes->get('temp', 'TempController::index', ['filter' => 'auth']);
 $routes->get('temp/getData', 'TempController::getData');
 $routes->post('temp/add', 'TempController::add'); 
 $routes->get('temp/getSingle/(:num)', 'TempController::getSingle/$1');
@@ -117,7 +117,7 @@ $routes->get('temperature/report', 'TempController::TempReport');
 
 
 
-$routes->get('speedtest', 'SpeedtestController::index');
+$routes->get('speedtest', 'SpeedtestController::index', ['filter' => 'auth']);
 $routes->get('speedtest/fetchData', 'SpeedtestController::fetchData');
 $routes->get('speedtest/get/(:num)', 'SpeedtestController::get/$1');      
 $routes->post('speedtest/add', 'SpeedtestController::add');
@@ -131,4 +131,28 @@ $routes->post('speedtest/importExcel', 'SpeedtestController::importExcel');
 
 
 
-$routes->get('dash2', 'Dashboard2Controller::index');
+$routes->get('dash2', 'Dashboard2Controller::index', ['filter' => 'auth']);
+
+
+$routes->get('SMC', 'ServerchecklistController::index', ['filter' => 'auth']);
+$routes->get('serverchecklist', 'ServerchecklistController::index', ['filter' => 'auth']);
+// ✅ DataTables fetch
+$routes->get('serverchecklist/fetchData', 'ServerchecklistController::fetchData');
+
+// ✅ CRUD routes
+$routes->post('serverchecklist/add', 'ServerchecklistController::add');
+$routes->get('serverchecklist/getEdit', 'ServerchecklistController::getEdit');
+$routes->post('serverchecklist/update', 'ServerchecklistController::update');
+$routes->post('serverchecklist/delete', 'ServerchecklistController::delete');
+$routes->get('serverchecklist/viewForm', 'ServerchecklistController::viewForm');
+
+
+$routes->get('SInvent', 'ServerinventoryController::index', ['filter' => 'auth']);
+$routes->get('serverinventory/fetchData', 'ServerinventoryController::fetchData');
+
+$routes->post('serverinventory/add', 'ServerinventoryController::add');
+$routes->get('serverinventory/getEdit', 'ServerinventoryController::getEdit');
+$routes->post('serverinventory/update', 'ServerinventoryController::update');
+$routes->post('serverinventory/delete', 'ServerinventoryController::delete');
+
+$routes->get('serverinventory/viewForm', 'ServerinventoryController::viewForm');
