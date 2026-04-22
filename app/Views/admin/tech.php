@@ -115,7 +115,7 @@ $this->section('body');
                     <!-- NAV TABS -->
 <div class="mb-3 d-flex justify-content-between align-items-center">
 
-<?php if (session()->get('role') == 3): ?>
+<?php if (session()->get('role') == 3 || session()->get('role') == 'admin'): ?>
 <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#addModal">
     <i class="fas fa-plus"></i> Add Technician
 </button>
@@ -175,7 +175,7 @@ $this->section('body');
         </span>
     </td>
     <td class="text-center">
-        <?php if (session()->get('role') == 3): ?>
+        <?php if (session()->get('role') == 3 || session()->get('role') == 'admin'):  ?>
         <div class="d-flex justify-content-center gap-2">
 
                 <form action="<?= base_url('tech/toggleStatus/' . $row['id']) ?>" method="post">
