@@ -68,9 +68,39 @@
             <input type="text" class="form-control" name="servername" required>
           </div>
           <div class="mb-3">
-            <label>Checkpoint</label>
-            <input type="text" class="form-control" name="checkpoint" required>
-          </div>
+                <label class="form-label">Checkpoint</label>
+
+                <!-- SELECT ALL -->
+                <div class="form-check mb-2">
+                    <input class="form-check-input" type="checkbox" id="selectAll">
+                    <label class="form-check-label fw-bold">Select All</label>
+                </div>
+
+                <div class="form-check">
+                    <input class="form-check-input checkpoint" type="checkbox" name="led" value="1">
+                    <label class="form-check-label">Check LED Indicators for alerts</label>
+                </div>
+
+                <div class="form-check">
+                    <input class="form-check-input checkpoint" type="checkbox" name="security" value="1">
+                    <label class="form-check-label">Check Security breach and antivirus status</label>
+                </div>
+
+                <div class="form-check">
+                    <input class="form-check-input checkpoint" type="checkbox" name="system_log" value="1">
+                    <label class="form-check-label">Check System Log</label>
+                </div>
+
+                <div class="form-check">
+                    <input class="form-check-input checkpoint" type="checkbox" name="backup_log" value="1">
+                    <label class="form-check-label">Check Backup Log</label>
+                </div>
+
+                <div class="form-check">
+                    <input class="form-check-input checkpoint" type="checkbox" name="available" value="1">
+                    <label class="form-check-label">Check available security patch</label>
+                </div>
+            </div>
           <div class="mb-3">
             <label>Problem</label>
             <textarea class="form-control" name="problem" rows="3"></textarea>
@@ -113,9 +143,39 @@
             <input type="text" class="form-control" name="servername" required>
           </div>
           <div class="mb-3">
-            <label>Checkpoint</label>
-            <input type="text" class="form-control" name="checkpoint" required>
-          </div>
+            <label class="form-label">Checkpoint</label>
+
+            <!-- SELECT ALL -->
+            <div class="form-check mb-2">
+                <input class="form-check-input edit-select-all" type="checkbox">
+                <label class="form-check-label fw-bold">Select All</label>
+            </div>
+
+            <div class="form-check">
+                <input class="form-check-input edit-checkpoint" type="checkbox" name="led" value="1">
+                <label class="form-check-label">Check LED Indicators for alerts</label>
+            </div>
+
+            <div class="form-check">
+                <input class="form-check-input edit-checkpoint" type="checkbox" name="security" value="1">
+                <label class="form-check-label">Check Security breach and antivirus status</label>
+            </div>
+
+            <div class="form-check">
+                <input class="form-check-input edit-checkpoint" type="checkbox" name="system_log" value="1">
+                <label class="form-check-label">Check System Log</label>
+            </div>
+
+            <div class="form-check">
+                <input class="form-check-input edit-checkpoint" type="checkbox" name="backup_log" value="1">
+                <label class="form-check-label">Check Backup Log</label>
+            </div>
+
+            <div class="form-check">
+                <input class="form-check-input edit-checkpoint" type="checkbox" name="available" value="1">
+                <label class="form-check-label">Check available security patch</label>
+            </div>
+        </div>
           <div class="mb-3">
             <label>Problem</label>
             <textarea class="form-control" name="problem" rows="3"></textarea>
@@ -273,37 +333,70 @@ $(document).ready(function(){
 
     // Edit button
     $(document).on('click', '.editBtn', function(){
-        let id = $(this).data('id');
+            let id = $(this).data('id');
 
-        $.ajax({
-            url: "<?= base_url('serverchecklist/getEdit') ?>",
-            type: "GET",
-            dataType: "json",
-            data: {id: id},
-            success: function(res){
-                if (!res.success) {
-                    Swal.fire('Error', res.message || 'Failed to fetch data', 'error');
-                    return;
+            $.ajax({
+                url: "<?= base_url('serverchecklist/getEdit') ?>",
+                type: "GET",
+                dataType: "json",
+                data: {id: id},
+                success: function(res){
+                    if (!res.success) {
+                        Swal.fire('Error', res.message || 'Failed to fetch data', 'error');
+                        return;
+                    }
+
+                    let row = res.data;
+                    let form = $('#editServerChecklistForm');
+
+                    form.find('input[name="id"]').val(row.id);
+                    form.find('input[name="datetime"]').val(row.datetime_local);
+                    form.find('input[name="servername"]').val(row.servername);
+
+                    // ✅ Reset ONLY inside edit modal
+                    form.find('.edit-checkpoint').prop('checked', false);
+
+                    // ✅ Set values correctly (scoped)
+                    form.find('input[name="led"]').prop('checked', row.led == 1);
+                    form.find('input[name="security"]').prop('checked', row.security == 1);
+                    form.find('input[name="system_log"]').prop('checked', row.system_log == 1);
+                    form.find('input[name="backup_log"]').prop('checked', row.backup_log == 1);
+                    form.find('input[name="available"]').prop('checked', row.available == 1);
+
+                    // ✅ Fix Select All logic
+                    let total = form.find('.edit-checkpoint').length;
+                    let checked = form.find('.edit-checkpoint:checked').length;
+
+                    form.find('.edit-select-all').prop('checked', total === checked);
+
+                    form.find('textarea[name="problem"]').val(row.problem);
+                    form.find('textarea[name="corrective"]').val(row.corrective);
+                    form.find('input[name="checked_by"]').val(row.checked_by);
+
+                    $('#editServerChecklistModal').modal('show');
+                },
+                error: function(xhr){
+                    console.log(xhr.responseText);
+                    Swal.fire('Error', 'Failed to fetch data', 'error');
                 }
-
-                let row = res.data;
-
-                $('#editServerChecklistForm input[name="id"]').val(row.id);
-                $('#editServerChecklistForm input[name="datetime"]').val(row.datetime_local);
-                $('#editServerChecklistForm input[name="servername"]').val(row.servername);
-                $('#editServerChecklistForm input[name="checkpoint"]').val(row.checkpoint);
-                $('#editServerChecklistForm textarea[name="problem"]').val(row.problem);
-                $('#editServerChecklistForm textarea[name="corrective"]').val(row.corrective);
-                $('#editServerChecklistForm input[name="checked_by"]').val(row.checked_by);
-
-                $('#editServerChecklistModal').modal('show');
-            },
-            error: function(xhr){
-                console.log(xhr.responseText);
-                Swal.fire('Error', 'Failed to fetch data', 'error');
-            }
+            });
         });
-    });
+    
+        // EDIT SELECT ALL (scoped)
+$(document).on('change', '.edit-select-all', function () {
+    let form = $('#editServerChecklistForm');
+    form.find('.edit-checkpoint').prop('checked', this.checked);
+});
+
+$(document).on('change', '.edit-checkpoint', function () {
+    let form = $('#editServerChecklistForm');
+
+    let total = form.find('.edit-checkpoint').length;
+    let checked = form.find('.edit-checkpoint:checked').length;
+
+    form.find('.edit-select-all').prop('checked', total === checked);
+});
+
 
     // Update
     $('#updateServerChecklist').click(function(){
@@ -372,6 +465,18 @@ $(document).ready(function(){
             }
         });
     });
+
+    $('#selectAll').on('change', function () {
+    $('.checkpoint').prop('checked', this.checked);
+});
+
+$('.checkpoint').on('change', function () {
+    if (!this.checked) {
+        $('#selectAll').prop('checked', false);
+    } else if ($('.checkpoint:checked').length === $('.checkpoint').length) {
+        $('#selectAll').prop('checked', true);
+    }
+});
 
 });
 </script>

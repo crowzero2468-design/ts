@@ -20,7 +20,7 @@ class ServerchecklistController extends BaseController
         return view('admin/server_checklist');
     }
 
-    public function fetchData()
+   public function fetchData()
 {
     $start_date  = $this->request->getGet('start_date');
     $end_date    = $this->request->getGet('end_date');
@@ -29,7 +29,7 @@ class ServerchecklistController extends BaseController
 
     $query = $this->serverchecklistModel;
 
-    // ✅ Proper date range filtering (NO DATE() function)
+    // ✅ Proper date range filtering
     if (!empty($start_date) && !empty($end_date)) {
         $query = $query->where('datetime >=', $start_date . ' 00:00:00')
                        ->where('datetime <=', $end_date . ' 23:59:59');
@@ -55,15 +55,41 @@ class ServerchecklistController extends BaseController
 
         $datetime = !empty($row['datetime']) ? strtotime($row['datetime']) : null;
 
+        // ✅ Build checkpoint string from columns
+        $checkpoints = [];
+
+        if (!empty($row['led'])) {
+            $checkpoints[] = 'LED Indicators';
+        }
+        if (!empty($row['security'])) {
+            $checkpoints[] = 'Security & Antivirus';
+        }
+        if (!empty($row['system_log'])) {
+            $checkpoints[] = 'System Log';
+        }
+        if (!empty($row['backup_log'])) {
+            $checkpoints[] = 'Backup Log';
+        }
+        if (!empty($row['available'])) {
+            $checkpoints[] = 'Security Patch';
+        }
+
         $formattedData[] = [
             'id'         => $row['id'],
             'date'       => $datetime ? date('Y-m-d', $datetime) : '',
             'time'       => $datetime ? date('h:i A', $datetime) : '',
-            'servername' => $row['servername'],
-            'checkpoint' => $row['checkpoint'],
-            'problem'    => $row['problem'],
-            'corrective' => $row['corrective'],
-            'checked_by' => $row['checked_by'],
+            'servername' => $row['servername'] ?? '',
+            'checkpoint' => !empty($checkpoints) ? implode(', ', $checkpoints) : 'None',
+            'problem'    => $row['problem'] ?? '',
+            'corrective' => $row['corrective'] ?? '',
+            'checked_by' => $row['checked_by'] ?? '',
+
+            // 🔥 include raw values for edit modal
+            'led'        => $row['led'] ?? 0,
+            'security'   => $row['security'] ?? 0,
+            'system_log' => $row['system_log'] ?? 0,
+            'backup_log' => $row['backup_log'] ?? 0,
+            'available'  => $row['available'] ?? 0,
 
             'datetime_local' => $datetime ? date('Y-m-d\TH:i', $datetime) : '',
         ];
@@ -77,19 +103,21 @@ class ServerchecklistController extends BaseController
     public function add()
     {
         $datetime    = $this->request->getPost('datetime');
-        $servername  = $this->request->getPost('servername');
-        $checkpoint  = $this->request->getPost('checkpoint');
-        $problem     = $this->request->getPost('problem');
-        $corrective  = $this->request->getPost('corrective');
-        $checked_by  = $this->request->getPost('checked_by');
 
         $data = [
             'datetime'   => date('Y-m-d H:i:s', strtotime($datetime)),
-            'servername' => $servername,
-            'checkpoint' => $checkpoint,
-            'problem'    => $problem,
-            'corrective' => $corrective,
-            'checked_by' => $checked_by
+            'servername' => $this->request->getPost('servername'),
+
+            // CHECKBOX VALUES (1 or 0)
+            'led'        => $this->request->getPost('led') ? 1 : 0,
+            'security'   => $this->request->getPost('security') ? 1 : 0,
+            'system_log' => $this->request->getPost('system_log') ? 1 : 0,
+            'backup_log' => $this->request->getPost('backup_log') ? 1 : 0,
+            'available'  => $this->request->getPost('available') ? 1 : 0,
+
+            'problem'    => $this->request->getPost('problem'),
+            'corrective' => $this->request->getPost('corrective'),
+            'checked_by' => $this->request->getPost('checked_by')
         ];
 
         $insert = $this->serverchecklistModel->insert($data);
@@ -100,7 +128,7 @@ class ServerchecklistController extends BaseController
         ]);
     }
 
-    public function getEdit()
+public function getEdit()
 {
     $id = $this->request->getGet('id');
 
@@ -120,10 +148,10 @@ class ServerchecklistController extends BaseController
         ])->setStatusCode(404);
     }
 
-    // Safe datetime conversion
+    // ✅ Convert datetime
     $datetimeLocal = '';
     if (!empty($data['datetime'])) {
-        $timestamp = strtotime((string) $data['datetime']);
+        $timestamp = strtotime($data['datetime']);
         $datetimeLocal = $timestamp ? date('Y-m-d\TH:i', $timestamp) : '';
     }
 
@@ -133,8 +161,15 @@ class ServerchecklistController extends BaseController
             'id' => $data['id'] ?? '',
             'datetime_local' => $datetimeLocal,
             'servername' => $data['servername'] ?? '',
-            'checkpoint' => $data['checkpoint'] ?? '',
-            'problem' => $data['problem'] ?? '',
+
+            // ✅ CHECKBOX VALUES (IMPORTANT)
+            'led'        => $data['led'] ?? 0,
+            'security'   => $data['security'] ?? 0,
+            'system_log' => $data['system_log'] ?? 0,
+            'backup_log' => $data['backup_log'] ?? 0,
+            'available'  => $data['available'] ?? 0,
+
+            'problem'    => $data['problem'] ?? '',
             'corrective' => $data['corrective'] ?? '',
             'checked_by' => $data['checked_by'] ?? ''
         ]
@@ -142,32 +177,32 @@ class ServerchecklistController extends BaseController
 }
 
 
-    public function update()
-    {
-        $id          = $this->request->getPost('id');
-        $datetime    = $this->request->getPost('datetime');
-        $servername  = $this->request->getPost('servername');
-        $checkpoint  = $this->request->getPost('checkpoint');
-        $problem     = $this->request->getPost('problem');
-        $corrective  = $this->request->getPost('corrective');
-        $checked_by  = $this->request->getPost('checked_by');
+   public function update()
+{
+    $id = $this->request->getPost('id');
 
-        $data = [
-            'datetime'   => date('Y-m-d H:i:s', strtotime($datetime)),
-            'servername' => $servername,
-            'checkpoint' => $checkpoint,
-            'problem'    => $problem,
-            'corrective' => $corrective,
-            'checked_by' => $checked_by
-        ];
+    $data = [
+        'datetime'   => date('Y-m-d H:i:s', strtotime($this->request->getPost('datetime'))),
+        'servername' => $this->request->getPost('servername'),
 
-        $update = $this->serverchecklistModel->update($id, $data);
+        'led'        => $this->request->getPost('led') ? 1 : 0,
+        'security'   => $this->request->getPost('security') ? 1 : 0,
+        'system_log' => $this->request->getPost('system_log') ? 1 : 0,
+        'backup_log' => $this->request->getPost('backup_log') ? 1 : 0,
+        'available'  => $this->request->getPost('available') ? 1 : 0,
 
-        return $this->response->setJSON([
-            'success' => (bool)$update,
-            'message' => $update ? 'Record updated successfully' : 'Failed to update record'
-        ]);
-    }
+        'problem'    => $this->request->getPost('problem'),
+        'corrective' => $this->request->getPost('corrective'),
+        'checked_by' => $this->request->getPost('checked_by')
+    ];
+
+    $update = $this->serverchecklistModel->update($id, $data);
+
+    return $this->response->setJSON([
+        'success' => (bool)$update,
+        'message' => $update ? 'Record updated successfully' : 'Failed to update record'
+    ]);
+}
 
     public function delete()
     {
@@ -231,24 +266,60 @@ class ServerchecklistController extends BaseController
         ';
         $mpdf->SetHTMLHeader($header);
 
-        // Table rows
-        $tableRows = '';
-        if (!empty($records)) {
-            foreach ($records as $row) {
-                $tableRows .= '
-                <tr>
-                    <td>' . date('F j, Y - h:i A', strtotime($row['datetime'])) . '</td>
-                    <td>' . esc($row['servername']) . '</td>
-                    <td>' . esc($row['checkpoint']) . '</td>
-                    <td>' . esc($row['problem']) . '</td>
-                    <td>' . esc($row['corrective']) . '</td>
-                    <td>' . esc($row['checked_by']) . '</td>
-                </tr>
-                ';
+        
+
+      $tableRows = '';
+    if (!empty($records)) {
+        foreach ($records as $row) {
+
+            // ✅ Build checkpoint text
+            $checkpoints = [];
+
+            if (!empty($row['led'])) {
+                $checkpoints[] = 'Check LED Indicators for alerts';
             }
-        } else {
-            $tableRows = '<tr><td colspan="6">No data found</td></tr>';
+            if (!empty($row['security'])) {
+                $checkpoints[] = 'Check Security Breach and Antivirus Statues';
+            }
+            if (!empty($row['system_log'])) {
+                $checkpoints[] = 'Check System Log';    
+            }
+            if (!empty($row['backup_log'])) {
+                $checkpoints[] = 'Check Backup Log';
+            }
+            if (!empty($row['available'])) {
+                $checkpoints[] = 'Check Available Security Patch';
+            }
+
+            // ✅ FORCE SAFE HTML OUTPUT
+            if (!empty($checkpoints)) {
+
+                $checkpointText = '<div style="text-align:left;">';
+
+                foreach ($checkpoints as $cp) {
+                    $checkpointText .= '' . $cp . '<br>';
+                }
+
+                $checkpointText .= '</div>';
+
+            } else {
+                $checkpointText = 'None';
+            }
+
+            $tableRows .= '
+            <tr>
+                <td>' . date('F j, Y - h:i A', strtotime($row['datetime'])) . '</td>
+                <td>' . esc($row['servername']) . '</td>
+                <td>' . $checkpointText . '</td>
+                <td>' . esc($row['problem']) . '</td>
+                <td>' . esc($row['corrective']) . '</td>
+                <td>' . esc($row['checked_by']) . '</td>
+            </tr>
+            ';
         }
+    } else {
+        $tableRows = '<tr><td colspan="6">No data found</td></tr>';
+    }
 
         // HTML content
         $html = '
