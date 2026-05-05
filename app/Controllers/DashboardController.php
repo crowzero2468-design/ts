@@ -34,24 +34,31 @@ class DashboardController extends BaseController
         $TotalTSCount = $db->table('tbtrouble')
             ->countAllResults();
 
-        // ✅ WITH REMARKS JOIN
-        $todayTroubles = $db->table('tbtrouble t')
-            ->select('
-                t.*, 
-                p.name as tech_name,
-                ack.id_num as ack_id_num,
-                ack.full_name as ack_full_name,
-                r.remarks as ack_remarks
-            ')
-            ->join('tb_it p', 'p.id = t.person', 'left')
-            ->join('tb_AcknowledgedBy ack', 'ack.id = t.Acknoby', 'left')
-            ->join('tb_AcknowledgedByRemarks r', 'r.id_ack = ack.id AND r.trouble_id = t.id', 'left')
-            ->where('t.time >=', date('Y-m-d 00:00:00'))
-            ->where('t.time <=', date('Y-m-d 23:59:59'))
-            ->whereIn('t.status', ['Ongoing', 'Done'])
-            ->orderBy('t.time', 'DESC')
-            ->get()
-            ->getResultArray();
+    $location = session()->get('location');
+
+    $builder = $db->table('tbtrouble t')
+        ->select('
+            t.*, 
+            p.name as tech_name,
+            ack.id_num as ack_id_num,
+            ack.full_name as ack_full_name,
+            r.remarks as ack_remarks
+        ')
+        ->join('tb_it p', 'p.id = t.person', 'left')
+        ->join('tb_AcknowledgedBy ack', 'ack.id = t.Acknoby', 'left')
+        ->join('tb_AcknowledgedByRemarks r', 'r.id_ack = ack.id AND r.trouble_id = t.id', 'left')
+        ->where('t.time >=', date('Y-m-d 00:00:00'))
+        ->where('t.time <=', date('Y-m-d 23:59:59'))
+        ->whereIn('t.status', ['Ongoing', 'Done']);
+
+    if (($location) !== 'IT Center') {
+        $builder->where('p.location', $location);
+    }
+
+    $todayTroubles = $builder
+        ->orderBy('t.time', 'DESC')
+        ->get()
+        ->getResultArray();
 
         $types = $db->table('tb_tstype')->get()->getResultArray();
 
@@ -94,7 +101,8 @@ class DashboardController extends BaseController
 
         $data['acknos'] = $acknoModel->findAll();
 
-        // ✅ WITH REMARKS JOIN
+        $location = session()->get('location');
+
         $todayTroubles = $db->table('tbtrouble t')
             ->select('
                 t.*, 
@@ -108,6 +116,7 @@ class DashboardController extends BaseController
             ->join('tb_AcknowledgedByRemarks r', 'r.id_ack = ack.id AND r.trouble_id = t.id', 'left')
             ->where('t.time >=', date('Y-m-d 00:00:00'))
             ->where('t.time <=', date('Y-m-d 23:59:59'))
+            ->where('tech.location', $location) // ✅ ADD THIS
             ->whereIn('t.status', ['Ongoing', 'Done'])
             ->orderBy("FIELD(t.status, 'Ongoing', 'Done')", '', false)
             ->orderBy('t.time', 'DESC')

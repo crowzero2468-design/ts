@@ -1,10 +1,10 @@
 <nav class="navbar navbar-header navbar-header-transparent navbar-expand-lg border-bottom no-print">
     <div class="container-fluid">
         <nav class="navbar navbar-header-left navbar-expand-lg navbar-form nav-search p-0 d-none d-lg-flex">
-            <!-- <span class="profile-username">
-                <span class="op-7">Ward/Office</span>
-                <span class="fw-bold"><?= session()->get('ward'); ?></span>
-            </span> -->
+            <span class="profile-username">
+                <span class="op-7">Office</span>
+                <span class="fw-bold"><?= session()->get('location'); ?></span>
+            </span>
         </nav>
 
         <ul class="navbar-nav topbar-nav ms-md-auto align-items-center">

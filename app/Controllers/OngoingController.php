@@ -30,21 +30,29 @@ class OngoingController extends BaseController
             ->countAllResults();
 
 
-       $todayTroubles = $db->table('tbtrouble t')
-            ->select('
-                t.*, 
-                p.name as tech_name,
-                ack.id_num as ack_id_num,
-                ack.full_name as ack_full_name,
-                r.remarks as ack_remarks
-            ')
-            ->join('tb_it p', 'p.id = t.person', 'left')
-            ->join('tb_AcknowledgedBy ack', 'ack.id = t.Acknoby', 'left')
-            ->join('tb_AcknowledgedByRemarks r', 'r.id_ack = ack.id AND r.trouble_id = t.id', 'left')
-            ->where('t.status', 'Ongoing') 
-            ->orderBy('t.time', 'DESC')
-            ->get()
-            ->getResultArray();
+        $location = session()->get('location');
+
+    $builder = $db->table('tbtrouble t')
+        ->select('
+            t.*, 
+            p.name as tech_name,
+            ack.id_num as ack_id_num,
+            ack.full_name as ack_full_name,
+            r.remarks as ack_remarks
+        ')
+        ->join('tb_it p', 'p.id = t.person', 'left')
+        ->join('tb_AcknowledgedBy ack', 'ack.id = t.Acknoby', 'left')
+        ->join('tb_AcknowledgedByRemarks r', 'r.id_ack = ack.id AND r.trouble_id = t.id', 'left')
+        ->where('t.status', 'Ongoing');
+
+    if (($location) !== 'IT Center') {
+        $builder->where('p.location', $location);
+    }
+
+    $todayTroubles = $builder
+        ->orderBy('t.time', 'DESC')
+        ->get()
+        ->getResultArray();
 
         $types = $db->table('tb_tstype')->get()->getResultArray();
 
