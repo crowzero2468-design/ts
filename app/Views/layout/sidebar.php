@@ -238,18 +238,18 @@ $current = service('uri')->getSegment(1);
         </li> -->
 
         <!-- IT EQUIPMENT GROUP -->
-        <li class="nav-item <?= ($current == 'equip' || $current == 'pmc' || $current == 'temp' || $current == 'speedtest' || $current == 'SMC' || $current == 'SInvent') ? 'active submenu' : '' ?>">
+        <li class="nav-item <?= ($current == 'equip' || $current == 'pmc' || $current == 'temp' || $current == 'speedtest' || $current == 'SMC' || $current == 'SInvent' || $current == 'DCA') ? 'active submenu' : '' ?>">
           <a data-bs-toggle="collapse"
             href="#itEquipment"
-            class="<?= ($current == 'equip' || $current == 'pmc' || $current == 'temp' || $current == 'speedtest' || $current == 'SMC' || $current == 'SInvent') ? '' : 'collapsed' ?>"
-            aria-expanded="<?= ($current == 'equip' || $current == 'pmc' || $current == 'temp' || $current == 'speedtest' || $current == 'SMC' || $current == 'SInvent') ? 'true' : 'false' ?>">
+            class="<?= ($current == 'equip' || $current == 'pmc' || $current == 'temp' || $current == 'speedtest' || $current == 'SMC' || $current == 'SInvent'|| $current == 'DCA') ? '' : 'collapsed' ?>"
+            aria-expanded="<?= ($current == 'equip' || $current == 'pmc' || $current == 'temp' || $current == 'speedtest' || $current == 'SMC' || $current == 'SInvent'|| $current == 'DCA') ? 'true' : 'false' ?>">
 
             <i class="fa-solid fa-laptop"></i>
             <p>Monitoring and Inspection</p>
             <span class="caret"></span>
           </a>
 
-          <div class="collapse <?= ($current == 'equip' || $current == 'pmc' || $current == 'temp' || $current == 'speedtest' || $current == 'SMC' || $current == 'SInvent') ? 'show' : '' ?>" id="itEquipment">
+          <div class="collapse <?= ($current == 'equip' || $current == 'pmc' || $current == 'temp' || $current == 'speedtest' || $current == 'SMC' || $current == 'SInvent'|| $current == 'DCA') ? 'show' : '' ?>" id="itEquipment">
             <ul class="nav nav-collapse">
               <?php if (session('role') == 3): ?>
               <li class="<?= $current == 'equip' ? 'active' : '' ?>">
@@ -289,6 +289,12 @@ $current = service('uri')->getSegment(1);
                 </a>
               </li>
               <?php endif; ?>
+
+              <li class="<?= $current == 'DCA' ? 'active' : '' ?>">
+                <a href="<?= base_url('/DCA'); ?>">
+                  <span class="sub-item">Device Corrective Action</span>
+                </a>
+              </li>
             </ul>
           </div>
         </li>

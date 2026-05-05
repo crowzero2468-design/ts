@@ -49,6 +49,7 @@
 
     <!-- <link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.11/index.global.min.css" rel="stylesheet"> -->
 <script src="<?= base_url('assets/fullcalendar/dist/index.global.min.js') ?>"></script>
+<script src="<?= base_url('assets/js/sweetalert2.all.min.js') ?>"></script>
 
 
     <title>Troublescope</title>
@@ -108,7 +109,6 @@
         <script src="<?= base_url('assets/js/buttons.html5.min.js') ?>"></script>
         <script src="<?= base_url('assets/js/jszip.min.js') ?>"></script>
         <script src="<?= base_url('assets/js/html2pdf.bundle.min.js'); ?>"></script>
-        <script src="<?= base_url('assets/js/sweetalert2.all.min.js') ?>"></script>
         <script src="<?= base_url('assets/js/chart.min.js') ?>"></script>
         <script src="<?= base_url('assets/js/chartjs-plugin-datalabels.min.js') ?>"></script>
         <script src="<?= base_url("assets/js/select2.min.js")?>"></script>

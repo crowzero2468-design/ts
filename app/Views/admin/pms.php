@@ -197,6 +197,8 @@ $this->section('body');
                 <div class="col-md-4">
                   <label class="form-label">Remarks</label>
                   <input type="text" name="remarks" class="form-control">
+                  <input type="checkbox" name="repair" value="1" class="form-check-input mt-1" id="forRepair">
+                  <label class="form-check-label" for="forRepair">For Repair?</label>
                 </div>
                 <div class="col-md-4">
                   <label class="form-label">Performed By</label>

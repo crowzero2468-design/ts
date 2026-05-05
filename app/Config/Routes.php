@@ -156,3 +156,13 @@ $routes->post('serverinventory/update', 'ServerinventoryController::update');
 $routes->post('serverinventory/delete', 'ServerinventoryController::delete');
 
 $routes->get('serverinventory/viewForm', 'ServerinventoryController::viewForm');
+
+
+
+$routes->get('DCA', 'Corrective::index', ['filter' => 'auth']);
+$routes->get('dca/getData', 'Corrective::getData');
+$routes->post('dca/save', 'Corrective::save');
+$routes->get('dca/pdf', 'Corrective::form');
+$routes->get('dca/edit', 'Corrective::edit');
+$routes->post('dca/update', 'Corrective::update');
+$routes->post('dca/delete', 'Corrective::delete');

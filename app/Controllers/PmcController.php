@@ -90,6 +90,8 @@ public function savePms()
         'remarks' => $this->request->getPost('remarks'),
         'performedby' => $this->request->getPost('performedby'),
         'notedby' => $this->request->getPost('notedby'),
+
+        'repair' => $this->request->getPost('repair') ?? 0,
     ];
 
     $model->insert($data);
