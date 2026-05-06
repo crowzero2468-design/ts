@@ -29,7 +29,7 @@ $this->section('body');
                           placeholder="Search or type office" required>
 
                     <div id="officeList" class="list-group position-absolute w-100 d-none"
-                        style="max-height:200px; overflow-y:auto; z-index:1056"></div>
+                        style="max-height:200px; overflow-y:auto; z-index:9999"></div>
                 </div>
 
                 <!-- START MONTH -->
@@ -116,7 +116,7 @@ $this->section('body');
                 </div>
                 <div class="col-md-6">
                   <label class="form-label">Date & Time</label>
-                  <input type="datetime-local" name="datetime" class="form-control" required>
+                  <input type="date" name="datetime" class="form-control" required>
                 </div>
                 <div class="col-md-12">
                   <label class="form-label">Computer Label</label>
@@ -255,14 +255,14 @@ $(document).ready(function () {
   
 $(document).ready(function () {
 
-$('#officeInput').on('keyup', function () {
+$('#officeInput').on('input', function () {
     let q = $(this).val();
     if (q.length < 1) {
         $('#officeList').addClass('d-none');
         return;
     }
 
-    $.get('<?= site_url("/search/ward") ?>', { q }, function (data) {
+    $.get('<?= site_url("/search/ward2") ?>', { q }, function (data) {
         let list = '';
         data.forEach(item => {
             list += `<button type="button"
@@ -275,9 +275,14 @@ $('#officeInput').on('keyup', function () {
     });
 });
 
-$(document).on('click', '.office-item', function () {
-    $('#officeInput').val($(this).text().trim());
+$(document).on('mousedown', '.office-item', function (e) {
+    e.preventDefault();
+    e.stopPropagation();
+    const selectedText = $(this).text().trim();
+
+    $('#officeInput').val(selectedText).focus();
     $('#officeList').addClass('d-none');
+    loadTable();
 });
 
 // Modal search
@@ -307,7 +312,7 @@ $(document).on('click', '.modal-office-item', function () {
     $('#modalOfficeList').addClass('d-none');
 });
 
-$(document).on('click', function(e) {
+$(document).on('mousedown', function(e) {
     // For modal dropdown
     if (!$(e.target).closest('#modalOfficeInput, #modalOfficeList').length) {
         $('#modalOfficeList').addClass('d-none');
@@ -339,8 +344,8 @@ $(document).on('click', function(e) {
     $('#pmsTable').show();
 
     if ($.fn.DataTable.isDataTable('#pmsTable')) {
-        table.destroy();
-        $('#pmsTable tbody').empty();
+        table.ajax.reload();
+        return;
     }
 
     Swal.fire({
@@ -354,7 +359,11 @@ $(document).on('click', function(e) {
         processing: true,
         ajax: {
             url: "<?= base_url('pmc/data') ?>",
-            data: { area: ward, start: start, end: end },
+            data: function (d) {
+                d.area = $('#officeInput').val();
+                d.start = $('#startMonth').val();
+                d.end = $('#endMonth').val();
+            },
             dataSrc: function (json) {
                 Swal.close();
                 return json.data;
@@ -364,7 +373,7 @@ $(document).on('click', function(e) {
             }
         },
         columns: [
-            { data: 'datetime', render: d => new Date(d).toLocaleString() },
+            { data: 'datetime' },
             { data: 'computerlabel' },
             { data: 'keyboard', render: d => d == 1 ? '✔' : '' },
             { data: 'mouse', render: d => d == 1 ? '✔' : '' },

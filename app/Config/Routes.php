@@ -15,6 +15,7 @@ $routes->post('forgot/updatePassword', 'Auth::updatePassword');
 $routes->get('dashboard', 'DashboardController::index', ['filter' => 'auth']);
 
 $routes->get('search/ward', 'SearchController::ward');
+$routes->get('search/ward2', 'SearchController::ward2');
 $routes->get('search/technician', 'SearchController::technician');
 
 $routes->post('trouble/saveResponse', 'TroubleController::saveResponse', ['filter' => 'auth']);

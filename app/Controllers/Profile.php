@@ -8,24 +8,37 @@ use App\Models\Tbtrouble;
 class Profile extends BaseController
 {
     public function index()
-    {
-        $userModel = new UserModel();
-        $troubleModel = new Tbtrouble();
+{
+    $userModel = new UserModel();
+    $troubleModel = new Tbtrouble();
+    $db = \Config\Database::connect();
 
-        $userId = session()->get('user_id');
+    $userId = session()->get('user_id');
 
-        // Get current user
-        $data['user'] = $userModel->find($userId);
+    // Get current user
+    $data['user'] = $userModel->find($userId);
 
-        // Get activity log from tbtrouble
-        $data['activities'] = $troubleModel
-            ->where('person', $userId)
-            ->orWhere('personnel', session()->get('name'))
-            ->orderBy('time', 'DESC')
-            ->findAll();
+    // ================= USER RATING =================
+    $ratingRow = $db->table('tb_rate')
+        ->select('AVG(rate) as avg_rate')
+        ->where('user_id', $userId) // tb_rate.user_id = tb_it.id (your user)
+        ->get()
+        ->getRow();
 
-        return view('profile/profile', $data);
-    }
+    $avg = $ratingRow->avg_rate ?? 0;
+
+    // convert to percentage (5-star system)
+    $data['user_rating'] = ($avg / 5) * 100;
+
+    // Get activity log
+    $data['activities'] = $troubleModel
+        ->where('person', $userId)
+        ->orWhere('personnel', session()->get('name'))
+        ->orderBy('time', 'DESC')
+        ->findAll();
+
+    return view('profile/profile', $data);
+}
 
 //     public function updateName()
 //     {

@@ -51,4 +51,27 @@ class SearchController extends BaseController
 
         return $this->response->setJSON($result);
     }
+
+    public function ward2()
+{
+    $q = $this->request->getGet('q');
+
+    if (!$q) {
+        return $this->response->setJSON([]);
+    }
+
+    $db = Database::connect();
+
+    $result = $db->table('tb_pms')
+        ->select('area as ward')
+        ->like('area', $q)
+        ->groupBy('area')
+        ->orderBy('area', 'ASC')
+        ->limit(10)
+        ->get()
+        ->getResultArray();
+
+    return $this->response->setJSON($result);
+}
+
 }

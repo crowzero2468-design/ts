@@ -185,7 +185,6 @@ public function form()
         <thead>
             <tr>
                 <th rowspan="2">Date</th>
-                <th rowspan="2">Time</th>
                 <th rowspan="2">Computer Label</th>
                 <th colspan="8">Check Points</th>
                 <th rowspan="2">Remarks</th>
@@ -209,7 +208,6 @@ public function form()
         foreach ($records as $row) {
             $html .= '<tr>
                 <td>' . date('m/d/Y', strtotime($row['datetime'])) . '</td>
-                <td>' . date('h:i A', strtotime($row['datetime'])) . '</td>
                 <td>' . esc($row['computerlabel']) . '</td>
                 <td>' . ($row['keyboard'] ? '✔' : '') . '</td>
                 <td>' . ($row['mouse'] ? '✔' : '') . '</td>

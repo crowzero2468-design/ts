@@ -287,111 +287,171 @@ $this->section('body');
             <h5 class="mb-0 fw-bold">Most Active Technicians</h5>
         </div>
 
-        <div class="card-body">
-            <div class="row">
+<div class="card-body">
+    <div class="row">
 
-                <!-- ================= USER SIDE ================= -->
-                <div class="col-md-6 border-end">
+        <!-- ================= USER SIDE ================= -->
+        <div class="col-md-6 border-end">
 
-                    <h6 class="fw-bold mb-3">BOYS</h6>
+            <h6 class="fw-bold mb-3">BOYS</h6>
 
-                    <div class="timeline" style="max-height: 320px; overflow-y: auto;">
+            <div class="timeline" style="max-height: 320px; overflow-y: auto;">
 
-                        <?php foreach ($techActivitiesUser as $tech): ?>
+                <?php foreach ($techActivitiesUser as $tech): ?>
 
-                            <?php
-                                $id = $tech->tech_id ?? null;
-                                $list = $techTroubleMap[$id] ?? [];
-                            ?>
+                    <?php
+                        $id = $tech->tech_id ?? null;
+                        $list = $techTroubleMap[$id] ?? [];
 
-                            <div class="timeline-item d-flex align-items-start justify-content-between mb-4 w-100">
+                        // ✅ SAFE 0–5 rating
+                        $rating = max(0, min(5, $tech->avg_rating ?? 0));
 
-                                <div class="d-flex">
-                                    <div class="timeline-icon bg-primary text-white rounded-circle d-flex align-items-center justify-content-center me-3">
-                                        <i class="fa fa-user"></i>
-                                    </div>
+                        $full = floor($rating);
+                        $half = ($rating - $full) >= 0.5 ? 1 : 0;
+                        $empty = 5 - $full - $half;
 
-                                    <div>
-                                        <div class="fw-bold">
-                                            <?= strtoupper($tech->name ?? 'Unknown') ?>
-                                        </div>
-                                        <div>
-                                            Handled <?= $tech->total ?> trouble(s)
-                                        </div>
-                                    </div>
-                                </div>
+                        // ⭐ convert to percentage (5 = 100%)
+                        $percent = ($rating / 5) * 100;
+                    ?>
 
-                                <div class="text-end" style="max-width: 45%;">
-                                    <?php if (!empty($list)): ?>
-                                        <?php foreach ($list as $item): ?>
-                                            <span class="badge bg-secondary me-1 mb-1">
-                                                <?= esc($item) ?>
-                                            </span>
-                                        <?php endforeach; ?>
-                                    <?php else: ?>
-                                        <span class="text-muted small">No breakdown data</span>
-                                    <?php endif; ?>
-                                </div>
+                    <div class="timeline-item d-flex align-items-start justify-content-between mb-4 w-100">
 
+                        <div class="d-flex">
+                            <div class="timeline-icon bg-primary text-white rounded-circle d-flex align-items-center justify-content-center me-3">
+                                <i class="fa fa-user"></i>
                             </div>
 
-                        <?php endforeach; ?>
+                            <div>
+                                <div class="fw-bold">
+                                    <?= strtoupper($tech->name ?? 'Unknown') ?>
 
-                    </div>
-                </div>
+                                    <!-- ⭐ RATING -->
+                                    <strong class="ms-2 text-warning" style="font-size: 12px;">
 
-                <!-- ================= ADMIN SIDE ================= -->
-                <div class="col-md-6">
+                                        <?php for ($i = 0; $i < $full; $i++): ?>
+                                            <i class="fa fa-star"></i>
+                                        <?php endfor; ?>
 
-                    <h6 class="fw-bold mb-3">GIRLS</h6>
+                                        <?php if ($half): ?>
+                                            <i class="fa fa-star-half-alt"></i>
+                                        <?php endif; ?>
 
-                    <div class="timeline" style="max-height: 320px; overflow-y: auto;">
+                                        <?php for ($i = 0; $i < $empty; $i++): ?>
+                                            <i class="fa fa-star text-muted"></i>
+                                        <?php endfor; ?>
 
-                        <?php foreach ($techActivitiesAdmin as $tech): ?>
+                                        (<?= number_format($percent, 0) ?>%)
 
-                            <?php
-                                $id = $tech->tech_id ?? null;
-                                $list = $techTroubleMap[$id] ?? [];
-                            ?>
-
-                            <div class="timeline-item d-flex align-items-start justify-content-between mb-4 w-100">
-
-                                <div class="d-flex">
-                                    <div class="timeline-icon bg-dark text-white rounded-circle d-flex align-items-center justify-content-center me-3">
-                                        <i class="fa fa-user-shield"></i>
-                                    </div>
-
-                                    <div>
-                                        <div class="fw-bold">
-                                            <?= strtoupper($tech->name ?? 'Unknown') ?>
-                                        </div>
-                                        <div>
-                                            Handled <?= $tech->total ?> trouble(s)
-                                        </div>
-                                    </div>
+                                    </strong>
                                 </div>
 
-                                <div class="text-end" style="max-width: 45%;">
-                                    <?php if (!empty($list)): ?>
-                                        <?php foreach ($list as $item): ?>
-                                            <span class="badge bg-secondary me-1 mb-1">
-                                                <?= esc($item) ?>
-                                            </span>
-                                        <?php endforeach; ?>
-                                    <?php else: ?>
-                                        <span class="text-muted small">No breakdown data</span>
-                                    <?php endif; ?>
+                                <div>
+                                    Handled <?= $tech->total ?> trouble(s)
                                 </div>
-
                             </div>
+                        </div>
 
-                        <?php endforeach; ?>
+                        <div class="text-end" style="max-width: 45%;">
+                            <?php if (!empty($list)): ?>
+                                <?php foreach ($list as $item): ?>
+                                    <span class="badge bg-secondary me-1 mb-1">
+                                        <?= esc($item) ?>
+                                    </span>
+                                <?php endforeach; ?>
+                            <?php else: ?>
+                                <span class="text-muted small">No breakdown data</span>
+                            <?php endif; ?>
+                        </div>
 
                     </div>
-                </div>
+
+                <?php endforeach; ?>
 
             </div>
         </div>
+
+        <!-- ================= ADMIN SIDE ================= -->
+        <div class="col-md-6">
+
+            <h6 class="fw-bold mb-3">GIRLS</h6>
+
+            <div class="timeline" style="max-height: 320px; overflow-y: auto;">
+
+                <?php foreach ($techActivitiesAdmin as $tech): ?>
+
+                    <?php
+                        $id = $tech->tech_id ?? null;
+                        $list = $techTroubleMap[$id] ?? [];
+
+                        // ✅ SAFE 0–5 rating
+                        $rating = max(0, min(5, $tech->avg_rating ?? 0));
+
+                        $full = floor($rating);
+                        $half = ($rating - $full) >= 0.5 ? 1 : 0;
+                        $empty = 5 - $full - $half;
+
+                        // ⭐ convert to percentage
+                        $percent = ($rating / 5) * 100;
+                    ?>
+
+                    <div class="timeline-item d-flex align-items-start justify-content-between mb-4 w-100">
+
+                        <div class="d-flex">
+                            <div class="timeline-icon bg-dark text-white rounded-circle d-flex align-items-center justify-content-center me-3">
+                                <i class="fa fa-user-shield"></i>
+                            </div>
+
+                            <div>
+                                <div class="fw-bold">
+                                    <?= strtoupper($tech->name ?? 'Unknown') ?>
+
+                                    <!-- ⭐ RATING -->
+                                    <strong class="ms-2 text-warning" style="font-size: 12px;">
+
+                                        <?php for ($i = 0; $i < $full; $i++): ?>
+                                            <i class="fa fa-star"></i>
+                                        <?php endfor; ?>
+
+                                        <?php if ($half): ?>
+                                            <i class="fa fa-star-half-alt"></i>
+                                        <?php endif; ?>
+
+                                        <?php for ($i = 0; $i < $empty; $i++): ?>
+                                            <i class="fa fa-star text-muted"></i>
+                                        <?php endfor; ?>
+
+                                        (<?= number_format($percent, 0) ?>%)
+
+                                    </strong>
+                                </div>
+
+                                <div>
+                                    Handled <?= $tech->total ?> trouble(s)
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="text-end" style="max-width: 45%;">
+                            <?php if (!empty($list)): ?>
+                                <?php foreach ($list as $item): ?>
+                                    <span class="badge bg-secondary me-1 mb-1">
+                                        <?= esc($item) ?>
+                                    </span>
+                                <?php endforeach; ?>
+                            <?php else: ?>
+                                <span class="text-muted small">No breakdown data</span>
+                            <?php endif; ?>
+                        </div>
+
+                    </div>
+
+                <?php endforeach; ?>
+
+            </div>
+        </div>
+
+    </div>
+</div>
 
     </div>
 </div>

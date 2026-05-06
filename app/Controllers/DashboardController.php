@@ -34,31 +34,36 @@ class DashboardController extends BaseController
         $TotalTSCount = $db->table('tbtrouble')
             ->countAllResults();
 
-    $location = session()->get('location');
+        $location = session()->get('location');
 
-    $builder = $db->table('tbtrouble t')
-        ->select('
-            t.*, 
-            p.name as tech_name,
-            ack.id_num as ack_id_num,
-            ack.full_name as ack_full_name,
-            r.remarks as ack_remarks
-        ')
-        ->join('tb_it p', 'p.id = t.person', 'left')
-        ->join('tb_AcknowledgedBy ack', 'ack.id = t.Acknoby', 'left')
-        ->join('tb_AcknowledgedByRemarks r', 'r.id_ack = ack.id AND r.trouble_id = t.id', 'left')
-        ->where('t.time >=', date('Y-m-d 00:00:00'))
-        ->where('t.time <=', date('Y-m-d 23:59:59'))
-        ->whereIn('t.status', ['Ongoing', 'Done']);
+        $rateColumns = array_column($db->query("SHOW COLUMNS FROM tb_rate")->getResultArray(), 'Field');
+        $rateTroubleColumn = in_array('trouble_id', $rateColumns) ? 'trouble_id' : 'arta_id';
+        $rateValueColumn = in_array('rating', $rateColumns) ? 'rating' : 'rate';
 
-    if (($location) !== 'IT Center') {
-        $builder->where('p.location', $location);
-    }
+        $builder = $db->table('tbtrouble t')
+            ->select("t.*, 
+                p.name as tech_name,
+                ack.id_num as ack_id_num,
+                ack.full_name as ack_full_name,
+                r.remarks as ack_remarks,
+                rate.{$rateValueColumn} AS rating
+            ")
+            ->join('tb_it p', 'p.id = t.person', 'left')
+            ->join('tb_AcknowledgedBy ack', 'ack.id = t.Acknoby', 'left')
+            ->join('tb_AcknowledgedByRemarks r', 'r.id_ack = ack.id AND r.trouble_id = t.id', 'left')
+            ->join('tb_rate rate', "rate.{$rateTroubleColumn} = t.id", 'left')
+            ->where('t.time >=', date('Y-m-d 00:00:00'))
+            ->where('t.time <=', date('Y-m-d 23:59:59'))
+            ->whereIn('t.status', ['Ongoing', 'Done']);
 
-    $todayTroubles = $builder
-        ->orderBy('t.time', 'DESC')
-        ->get()
-        ->getResultArray();
+        if ($location !== 'IT Center') {
+            $builder->where('p.location', $location);
+        }
+
+        $todayTroubles = $builder
+            ->orderBy('t.time', 'DESC')
+            ->get()
+            ->getResultArray();
 
         $types = $db->table('tb_tstype')->get()->getResultArray();
 
@@ -73,7 +78,7 @@ class DashboardController extends BaseController
         ]);
     }
 
-    public function checkNewTrouble()
+        public function checkNewTrouble()
     {
         $model = new Tbtrouble();
 
@@ -100,23 +105,27 @@ class DashboardController extends BaseController
         $acknoModel = new AcknoModel();
 
         $data['acknos'] = $acknoModel->findAll();
-
         $location = session()->get('location');
 
+        $rateColumns = array_column($db->query("SHOW COLUMNS FROM tb_rate")->getResultArray(), 'Field');
+        $rateTroubleColumn = in_array('trouble_id', $rateColumns) ? 'trouble_id' : 'arta_id';
+        $rateValueColumn = in_array('rating', $rateColumns) ? 'rating' : 'rate';
+
         $todayTroubles = $db->table('tbtrouble t')
-            ->select('
-                t.*, 
+            ->select("t.*, 
                 tech.name as tech_name, 
                 ack.id_num as ack_id_num, 
                 ack.full_name as ack_full_name,
-                r.remarks as ack_remarks
-            ')
+                r.remarks as ack_remarks,
+                rate.{$rateValueColumn} AS rating
+            ")
             ->join('tb_it tech', 'tech.id = t.person', 'left')
             ->join('tb_AcknowledgedBy ack', 'ack.id = t.Acknoby', 'left')
             ->join('tb_AcknowledgedByRemarks r', 'r.id_ack = ack.id AND r.trouble_id = t.id', 'left')
+            ->join('tb_rate rate', "rate.{$rateTroubleColumn} = t.id", 'left')
             ->where('t.time >=', date('Y-m-d 00:00:00'))
             ->where('t.time <=', date('Y-m-d 23:59:59'))
-            ->where('tech.location', $location) // ✅ ADD THIS
+            ->where('tech.location', $location)
             ->whereIn('t.status', ['Ongoing', 'Done'])
             ->orderBy("FIELD(t.status, 'Ongoing', 'Done')", '', false)
             ->orderBy('t.time', 'DESC')

@@ -181,6 +181,21 @@
             <?= !empty($row['ack_remarks']) ? esc($row['ack_remarks']) : 'No remarks' ?>
         </div>
 
+        <div>
+            <?php $displayRating = is_numeric($row['rating']) ? (int) $row['rating'] : 0; ?>
+            <strong>Rating:</strong><br>
+            <?php for ($i = 1; $i <= 5; $i++): ?>
+                <span style="color: <?= $i <= $displayRating ? 'gold' : '#ccc' ?>;">★</span>
+            <?php endfor; ?>
+            (
+                <?php if ($displayRating > 0): ?>
+                    <?= $displayRating * 20 ?>%
+                <?php else: ?>
+                    <?= esc($row['rating']) ?>
+                <?php endif; ?>
+            )
+        </div>
+
     <?php else: ?>
         <form action="<?= site_url('trouble/saveAck') ?>" method="post">
             <?= csrf_field() ?>
@@ -204,6 +219,19 @@
                 class="form-control form-control-sm mb-1"
                 placeholder="Enter caller remarks"
                 rows="3"></textarea>
+
+
+                <div class="mb-2">
+                    <label class="form-label"><strong>Rate Service:</strong></label><br>
+
+                    <div class="star-rating" data-id="<?= $row['id'] ?>">
+                        <?php for ($i = 1; $i <= 5; $i++): ?>
+                            <span class="star" data-value="<?= $i ?>">★</span>
+                        <?php endfor; ?>
+                    </div>
+
+                    <input type="hidden" name="rating" data-id="<?= $row['id'] ?>" class="rating-value" required>
+                </div>
                 
             <button type="submit" class="btn btn-primary btn-sm w-100">
                 Save

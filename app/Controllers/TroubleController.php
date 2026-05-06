@@ -130,6 +130,7 @@ public function saveAck()
     $idNum     = trim($this->request->getPost('id_num'));
     $fullName  = trim($this->request->getPost('full_name'));
     $remarks   = trim($this->request->getPost('remarks'));
+    $rating    = (int) $this->request->getPost('rating'); 
 
     // Basic validation
     if (!$troubleId || !$idNum || !$fullName) {
@@ -138,6 +139,30 @@ public function saveAck()
 
     $ackTable     = $db->table('tb_AcknowledgedBy');
     $remarksTable = $db->table('tb_AcknowledgedByRemarks');
+    $rateTable    = $db->table('tb_rate'); // ⭐ NEW
+
+    $rateColumns = array_column($db->query("SHOW COLUMNS FROM tb_rate")->getResultArray(), 'Field');
+    $rateTroubleColumn = in_array('trouble_id', $rateColumns) ? 'trouble_id' : 'arta_id';
+    $rateValueColumn = in_array('rating', $rateColumns) ? 'rating' : 'rate';
+    $rateUserColumn = in_array('user_id', $rateColumns) ? 'user_id' : (in_array('IT_name', $rateColumns) ? 'IT_name' : null);
+    $rateDateColumn = in_array('rateddate', $rateColumns) ? 'rateddate' : (in_array('rated_date', $rateColumns) ? 'rated_date' : null);
+    $rateInsertDefaults = [];
+
+    $trouble = $db->table('tbtrouble')->select('person')->where('id', $troubleId)->get()->getRowArray();
+    $ratePersonId = $trouble['person'] ?? session()->get('user_id') ?? session()->get('id') ?? 0;
+    $rateDateValue = date('Y-m-d');
+
+    if (in_array('comment', $rateColumns)) {
+        $rateInsertDefaults['comment'] = $remarks ?: 'Rating';
+    }
+
+    if ($rateUserColumn) {
+        $rateInsertDefaults[$rateUserColumn] = $ratePersonId;
+    }
+
+    if ($rateDateColumn) {
+        $rateInsertDefaults[$rateDateColumn] = $rateDateValue;
+    }
 
     // Check if person already exists
     $existing = $ackTable->where('id_num', $idNum)->get()->getRowArray();
@@ -170,14 +195,12 @@ public function saveAck()
         ->getRowArray();
 
     if ($existingRemark) {
-        // Update existing remark instead of inserting duplicate
         $remarksTable
             ->where('id', $existingRemark['id'])
             ->update([
                 'remarks' => $remarks
             ]);
     } else {
-        // Insert new remark
         $remarksTable->insert([
             'id_ack'     => $ackId,
             'trouble_id' => $troubleId,
@@ -185,12 +208,44 @@ public function saveAck()
         ]);
     }
 
-    // Update tbtrouble with the Acknoby ID
+
+    if ($rating > 0) {
+
+        $existingRate = $rateTable
+            ->where($rateTroubleColumn, $troubleId)
+            ->get()
+            ->getRowArray();
+
+        $rateUpdateData = [$rateValueColumn => $rating];
+        if ($rateUserColumn) {
+            $rateUpdateData[$rateUserColumn] = $ratePersonId;
+        }
+        if ($rateDateColumn) {
+            $rateUpdateData[$rateDateColumn] = $rateDateValue;
+        }
+
+        if ($existingRate) {
+            // Update existing rating
+            $rateTable
+                ->where('id', $existingRate['id'])
+                ->update($rateUpdateData);
+        } else {
+            // Insert new rating
+            $rateData = array_merge([
+                $rateTroubleColumn => $troubleId,
+                $rateValueColumn => $rating
+            ], $rateInsertDefaults);
+
+            $rateTable->insert($rateData);
+        }
+    }
+
+
     $tbTrouble = new Tbtrouble();
     $tbTrouble->update($troubleId, [
         'Acknoby' => $ackId
     ]);
 
-    return redirect()->back()->with('success', 'Acknowledged saved successfully');
+    return redirect()->back()->with('success', 'Acknowledged + Rating saved successfully');
 }
 }

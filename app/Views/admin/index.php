@@ -4,6 +4,22 @@ $this->section('body');
 ?>
 
 <style>
+.star-rating {
+    display: inline-flex;
+    gap: 5px;
+    font-size: 22px;
+    cursor: pointer;
+}
+
+.star {
+    color: #ccc;
+    transition: 0.2s;
+}
+
+.star.active {
+    color: gold;
+}
+    
 .btn-add-response {
     background: linear-gradient(135deg, #4e73df, #6f42c1);
     color: #fff;
@@ -638,7 +654,7 @@ setInterval(function () {
 
     // 🔥 Save all input values before refresh
     let inputData = {};
-    $('input[name="remarks"], input[name="id_num"], input[name="full_name"]').each(function() {
+    $('input[name="remarks"], input[name="id_num"], input[name="full_name"], input[name="rating"]').each(function() {
         let id = $(this).data('id');
         if (id) {
             inputData[$(this).attr('name') + '_' + id] = $(this).val();
@@ -667,7 +683,7 @@ setInterval(function () {
         table.draw(false);
 
         // 🔥 Restore all input values after redraw
-        $('input[name="remarks"], input[name="id_num"], input[name="full_name"]').each(function() {
+        $('input[name="remarks"], input[name="id_num"], input[name="full_name"], input[name="rating"]').each(function() {
             let id = $(this).data('id');
             if (id) {
                 let key = $(this).attr('name') + '_' + id;
@@ -677,11 +693,73 @@ setInterval(function () {
             }
         });
 
+        syncStarRatings();
+
         // Update counts
         refreshCounts();
     });
 
 }, 100000);
+
+function syncStarRatings() {
+    document.querySelectorAll('.star-rating').forEach(function(rating) {
+        const input = rating.parentElement.querySelector('.rating-value');
+        const selected = parseInt(input.value, 10) || 0;
+        rating.querySelectorAll('.star').forEach(function(star, index) {
+            star.classList.toggle('active', index < selected);
+        });
+    });
+}
+
+// ==============================
+// ⭐ STAR RATING INTERACTIONS
+// ==============================
+document.addEventListener('click', function(event) {
+    const star = event.target.closest('.star');
+    if (!star) {
+        return;
+    }
+
+    const rating = star.closest('.star-rating');
+    const input = rating.parentElement.querySelector('.rating-value');
+    const value = parseInt(star.dataset.value, 10) || 0;
+
+    input.value = value;
+    rating.querySelectorAll('.star').forEach(function(s, index) {
+        s.classList.toggle('active', index < value);
+    });
+});
+
+document.addEventListener('mouseover', function(event) {
+    const star = event.target.closest('.star');
+    if (!star) {
+        return;
+    }
+
+    const rating = star.closest('.star-rating');
+    const hoverValue = parseInt(star.dataset.value, 10) || 0;
+    rating.querySelectorAll('.star').forEach(function(s, index) {
+        s.classList.toggle('active', index < hoverValue);
+    });
+});
+
+document.addEventListener('mouseout', function(event) {
+    const rating = event.target.closest('.star-rating');
+    if (!rating) {
+        return;
+    }
+
+    const related = event.relatedTarget;
+    if (related && rating.contains(related)) {
+        return;
+    }
+
+    const input = rating.parentElement.querySelector('.rating-value');
+    const selected = parseInt(input.value, 10) || 0;
+    rating.querySelectorAll('.star').forEach(function(s, index) {
+        s.classList.toggle('active', index < selected);
+    });
+});
 
 
 // ==============================
@@ -713,6 +791,19 @@ $('#endorseModal').on('hidden.bs.modal', function () {
     $('#endorseSelectedTechs').html('');
     $('#endorseTechInput').val('');
     $('#endorseTechList').addClass('d-none');
+});
+
+
+$(document).on('click', '.remove-tech', function () {
+
+    let id = parseInt($(this).data('id'));
+
+    // remove from array
+    selectedTechIds = selectedTechIds.filter(x => x !== id);
+
+    // remove badge UI
+    $(this).closest('.tech-badge').remove();
+
 });
 
 });

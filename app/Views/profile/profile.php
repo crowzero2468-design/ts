@@ -14,8 +14,50 @@
     <div class="row">
 
         <!-- LEFT SIDE - PROFILE INFO -->
-        <div class="col-md-4">
+         <div class="col-md-4">
 
+    <!-- USER RATING CARD -->
+    <div class="card mb-3 border-primary shadow-sm">
+        <div class="card-body text-center">
+
+            <h5 class="mb-2">User Rating</h5>
+
+            <h2 class="text-primary mb-0">
+                <?= number_format($user_rating, 2) ?>%
+            </h2>
+
+            <small class="text-muted">Based on system ratings</small>
+
+            <?php
+            $stars = ($user_rating / 100) * 5;
+            $fullStars = floor($stars);
+            $halfStar = ($stars - $fullStars) >= 0.5 ? 1 : 0;
+            $emptyStars = 5 - $fullStars - $halfStar;
+            ?>
+
+            <div class="mt-3 fs-4">
+
+                <!-- FULL STARS -->
+                <?php for ($i = 0; $i < $fullStars; $i++): ?>
+                    <i class="fa fa-star text-warning"></i>
+                <?php endfor; ?>
+
+                <!-- HALF STAR -->
+                <?php if ($halfStar): ?>
+                    <i class="fa fa-star-half-alt text-warning"></i>
+                <?php endif; ?>
+
+                <!-- EMPTY STARS -->
+                <?php for ($i = 0; $i < $emptyStars; $i++): ?>
+                    <i class="fa fa-star text-muted"></i>
+                <?php endfor; ?>
+
+</div>
+
+        </div>
+    </div>
+
+        
             <div class="card mb-4">
                 <div class="card-body">
 
