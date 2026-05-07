@@ -516,6 +516,16 @@ $this->section('body');
         <label>Password</label>
         <input type="password" name="password" class="form-control" required>
     </div>
+    
+    <div class="mb-3">
+        <label>Role</label>
+        <select name="role" class="form-select" required>
+            <option value="" selected disabled>Select Role</option>
+            <option value="user">Support</option>
+            <option value="admin">Admin</option>
+            <option value="3">Super Admin</option>
+        </select>
+    </div>
 
     <div class="mb-3">
         <label>Office</label>
@@ -531,7 +541,7 @@ $this->section('body');
 
 <div class="modal-footer">
     <button type="submit" class="btn btn-success">Save</button>
-    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+    <button type="button" class="btn btn-danger" data-bs-dismiss="modal">Cancel</button>
 </div>
 
 </form>

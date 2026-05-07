@@ -41,7 +41,7 @@
         <div class="row g-3">
 
             <div class="col-md-6">
-                <button class="btn btn-primary w-100"
+                <button class="btn btn-success w-100"
                     data-bs-toggle="modal"
                     data-bs-target="#addModal">
                     Add Repair
@@ -49,7 +49,7 @@
             </div>
 
             <div class="col-md-6">
-                <a id="btnPDF" href='dca/pdf' class="btn btn-primary w-100"  target="_blank">
+                <a id="btnPDF" href='dca/pdf' class="btn btn-danger w-100"  target="_blank">
                     Generate PDF
                     </a>
             </div>
@@ -86,7 +86,6 @@
             <form id="repairForm">
                 <div class="modal-header">
                     <h5 class="modal-title">Add Repair</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
 
                 <div class="modal-body">
@@ -132,6 +131,7 @@
 
                 <div class="modal-footer">
                     <button class="btn btn-success" type="submit">Save</button>
+                    <button type="button" class="btn btn-danger" data-bs-dismiss="modal">Close</button>
                 </div>
 
             </form>
@@ -147,7 +147,6 @@
             <form id="editForm">
                 <div class="modal-header">
                     <h5 class="modal-title">Edit Repair</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
 
                 <div class="modal-body">
@@ -189,6 +188,7 @@
 
                 <div class="modal-footer">
                     <button class="btn btn-primary" type="submit">Update</button>
+                     <button type="button" class="btn btn-danger" data-bs-dismiss="modal">Close</button>
                 </div>
 
             </form>
@@ -248,7 +248,7 @@ $(document).ready(function () {
                     return `
                     <div class="d-flex gap-1">
                         <button class="btn btn-sm btn-primary btn-edit" data-id="${row.id}">Edit</button>
-                        <button class="btn btn-sm btn-primary btn-delete" data-id="${row.id}">Delete</button>
+                        <button class="btn btn-sm btn-danger btn-delete" data-id="${row.id}">Delete</button>
                     </div>
                 `;
                 }

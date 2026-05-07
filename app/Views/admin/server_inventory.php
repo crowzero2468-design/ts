@@ -28,10 +28,10 @@
     </div>
 
 <div class="col-md-12 d-flex flex-column flex-md-row gap-2 mt-2">
-    <button class="btn btn-secondary" id="filterBtn">Filter</button>
-    <button class="btn btn-secondary" id="clearFilterBtn">Clear Filter</button>
-    <button class="btn btn-secondary" id="addInventoryBtn">Add Server</button>
-    <button class="btn btn-secondary" id="viewFormBtn">Generate PDF</button>
+    <button class="btn btn-success" id="addInventoryBtn">Add Server</button>
+    <button class="btn btn-warning" id="filterBtn">Filter</button>
+    <button class="btn btn-info" id="clearFilterBtn">Clear Filter</button>
+    <button class="btn btn-danger" id="viewFormBtn">Generate PDF</button>
 </div>
 
 </div>
@@ -107,7 +107,7 @@
 
       <div class="modal-footer">
         <button type="button" id="saveInventory" class="btn btn-success">Save</button>
-        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+        <button type="button" class="btn btn-danger" data-bs-dismiss="modal">Close</button>
       </div>
 
     </div>
@@ -168,7 +168,7 @@
 
       <div class="modal-footer">
         <button type="button" id="updateInventory" class="btn btn-success">Update</button>
-        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+        <button type="button" class="btn btn-danger" data-bs-dismiss="modal">Close</button>
       </div>
 
     </div>

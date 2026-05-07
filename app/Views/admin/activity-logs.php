@@ -100,19 +100,19 @@ $this->section('body');
             </div>
 
             <div class="col-md-3">
-                <button type="button" id="filterBtn" class="btn btn-secondary w-100">
+                <button type="button" id="filterBtn" class="btn btn-warning w-100">
                     <i class="fas fa-filter me-1"></i> Filter
                 </button>
             </div>
 
             <div class="col-md-3">
-                <button type="button" id="clearFilterBtn" class="btn btn-secondary w-100">
+                <button type="button" id="clearFilterBtn" class="btn btn-info w-100">
                     <i class="fas fa-eraser me-1"></i> Clear
                 </button>
             </div>
             <?php if (session()->get('role') == 3): ?>
                 <div class="col-md-3">
-                    <button type="button" id="viewFormBtn" class="btn btn-secondary w-100">
+                    <button type="button" id="viewFormBtn" class="btn btn-danger w-100">
                         <i class="fas fa-file-alt me-1"></i> Generate PDF
                     </button>
                 </div>

@@ -10,13 +10,13 @@ $this->section('body');
 
                 <!-- BUTTONS -->
                 <div class="col-md-auto">
-                    <button type="button" class="btn btn-secondary" data-bs-toggle="modal" data-bs-target="#addPmsModal">
+                    <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#addPmsModal">
                         <i class="bi bi-plus-circle"></i> Add PMS Record
                     </button>
                 </div>
 
                 <div class="col-md-auto">
-                    <button id="viewFormBtn" class="btn btn-secondary">
+                    <button id="viewFormBtn" class="btn btn-danger">
                         <i class="bi bi-file-earmark-text"></i> Generate PDF
                     </button>
                 </div>
@@ -216,10 +216,11 @@ $this->section('body');
 
         <!-- FOOTER -->
         <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
           <button type="submit" class="btn btn-success">
             <i class="bi bi-save"></i> Save PMS
           </button>
+          <button type="button" class="btn btn-danger" data-bs-dismiss="modal">Close</button>
+
         </div>
 
       </form>

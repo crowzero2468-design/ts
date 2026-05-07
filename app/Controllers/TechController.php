@@ -187,7 +187,7 @@ class TechController extends BaseController
             'pass'     => password_hash($this->request->getPost('password'), PASSWORD_DEFAULT),
             'location' => $this->request->getPost('location'),
             'status'   => 'active',
-            'role'     => 'admin',
+            'role'     => $this->request->getPost('role'),
             'stat'     => '',
             'img'      => ''
         ];

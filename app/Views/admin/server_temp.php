@@ -28,8 +28,8 @@ $this->section('body');
                 </div>
 
                 <div class="col-md-3 d-flex gap-2">
-                    <button id="btnFilter" class="btn btn-secondary w-100">Filter</button>
-                    <button id="btnClearFilter" class="btn btn-secondary w-100">Clear</button>
+                    <button id="btnFilter" class="btn btn-warning w-100">Filter</button>
+                    <button id="btnClearFilter" class="btn btn-info w-100">Clear</button>
                 </div>
 
             </div>
@@ -39,7 +39,7 @@ $this->section('body');
 
                 <div class="col-md-6">
                     <button id="btnAddTemp" 
-                            class="btn btn-secondary w-100"
+                            class="btn btn-success w-100"
                             data-bs-toggle="modal" 
                             data-bs-target="#addTempModal">
                         Add Temperature
@@ -47,7 +47,7 @@ $this->section('body');
                 </div>
 
                 <div class="col-md-6">
-                    <button id="btnTempPDF" class="btn btn-secondary w-100">
+                    <button id="btnTempPDF" class="btn btn-danger w-100">
                         Generate PDF
                     </button>
                 </div>
@@ -100,8 +100,9 @@ $this->section('body');
             </div>
         </div>
         <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-          <button type="submit" class="btn btn-success">Save</button>
+            <button type="submit" class="btn btn-success">Save</button>
+          <button type="button" class="btn btn-danger" data-bs-dismiss="modal">Close</button>
+          
         </div>
       </form>
     </div>

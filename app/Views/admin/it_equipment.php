@@ -15,7 +15,7 @@ $this->section('body');
 <?php endif; ?>
 
 <div class="mb-2">
-    <button type="button" class="btn btn-secondary me-2" data-bs-toggle="modal" data-bs-target="#addEquipmentModal">
+    <button type="button" class="btn btn-success me-2" data-bs-toggle="modal" data-bs-target="#addEquipmentModal">
         Add Equipment
     </button>
 
@@ -24,17 +24,18 @@ $this->section('body');
         View All as Form
     </a> -->
 
-    <!-- View Filtered -->
-    <button type="button" id="viewFilteredForm" class="btn btn-secondary me-2">
+    <!-- Trigger Button -->
+    <button type="button" class="btn btn-outline-success me-2" data-bs-toggle="modal" data-bs-target="#importExcelModal">
+        Import Excel
+    </button>
+    <button id="resetFilters" class="btn btn-info me-2">Reset</button>
+    <!-- Filters -->
+
+        <!-- View Filtered -->
+    <button type="button" id="viewFilteredForm" class="btn btn-danger me-2">
         Generate PDF
     </button>
 
-    <!-- Trigger Button -->
-    <button type="button" class="btn btn-secondary me-2" data-bs-toggle="modal" data-bs-target="#importExcelModal">
-        Import Excel
-    </button>
-    <button id="resetFilters" class="btn btn-secondary me-2">Reset</button>
-    <!-- Filters -->
 <div class="card shadow-sm mb-3 mt-2">
     <div class="card-body">
         <div class="row g-3 align-items-end">
@@ -197,8 +198,9 @@ $this->section('body');
           </div>
         </div>
         <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-          <button type="submit" class="btn btn-success">Save Equipment</button>
+            <button type="submit" class="btn btn-success">Save Equipment</button>
+          <button type="button" class="btn btn-danger" data-bs-dismiss="modal">Close</button>
+          
         </div>
       </form>
     </div>
@@ -276,8 +278,9 @@ $this->section('body');
           </div>
         </div>
         <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
           <button type="submit" class="btn btn-success">Update Equipment</button>
+          <button type="button" class="btn btn-danger" data-bs-dismiss="modal">Close</button>
+          
         </div>
       </form>
     </div>
@@ -310,8 +313,9 @@ $this->section('body');
           </div>
         </div>
         <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
           <button type="submit" class="btn btn-success">Import Excel</button>
+          <button type="button" class="btn btn-danger" data-bs-dismiss="modal">Close</button>
+
         </div>
       </form>
     </div>

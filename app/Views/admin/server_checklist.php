@@ -25,10 +25,10 @@
         <input type="text" id="filterBy" class="form-control" placeholder="Checked By">
     </div>
 <div class="col-md-12 d-flex flex-wrap gap-2 mt-2">
-    <button class="btn btn-secondary" id="filterBtn">Filter</button>
-    <button class="btn btn-secondary" id="clearFilterBtn">Clear Filter</button>
-    <button class="btn btn-secondary" id="addServerChecklistBtn">Add Checklist</button>
-    <button class="btn btn-secondary" id="viewFormBtn">Generate PDF</button>
+    <button class="btn btn-success" id="addServerChecklistBtn">Add Checklist</button>
+    <button class="btn btn-warning" id="filterBtn">Filter</button>
+    <button class="btn btn-info" id="clearFilterBtn">Clear Filter</button>
+    <button class="btn btn-danger" id="viewFormBtn">Generate PDF</button>
 </div>
 </div>
 
@@ -117,7 +117,7 @@
       </div>
       <div class="modal-footer">
         <button type="button" id="saveServerChecklist" class="btn btn-success">Save</button>
-        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+        <button type="button" class="btn btn-danger" data-bs-dismiss="modal">Close</button>
       </div>
     </div>
   </div>

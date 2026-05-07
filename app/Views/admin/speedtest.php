@@ -26,8 +26,8 @@
             </div>
 
             <div class="col-md-3 d-flex gap-2">
-                <button class="btn btn-secondary w-100" id="filterBtn">Filter</button>
-                <button class="btn btn-secondary w-100" id="clearFilterBtn">Clear</button>
+                <button class="btn btn-warning w-100" id="filterBtn">Filter</button>
+                <button class="btn btn-info w-100" id="clearFilterBtn">Clear</button>
             </div>
 
         </div>
@@ -64,13 +64,13 @@
             <div class="col-md-4">
                 <form action="<?= base_url('speedtest/importExcel') ?>" method="post" enctype="multipart/form-data" class="d-flex gap-2">
                     <input class="form-control" type="file" name="excel_file" required>
-                    <button type="submit" class="btn btn-secondary">Import</button>
+                    <button type="submit" class="btn btn-outline-success">Import</button>
                 </form>
             </div>
 
             <div class="col-md-8 d-flex justify-content-end gap-2">
-                <button class="btn btn-secondary" id="addSpeedtestBtn">Add Speedtest</button>
-                <button class="btn btn-secondary" id="viewFormBtn">Generate PDF</button>
+                <button class="btn btn-success" id="addSpeedtestBtn">Add Speedtest</button>
+                <button class="btn btn-danger" id="viewFormBtn">Generate PDF</button>
             </div>
 
         </div>
@@ -143,7 +143,7 @@
       </div>
       <div class="modal-footer">
         <button type="button" id="saveSpeedtest" class="btn btn-success">Save</button>
-        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+        <button type="button" class="btn btn-danger" data-bs-dismiss="modal">Close</button>
       </div>
     </div>
   </div>
@@ -193,7 +193,7 @@
       </div>
       <div class="modal-footer">
         <button type="button" id="updateSpeedtest" class="btn btn-success">Update</button>
-        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+        <button type="button" class="btn btn-danger" data-bs-dismiss="modal">Close</button>
       </div>
     </div>
   </div>
