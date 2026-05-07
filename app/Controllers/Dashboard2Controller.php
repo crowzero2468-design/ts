@@ -84,7 +84,7 @@ class Dashboard2Controller extends BaseController
             SELECT 
                 i.id AS tech_id,
                 i.name,
-                COUNT(t.id) AS total,
+                COUNT(DISTINCT t.id) AS total,
                 MAX(t.time) AS latest_time,
                 COALESCE(AVG(r.rate), 0) AS avg_rating
             FROM tb_it i
@@ -93,7 +93,8 @@ class Dashboard2Controller extends BaseController
                 AND t.status = 'Done'
                 AND t.time BETWEEN '$start' AND '$end'
             LEFT JOIN tb_rate r 
-                ON r.user_id = i.id
+                ON r.trouble_id = t.id
+                AND r.user_id = i.id
                 AND r.rateddate BETWEEN '$start' AND '$end'
             WHERE i.role IN ('user', '3')
             GROUP BY i.id, i.name
@@ -105,7 +106,7 @@ class Dashboard2Controller extends BaseController
             SELECT 
                 i.id AS tech_id,
                 i.name,
-                COUNT(t.id) AS total,
+                COUNT(DISTINCT t.id) AS total,
                 MAX(t.time) AS latest_time,
                 COALESCE(AVG(r.rate), 0) AS avg_rating
             FROM tb_it i
@@ -114,7 +115,8 @@ class Dashboard2Controller extends BaseController
                 AND t.status = 'Done'
                 AND t.time BETWEEN '$start' AND '$end'
             LEFT JOIN tb_rate r 
-                ON r.user_id = i.id
+                ON r.trouble_id = t.id
+                AND r.user_id = i.id
                 AND r.rateddate BETWEEN '$start' AND '$end'
             WHERE i.role = 'admin'
             GROUP BY i.id, i.name
