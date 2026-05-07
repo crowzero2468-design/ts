@@ -54,7 +54,7 @@ class DashboardController extends BaseController
             ->join('tb_rate rate', "rate.{$rateTroubleColumn} = t.id", 'left')
             ->where('t.time >=', date('Y-m-d 00:00:00'))
             ->where('t.time <=', date('Y-m-d 23:59:59'))
-            ->whereIn('t.status', ['Ongoing', 'Done']);
+            ->whereIn('t.status', ['Ongoing', 'Done', 'Waiting']);
 
         if ($location !== 'IT Center') {
             $builder->where('p.location', $location);

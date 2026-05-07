@@ -12,34 +12,33 @@ class TroubleController extends BaseController
 
 
 
-   public function saveResponse()
+  public function saveResponse()
 {
     $db = \Config\Database::connect();
 
     $personnels = $this->request->getPost('person_id');
 
-    $loggedUser = session()->get('name'); // 🔥 get logged-in user name
+    $loggedUser = session()->get('name');
 
     $baseData = [
         'name'        => strtoupper($this->request->getPost('name')),
         'location'    => $this->request->getPost('location'),
         'ts_type'     => $this->request->getPost('ts_type'),
         'description' => strtoupper($this->request->getPost('description')),
-        'status'      => 'Ongoing',
+        'status'      => !empty($personnels) ? 'Ongoing' : 'Waiting',
         'time'        => date('Y-m-d H:i:s'),
-        'personnel'  => $loggedUser, 
+        'personnel'   => $loggedUser,
     ];
 
     if (
         empty($baseData['name']) ||
         empty($baseData['location']) ||
-        empty($baseData['description']) 
-        // empty($personnels)
+        empty($baseData['description'])
     ) {
         return redirect()->back()->with('error', 'Please complete all required fields');
     }
 
-    // ✅ CASE 1: If personnel selected → loop insert
+
     if (!empty($personnels)) {
         foreach ($personnels as $techId) {
             $data = $baseData;
@@ -48,17 +47,16 @@ class TroubleController extends BaseController
             $db->table('tbtrouble')->insert($data);
         }
     } 
-    // ✅ CASE 2: No personnel selected → insert once with NULL
+
     else {
         $data = $baseData;
-        $data['person'] = null; // or 0 if your DB requires
+        $data['person'] = null;
 
         $db->table('tbtrouble')->insert($data);
     }
 
     return redirect()->back()->with('success', 'Troubleshoot saved successfully');
 }
-
 
 public function markDone()
 {
@@ -93,16 +91,19 @@ public function endorse()
     $db = \Config\Database::connect();
 
     $id     = $this->request->getPost('id');
-    $person = $this->request->getPost('person_id'); // single ID
+    $person = $this->request->getPost('person_id');
 
     $db->table('tbtrouble')
-       ->where('id', $id)
-       ->update([
-           'status' => 'Ongoing',
-           'person' => $person
-       ]);
+        ->where('id', $id)
+        ->update([
+            'status' => 'Ongoing',
+            'person' => $person
+        ]);
 
-    return redirect()->back()->with('success', 'Troubleshoot endorsed successfully.');
+    return $this->response->setJSON([
+        'success' => true,
+        'message' => 'Troubleshoot endorsed successfully.'
+    ]);
 }
 
 public function startNow()

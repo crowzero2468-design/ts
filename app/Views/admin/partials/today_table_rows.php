@@ -18,7 +18,7 @@
     <td><?= esc($row['description']) ?></td>
 
     <td>
-        <span class="badge <?= $row['status'] === 'Ongoing' ? 'bg-warning' : 'bg-success' ?>">
+        <span class="badge <?= $row['status'] === 'Ongoing' ? 'bg-warning' : ($row['status'] === 'Waiting' ? 'bg-info' : 'bg-success') ?>">
             <?= esc($row['status']) ?>
         </span>
     </td>
@@ -45,30 +45,28 @@
     <?php endif; ?>
 </td>
     <td>
-        <?php if (empty($row['time_started']) && $row['status'] === 'Ongoing'): ?>
-            
-            <form action="<?= site_url('trouble/startNow') ?>" method="post">
-                <?= csrf_field() ?>
-                <input type="hidden" name="id" value="<?= $row['id'] ?>">
-                <button type="submit" class="btn btn-success btn-sm">
-                    Start Now
-                </button>
-            </form>
+    <?php if (empty($row['time_started']) && ($row['status'] === 'Ongoing' || $row['status'] === 'Waiting')): ?>
+        
+        <form action="<?= site_url('trouble/startNow') ?>" method="post">
+            <?= csrf_field() ?>
+            <input type="hidden" name="id" value="<?= $row['id'] ?>">
+            <button type="submit" class="btn btn-success btn-sm">
+                Start Now
+            </button>
+        </form>
 
-        <?php elseif (empty($row['time_started']) && $row['status'] === 'Done'): ?>
+    <?php elseif (empty($row['time_started']) && $row['status'] === 'Done'): ?>
 
-            <span>
-                -
-            </span>
+        <span>-</span>
 
-        <?php else: ?>
+    <?php else: ?>
 
-            <span>
-                <?= date('h:i A', strtotime($row['time_started'])) ?>
-            </span>
+        <span>
+            <?= !empty($row['time_started']) ? date('h:i A', strtotime($row['time_started'])) : '-' ?>
+        </span>
 
-        <?php endif; ?>
-        </td>
+    <?php endif; ?>
+</td>
     
     <td>
     <?php if ($row['status'] === 'Ongoing' && !empty($row['Acknoby'])): ?>

@@ -516,43 +516,83 @@ $(document).on('click', '.tech-item', function () {
     $('#techList').addClass('d-none'); // 👈 close after select
 });
 
-$(document).on('click', '.table-tech-item', function () {
+$(document).on('click', '.table-tech-item', function (e) {
+
+    e.preventDefault();
+
     let id = $(this).data('id');
     let name = $(this).data('name');
+
     let $container = $(this).closest('.position-relative');
     let troubleId = $container.data('trouble-id');
 
-    // Hide input and dropdown
-    $container.find('.tech-input').hide();
-    $container.find('.techList').addClass('d-none');
+    // loading UI
+    $container.html(`
+        <span class="text-muted">
+            Assigning technician...
+        </span>
+    `);
 
-    // AJAX call to assign tech using endorse endpoint
-    $.post('<?= site_url("trouble/endorse") ?>', {
-        id: troubleId,
-        person_id: id
-    }, function(response) {
-        if (response.success) {
-            // Show success SweetAlert
+    $.ajax({
+        url: '<?= site_url("trouble/endorse") ?>',
+        type: 'POST',
+        dataType: 'json',
+
+        data: {
+            id: troubleId,
+            person_id: id
+        },
+
+        success: function(response) {
+
+            if (response.success) {
+
+                // show assigned tech immediately
+                $container.html(`
+                    <span class="badge bg-primary">
+                        ${name}
+                    </span>
+                `);
+
+                Swal.fire({
+                    toast: true,
+                    position: 'top-end',
+                    icon: 'success',
+                    title: 'Technician Assigned',
+                    text: name + ' assigned successfully',
+                    timer: 2000,
+                    showConfirmButton: false
+                });
+
+                // refresh only tbody
+                $('#todayTableBody').load(
+                    location.href + ' #todayTableBody>*',
+                    function () {
+
+                        table.draw(false);
+                        refreshCounts();
+
+                    }
+                );
+
+            }
+
+        },
+
+        error: function(xhr) {
+
+            console.log(xhr.responseText);
+
             Swal.fire({
-                icon: 'success',
-                title: 'Technician Assigned',
-                text: name + ' has been assigned to this troubleshoot.',
-                timer: 2000,
-                showConfirmButton: false
+                icon: 'error',
+                title: 'Error',
+                text: 'Failed to assign technician'
             });
-            
-            // Optionally refresh the table or update the row
-            setTimeout(function() {
-                location.reload();
-            }, 2000);
+
         }
-    }).fail(function() {
-        Swal.fire({
-            icon: 'error',
-            title: 'Error',
-            text: 'Failed to assign technician. Please try again.'
-        });
+
     });
+
 });
 
 
@@ -626,7 +666,13 @@ function checkNewTrouble() {
                         text: (item.personnel ?? 'Someone') + ' submitted a new troubleshoot.',
                         showConfirmButton: false,
                         timer: 4000,
-                        timerProgressBar: true
+                        timerProgressBar: true,
+
+                        // 🔥 Refresh page after alert closes
+                        didClose: () => {
+                            location.reload();
+                        }
+
                     });
                 }, index * 800);
 
@@ -643,73 +689,72 @@ function checkNewTrouble() {
 checkNewTrouble();
 
 // Then continue checking every 5 seconds
-setInterval(checkNewTrouble, 5000);
-
+setInterval(checkNewTrouble, 1000);
 
 
 // ==============================
 // 🔄 REFRESH TABLE
 // ==============================
-setInterval(function () {
+// setInterval(function () {
 
-    // 🔥 Save all input values before refresh
-    let inputData = {};
-    $('input[name="remarks"], input[name="id_num"], input[name="full_name"], input[name="rating"]').each(function() {
-        let id = $(this).data('id');
-        if (id) {
-            inputData[$(this).attr('name') + '_' + id] = $(this).val();
-        }
-    });
+//     // 🔥 Save all input values before refresh
+//     let inputData = {};
+//     $('input[name="remarks"], input[name="id_num"], input[name="full_name"], input[name="rating"]').each(function() {
+//         let id = $(this).data('id');
+//         if (id) {
+//             inputData[$(this).attr('name') + '_' + id] = $(this).val();
+//         }
+//     });
 
-    $.get("<?= site_url('dashboard/refreshTodayTable') ?>?t=" + new Date().getTime(), function (data) {
+//     $.get("<?= site_url('dashboard/refreshTodayTable') ?>?t=" + new Date().getTime(), function (data) {
 
-        let temp = $('<tbody>').html(data);
+//         let temp = $('<tbody>').html(data);
 
-        // Clear old table
-        table.clear();
+//         // Clear old table
+//         table.clear();
 
-        // Extract rows safely
-        temp.find('tr').each(function () {
-            let row = [];
-            $(this).find('td').each(function () {
-                row.push($(this).html());
-            });
-            if (row.length === 11) {
-                table.row.add(row);
-            }
-        });
+//         // Extract rows safely
+//         temp.find('tr').each(function () {
+//             let row = [];
+//             $(this).find('td').each(function () {
+//                 row.push($(this).html());
+//             });
+//             if (row.length === 11) {
+//                 table.row.add(row);
+//             }
+//         });
 
-        // Redraw table
-        table.draw(false);
+//         // Redraw table
+//         table.draw(false);
 
-        // 🔥 Restore all input values after redraw
-        $('input[name="remarks"], input[name="id_num"], input[name="full_name"], input[name="rating"]').each(function() {
-            let id = $(this).data('id');
-            if (id) {
-                let key = $(this).attr('name') + '_' + id;
-                if (inputData[key] !== undefined) {
-                    $(this).val(inputData[key]);
-                }
-            }
-        });
+//         // 🔥 Restore all input values after redraw
+//         $('input[name="remarks"], input[name="id_num"], input[name="full_name"], input[name="rating"]').each(function() {
+//             let id = $(this).data('id');
+//             if (id) {
+//                 let key = $(this).attr('name') + '_' + id;
+//                 if (inputData[key] !== undefined) {
+//                     $(this).val(inputData[key]);
+//                 }
+//             }
+//         });
 
-        syncStarRatings();
+//         syncStarRatings();
 
-        // Update counts
-        refreshCounts();
-    });
+//         // Update counts
+//         refreshCounts();
+//     });
 
-}, 100000);
+// }, 100000);
 
-function syncStarRatings() {
-    document.querySelectorAll('.star-rating').forEach(function(rating) {
-        const input = rating.parentElement.querySelector('.rating-value');
-        const selected = parseInt(input.value, 10) || 0;
-        rating.querySelectorAll('.star').forEach(function(star, index) {
-            star.classList.toggle('active', index < selected);
-        });
-    });
-}
+// function syncStarRatings() {
+//     document.querySelectorAll('.star-rating').forEach(function(rating) {
+//         const input = rating.parentElement.querySelector('.rating-value');
+//         const selected = parseInt(input.value, 10) || 0;
+//         rating.querySelectorAll('.star').forEach(function(star, index) {
+//             star.classList.toggle('active', index < selected);
+//         });
+//     });
+// }
 
 // ==============================
 // ⭐ STAR RATING INTERACTIONS
