@@ -459,6 +459,7 @@ $this->section('body');
                         <select name="role" id="editRole" class="form-select">
                             <option value="user">Support</option>
                             <option value="admin">Admin</option>
+                            <option value="3">Super Admin</option>
                         </select>
                     </div>
 

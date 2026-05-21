@@ -56,9 +56,9 @@ class DashboardController extends BaseController
             ->where('t.time <=', date('Y-m-d 23:59:59'))
             ->whereIn('t.status', ['Ongoing', 'Done', 'Waiting']);
 
-        if ($location !== 'IT Center') {
-            $builder->where('p.location', $location);
-        }
+        // if ($location !== 'IT Center') {
+        //     $builder->where('p.location', $location);
+        // }
 
         $todayTroubles = $builder
             ->orderBy('t.time', 'DESC')

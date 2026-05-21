@@ -170,7 +170,7 @@ class Corrective extends BaseController
                 ->where('datetime <=', $endDate);
     }
 
-    $records = $builder->orderBy('datetime', 'ASC')->get()->getResultArray();
+    $records = $builder->orderBy('code', 'ASC')->get()->getResultArray();
 
     $rangeText = '';
     if ($start && $end) {

@@ -641,13 +641,21 @@ table.on('order.dt search.dt draw.dt', function () {
 // 🔔 CHECK NEW TROUBLESHOOTS
 // ==============================
 let lastId = <?= !empty($todayTroubles) ? max(array_column($todayTroubles, 'id')) : 0 ?>;
+
+// Logged in user location
+let userLocation = '<?= session()->get('location_name') ?>';
+
 let isChecking = false;
 
 function checkNewTrouble() {
+
     if (isChecking) return;
     isChecking = true;
 
-    $.get('<?= site_url("dashboard/check-new") ?>', { lastId: lastId }, function (response) {
+    $.get('<?= site_url("dashboard/check-new") ?>', {
+        lastId: lastId,
+        location: userLocation
+    }, function (response) {
 
         if (response.new.length > 0) {
 
@@ -658,22 +666,23 @@ function checkNewTrouble() {
                 }
 
                 setTimeout(() => {
+
                     Swal.fire({
                         toast: true,
                         position: 'top-end',
                         icon: 'info',
                         title: 'New Troubleshoot Request!',
-                        text: (item.personnel ?? 'Someone') + ' submitted a new troubleshoot.',
+                        text: item.location + ' submitted a new troubleshoot.',
                         showConfirmButton: false,
                         timer: 4000,
                         timerProgressBar: true,
 
-                        // 🔥 Refresh page after alert closes
                         didClose: () => {
                             location.reload();
                         }
 
                     });
+
                 }, index * 800);
 
             });
@@ -685,12 +694,9 @@ function checkNewTrouble() {
     });
 }
 
-// Run the check immediately on page load
 checkNewTrouble();
 
-// Then continue checking every 5 seconds
 setInterval(checkNewTrouble, 1000);
-
 
 // ==============================
 // 🔄 REFRESH TABLE

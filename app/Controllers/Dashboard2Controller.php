@@ -97,6 +97,7 @@ class Dashboard2Controller extends BaseController
                 AND r.user_id = i.id
                 AND r.rateddate BETWEEN '$start' AND '$end'
             WHERE i.role IN ('user', '3')
+            and i.status = 'active'
             GROUP BY i.id, i.name
             ORDER BY total DESC
         ")->getResult();
@@ -119,6 +120,7 @@ class Dashboard2Controller extends BaseController
                 AND r.user_id = i.id
                 AND r.rateddate BETWEEN '$start' AND '$end'
             WHERE i.role = 'admin'
+            and i.status = 'active'
             GROUP BY i.id, i.name
             ORDER BY total DESC
         ")->getResult();
