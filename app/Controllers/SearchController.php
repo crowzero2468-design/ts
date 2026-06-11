@@ -74,4 +74,22 @@ class SearchController extends BaseController
     return $this->response->setJSON($result);
 }
 
+
+public function doctype()
+{
+    $q = $this->request->getGet('q');
+
+    $db = Database::connect();
+
+    $builder = $db->table('tb_doctype');
+
+    if ($q) {
+        $builder->like('doc_type', $q);
+    }
+
+    $data = $builder->select('doc_type')->limit(20)->get()->getResultArray();
+
+    return $this->response->setJSON($data);
+}
+
 }

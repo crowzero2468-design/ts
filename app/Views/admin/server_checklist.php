@@ -28,7 +28,8 @@
     <button class="btn btn-success" id="addServerChecklistBtn">Add Checklist</button>
     <button class="btn btn-warning" id="filterBtn">Filter</button>
     <button class="btn btn-info" id="clearFilterBtn">Clear Filter</button>
-    <button class="btn btn-danger" id="viewFormBtn">Generate PDF</button>
+    <button class="btn btn-danger" id="viewFormBtn">Generate Server Management Checklist PDF</button>
+    <button class="btn btn-danger" id="viewFormBtn">Generate Server Monitoring Plan PDF</button>
 </div>
 </div>
 

@@ -143,6 +143,8 @@ $current = service('uri')->getSegment(1);
               <span class="caret"></span>
           </a>
 
+          
+
           <div class="collapse <?= in_array($current, ['', 'dashboard', 'dash2']) ? 'show' : '' ?>" id="dashboard">
               <ul class="nav nav-collapse">
                 
@@ -165,11 +167,20 @@ $current = service('uri')->getSegment(1);
           </div>
       </li>
 
+      
+
         <li class="nav-section">
           <span class="sidebar-mini-icon">
             <i class="fa fa-ellipsis-h"></i>
           </span>
           <h4 class="text-section">Tools</h4>
+        </li>
+
+          <li class="nav-item <?= $current == 'doc' ? 'active' : '' ?>">
+          <a href="<?= base_url('/doc'); ?>">
+            <i class="fa-solid fa-book"></i>
+            <p>Document's</p>
+          </a>
         </li>
 
         <!-- HISTORY -->
@@ -238,18 +249,18 @@ $current = service('uri')->getSegment(1);
         </li> -->
 
         <!-- IT EQUIPMENT GROUP -->
-        <li class="nav-item <?= ($current == 'equip' || $current == 'pmc' || $current == 'temp' || $current == 'speedtest' || $current == 'SMC' || $current == 'SInvent' || $current == 'DCA') ? 'active submenu' : '' ?>">
+        <li class="nav-item <?= ($current == 'equip' || $current == 'pmc' || $current == 'temp' || $current == 'speedtest' || $current == 'SMC' || $current == 'SInvent' || $current == 'DCA' || $current == 'Splan' || $current == 'PMSplan') ? 'active submenu' : '' ?>">
           <a data-bs-toggle="collapse"
             href="#itEquipment"
-            class="<?= ($current == 'equip' || $current == 'pmc' || $current == 'temp' || $current == 'speedtest' || $current == 'SMC' || $current == 'SInvent'|| $current == 'DCA') ? '' : 'collapsed' ?>"
-            aria-expanded="<?= ($current == 'equip' || $current == 'pmc' || $current == 'temp' || $current == 'speedtest' || $current == 'SMC' || $current == 'SInvent'|| $current == 'DCA') ? 'true' : 'false' ?>">
+            class="<?= ($current == 'equip' || $current == 'pmc' || $current == 'temp' || $current == 'speedtest' || $current == 'SMC' || $current == 'SInvent'|| $current == 'DCA'|| $current == 'Splan'|| $current == 'PMSplan') ? '' : 'collapsed' ?>"
+            aria-expanded="<?= ($current == 'equip' || $current == 'pmc' || $current == 'temp' || $current == 'speedtest' || $current == 'SMC' || $current == 'SInvent'|| $current == 'DCA'|| $current == 'Splan'|| $current == 'PMSplan') ? 'true' : 'false' ?>">
 
             <i class="fa-solid fa-laptop"></i>
             <p>Monitoring and Inspection</p>
             <span class="caret"></span>
           </a>
 
-          <div class="collapse <?= ($current == 'equip' || $current == 'pmc' || $current == 'temp' || $current == 'speedtest' || $current == 'SMC' || $current == 'SInvent'|| $current == 'DCA') ? 'show' : '' ?>" id="itEquipment">
+          <div class="collapse <?= ($current == 'equip' || $current == 'pmc' || $current == 'temp' || $current == 'speedtest' || $current == 'SMC' || $current == 'SInvent'|| $current == 'DCA'|| $current == 'Splan'|| $current == 'PMSplan') ? 'show' : '' ?>" id="itEquipment">
             <ul class="nav nav-collapse">
               <?php if (session('role') == 3): ?>
               <li class="<?= $current == 'equip' ? 'active' : '' ?>">
@@ -295,6 +306,23 @@ $current = service('uri')->getSegment(1);
                   <span class="sub-item">Device Corrective Action</span>
                 </a>
               </li>
+                
+              <!-- <li>
+                  <label class="mt-3 mb-1 px-3 text-uppercase"><strong>PLANS</strong></label>
+              </li>
+              <li class="<?= $current == 'Splan' ? 'active' : '' ?>">
+                <a href="<?= base_url('/Splan'); ?>">
+                  <span class="sub-item">Server Monitoring Plan</span>
+                </a>
+              </li>
+
+              <li class="<?= $current == 'PMSplan' ? 'active' : '' ?>">
+                <a href="<?= base_url('/PMSplan'); ?>">
+                  <span class="sub-item">PMS Plan</span>
+                </a>
+              </li> -->
+
+
             </ul>
           </div>
         </li>

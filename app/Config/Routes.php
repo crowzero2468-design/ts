@@ -167,3 +167,13 @@ $routes->get('dca/pdf', 'Corrective::form');
 $routes->get('dca/edit', 'Corrective::edit');
 $routes->post('dca/update', 'Corrective::update');
 $routes->post('dca/delete', 'Corrective::delete');
+
+$routes->get('doc', 'DocumentController::index', ['filter' => 'auth']);
+
+$routes->get('document/getData', 'DocumentController::getData');
+$routes->post('document/add', 'DocumentController::add');
+$routes->get('document/edit/(:num)', 'DocumentController::edit/$1');
+$routes->post('document/update', 'DocumentController::update');
+$routes->post('document/delete', 'DocumentController::delete');
+$routes->get('search/doctype', 'SearchController::doctype');
+$routes->get('search/technician', 'SearchController::technician');
