@@ -140,8 +140,10 @@ $this->section('body');
                             <th>Status</th>
                             <th>Response Input by</th>
                             <th>Name of Personnel</th>
+                            <th>Remarks / Action</th>
                             <th>Date and Time Called</th>
                             <th>Completion Date and Time</th>
+                            <th>Acknowledged By</th>
                             <th>TS Type</th>
                         </tr>
                     </thead>
@@ -264,6 +266,7 @@ $(document).ready(function () {
             },
             { data: 'personnel' },
             { data: 'personnel_name', defaultContent: '-' },
+            { data: 'remarks', defaultContent: '-' },
             {
                 data: 'time',
                render: data => {
@@ -305,6 +308,23 @@ $(document).ready(function () {
                             
                             hour12: true
                         });
+                },
+                defaultContent: '-'
+            },
+            {
+                data: null,
+                render: row => {
+                    if (!row.Acknoby) return '-';
+
+                    const id = row.ack_id_num ?? '-';
+                    const name = row.ack_full_name ?? '-';
+                    const remarks = row.ack_remarks ? row.ack_remarks : 'No remarks';
+
+                    return `
+                        <div><strong>ID Number:</strong> ${id}</div>
+                        <div><strong>Full Name:</strong> ${name}</div>
+                        <div><strong>Remarks:</strong> ${remarks}</div>
+                    `;
                 },
                 defaultContent: '-'
             },
@@ -441,8 +461,10 @@ $(document).ready(function () {
                     <td>${row.status}</td>
                     <td>${row.personnel}</td>
                     <td>${row.personnel_name ?? '-'}</td>
+                    <td>${row.remarks ?? '-'}</td>
                     <td>${new Date(row.time).toLocaleString()}</td>
                     <td>${new Date(row.completion_time).toLocaleString()}</td>
+                    <td>${row.Acknoby ? `<div>ID Number: ${row.ack_id_num ?? '-'}</div><div>Full Name: ${row.ack_full_name ?? '-'}</div><div>Remarks: ${row.ack_remarks ?? 'No remarks'}</div>` : '-'}</td>
                     <td>${row.ts_type ?? '-'}</td>
                 </tr>
             `;

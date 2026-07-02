@@ -28,8 +28,10 @@ class TSHistoryController extends BaseController
 
         $builder = $db->table('tbtrouble');
 
-        $builder->select('tbtrouble.*, tb_it.name as personnel_name');
+        $builder->select('tbtrouble.*, tb_it.name as personnel_name, a.id_num as ack_id_num, a.full_name as ack_full_name, r.remarks as ack_remarks');
         $builder->join('tb_it', 'tb_it.id = tbtrouble.person', 'left');
+        $builder->join('tb_AcknowledgedBy a', 'a.id = tbtrouble.Acknoby', 'left');
+        $builder->join('tb_AcknowledgedByRemarks r', 'r.id_ack = a.id AND r.trouble_id = tbtrouble.id', 'left');
 
         if (!empty($start)) {
             $builder->where('tbtrouble.time >=', $start);

@@ -62,7 +62,8 @@ class DocumentController extends BaseController
             'receivedby' => $this->request->getPost('receivedby'),
             'sendby'     => $this->request->getPost('sendby'),
             'shelf'      => $this->request->getPost('shelf'),
-            'status'     => $this->request->getPost('status')
+            'status'     => $this->request->getPost('status'),
+            'remarks'    => $this->request->getPost('remarks')
         ]);
 
         return $this->response->setJSON([
@@ -105,7 +106,8 @@ class DocumentController extends BaseController
             'receivedby' => $this->request->getPost('receivedby'),
             'sendby'     => $this->request->getPost('sendby'),
             'shelf'      => $this->request->getPost('shelf'),
-            'status'     => $this->request->getPost('status')
+            'status'     => $this->request->getPost('status'),
+            'remarks'    => $this->request->getPost('remarks')
         ]);
 
         return $this->response->setJSON([

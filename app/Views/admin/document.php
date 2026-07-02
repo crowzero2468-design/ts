@@ -13,23 +13,23 @@ $this->section('body');
 
                 <div class="col-md-3">
                     <label class="form-label">Type</label>
-                    <input type="text" id="filterType" class="form-control">
+                    <select id="filterType" class="form-control"></select>
                 </div>
 
                 <div class="col-md-3">
                     <label class="form-label">Title</label>
-                    <input type="text" id="filterTitle" class="form-control">
+                    <input type="text" id="filterTitle" placeholder="Enter Title" class="form-control">
                 </div>
 
                 <div class="col-md-3">
                     <label class="form-label">Received By</label>
-                    <input type="text" id="filterReceivedBy" class="form-control">
+                    <select id="filterReceivedBy" class="form-control"></select>
                 </div>
 
                 <div class="col-md-3 d-flex gap-2">
-                    <button id="btnFilter" class="btn btn-warning w-100">
+                    <!-- <button id="btnFilter" class="btn btn-warning w-100">
                         Filter
-                    </button>
+                    </button> -->
 
                     <button id="btnClearFilter" class="btn btn-info w-100">
                         Clear
@@ -62,6 +62,7 @@ $this->section('body');
                 <th>Received By</th>
                 <th>Sent By</th>
                 <th>Shelf</th>
+                <th>Remarks</th>
                 <th>Status</th>
                 <th width="150">Action</th>
             </tr>
@@ -139,6 +140,11 @@ $this->section('body');
                         </select>
                     </div>
 
+                    <div class="mb-3">
+                        <label class="form-label">Remarks</label>
+                        <textarea class="form-control" id="remarks" rows="3"></textarea>
+                    </div>
+
                 </div>
 
                 <div class="modal-footer">
@@ -193,6 +199,54 @@ $(document).ready(function(){
         }
     });
 
+    // FILTER TYPE DROPDOWN
+    $('#filterType').select2({
+        width: '100%',
+        placeholder: 'All types',
+        allowClear: true,
+        ajax: {
+            url: "<?= base_url('search/doctype') ?>",
+            dataType: 'json',
+            delay: 250,
+            data: function(params){
+                return { q: params.term || '' };
+            },
+            processResults: function(data){
+                return {
+                    results: $.map(data, function(item){
+                        return { id: item.doc_type, text: item.doc_type };
+                    })
+                };
+            }
+        }
+    });
+
+    // FILTER RECEIVEDBY DROPDOWN
+    $('#filterReceivedBy').select2({
+        width: '100%',
+        placeholder: 'All technicians',
+        allowClear: true,
+        minimumInputLength: 1,
+        ajax: {
+            url: "<?= base_url('search/technician') ?>",
+            dataType: 'json',
+            delay: 250,
+            data: function(params){
+                return { q: params.term || '' };
+            },
+            processResults: function(data){
+                return {
+                    results: data.map(function(item){
+                        return { id: item.name, text: item.name };
+                    })
+                };
+            }
+        },
+        language: {
+            inputTooShort: function() { return 'please enter name'; }
+        }
+    });
+
 $(document).on('shown.bs.modal', '#documentModal', function () {
 
     setTimeout(function () {
@@ -206,6 +260,11 @@ $(document).on('shown.bs.modal', '#documentModal', function () {
             width: '100%',
             placeholder: 'Search technician',
             minimumInputLength: 1,
+            language: {
+                inputTooShort: function() {
+                    return 'Please type and select a Person';
+                }
+            },
             ajax: {
                 url: "<?= base_url('search/technician') ?>",
                 dataType: 'json',
@@ -247,6 +306,7 @@ $(document).on('shown.bs.modal', '#documentModal', function () {
             {data:'receivedby'},
             {data:'sendby'},
             {data:'shelf'},
+            {data:'remarks'},
 
             {
                 data:'status',
@@ -287,11 +347,49 @@ $(document).on('shown.bs.modal', '#documentModal', function () {
         table.ajax.reload();
     });
 
+    // Auto-apply filters when user selects or types
+    // debounce helper
+    var filterTimer;
+
+    $('#filterType').on('change', function(){
+        table.ajax.reload();
+    });
+
+    $('#filterReceivedBy').on('change', function(){
+        table.ajax.reload();
+    });
+
+    $('#filterTitle').on('keyup', function(e){
+        clearTimeout(filterTimer);
+        filterTimer = setTimeout(function(){
+            table.ajax.reload();
+        }, 350);
+    });
+
+    // apply immediately on Enter
+    $('#filterTitle').on('keypress', function(e){
+        if(e.which == 13){
+            clearTimeout(filterTimer);
+            table.ajax.reload();
+        }
+    });
+
     $('#btnClearFilter').click(function(){
 
-        $('#filterType').val('');
+        // reset dropdown and inputs
+        if ($('#filterType').hasClass('select2-hidden-accessible')) {
+            $('#filterType').val(null).trigger('change');
+        } else {
+            $('#filterType').val('');
+        }
+
         $('#filterTitle').val('');
-        $('#filterReceivedBy').val('');
+
+        if ($('#filterReceivedBy').hasClass('select2-hidden-accessible')) {
+            $('#filterReceivedBy').val(null).trigger('change');
+        } else {
+            $('#filterReceivedBy').val('');
+        }
 
         table.ajax.reload();
 
@@ -318,7 +416,8 @@ $(document).on('shown.bs.modal', '#documentModal', function () {
                 receivedby:$('#receivedby').val(),
                 sendby:$('#sendby').val(),
                 shelf:$('#shelf').val(),
-                status:$('#status').val()
+                status:$('#status').val(),
+                remarks:$('#remarks').val()
             },
 
             dataType:'json',
@@ -393,6 +492,7 @@ $(document).on('shown.bs.modal', '#documentModal', function () {
                 $('#sendby').val(res.sendby);
                 $('#shelf').val(res.shelf);
                 $('#status').val(res.status);
+                $('#remarks').val(res.remarks);
 
                 $('#documentModal').modal('show');
 
