@@ -858,6 +858,30 @@ $(document).on('click', '.remove-tech', function () {
 });
 
 });
+
+document.querySelectorAll('.statusForm').forEach(form => {
+    form.addEventListener('submit', function(e) {
+        e.preventDefault();
+
+        const button = this.querySelector('button[type="submit"]');
+        const action = button.dataset.status;
+
+        Swal.fire({
+            title: 'Are you sure?',
+            text: `Are you sure you want to ${action} this trouble?`,
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: action === 'Delete' ? '#d33' : '#6c757d',
+            cancelButtonColor: '#3085d6',
+            confirmButtonText: `Yes, ${action} it!`,
+            cancelButtonText: 'No'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                form.submit();
+            }
+        });
+    });
+});
 </script>
 
 

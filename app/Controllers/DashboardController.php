@@ -54,7 +54,7 @@ class DashboardController extends BaseController
             ->join('tb_rate rate', "rate.{$rateTroubleColumn} = t.id", 'left')
             ->where('t.time >=', date('Y-m-d 00:00:00'))
             ->where('t.time <=', date('Y-m-d 23:59:59'))
-            ->whereIn('t.status', ['Ongoing', 'Done', 'Waiting']);
+            ->whereIn('t.status', ['Ongoing', 'Done', 'Waiting', 'Cancelled', 'Deleted']);
 
         // if ($location !== 'IT Center') {
         //     $builder->where('p.location', $location);
@@ -126,8 +126,8 @@ class DashboardController extends BaseController
             ->where('t.time >=', date('Y-m-d 00:00:00'))
             ->where('t.time <=', date('Y-m-d 23:59:59'))
             ->where('tech.location', $location)
-            ->whereIn('t.status', ['Ongoing', 'Done'])
-            ->orderBy("FIELD(t.status, 'Ongoing', 'Done')", '', false)
+            ->whereIn('t.status', ['Ongoing', 'Done', 'Waiting', 'Cancelled', 'Deleted'])
+            ->orderBy("FIELD(t.status, 'Ongoing', 'Done', 'Waiting', 'Cancelled', 'Deleted')", '', false)
             ->orderBy('t.time', 'DESC')
             ->get()
             ->getResultArray();

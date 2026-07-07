@@ -86,6 +86,24 @@ public function markDone()
     return redirect()->back()->with('success', 'Marked as done successfully.');
 }
 
+public function updateStatus()
+{
+    $tbTrouble = new Tbtrouble();
+
+    $id = $this->request->getPost('id');
+    $status = $this->request->getPost('status');
+
+    if (!$id || !in_array($status, ['Deleted', 'Cancelled'], true)) {
+        return redirect()->back()->with('error', 'Invalid status update');
+    }
+
+    $tbTrouble->update($id, [
+        'status' => $status,
+    ]);
+
+    return redirect()->back()->with('success', 'Trouble marked as ' . strtolower($status) . '.');
+}
+
 public function endorse()
 {
     $db = \Config\Database::connect();

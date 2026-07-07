@@ -18,7 +18,7 @@
     <td><?= esc($row['description']) ?></td>
 
     <td>
-        <span class="badge <?= $row['status'] === 'Ongoing' ? 'bg-warning' : ($row['status'] === 'Waiting' ? 'bg-info' : 'bg-success') ?>">
+        <span class="badge <?= $row['status'] === 'Ongoing' ? 'bg-warning' : ($row['status'] === 'Waiting' ? 'bg-info' : ($row['status'] === 'Cancelled' ? 'bg-secondary' : ($row['status'] === 'Deleted' ? 'bg-dark' : 'bg-success'))) ?>">
             <?= esc($row['status']) ?>
         </span>
     </td>
@@ -69,6 +69,36 @@
 </td>
     
     <td>
+       <?php if ($row['status'] !== 'Done' && !in_array($row['status'], ['Deleted', 'Cancelled'], true)): ?>
+    <div class="d-flex flex-column gap-2">
+
+        <form action="<?= site_url('trouble/updateStatus') ?>" method="post" class="m-0 statusForm">
+            <?= csrf_field() ?>
+            <input type="hidden" name="id" value="<?= $row['id'] ?>">
+            <input type="hidden" name="status" value="Deleted">
+
+            <button type="submit"
+                class="btn btn-outline-danger btn-sm w-100"
+                data-status="Delete">
+                Delete
+            </button>
+        </form>
+
+        <form action="<?= site_url('trouble/updateStatus') ?>" method="post" class="m-0 statusForm">
+            <?= csrf_field() ?>
+            <input type="hidden" name="id" value="<?= $row['id'] ?>">
+            <input type="hidden" name="status" value="Cancelled">
+
+            <button type="submit"
+                class="btn btn-outline-secondary btn-sm w-100"
+                data-status="Cancel">
+                Cancel
+            </button>
+        </form>
+
+    </div>
+<?php endif; ?>
+
     <?php if ($row['status'] === 'Ongoing' && !empty($row['Acknoby'])): ?>
 
         <?php if (empty($row['time_started'])): ?>
@@ -126,7 +156,7 @@
 
 <?php else: ?>
     <div>
-        <?= esc($row['remarks'] ?? '-') ?>
+        <?= esc($row['remarks']) ?>
 
         <?php if (!empty($row['image'])): ?>
             <br>
@@ -164,7 +194,11 @@
     </td>
 
 <td>
-    <?php if (!empty($row['Acknoby'])): ?>
+    <?php if (in_array(strtolower($row['status']), ['delete', 'deleted', 'cancelled', 'cancelled'])): ?>
+
+        <div class="text-center">-</div>
+
+    <?php elseif (!empty($row['Acknoby'])): ?>
 
         <div class="mb-1">
             <strong>ID Number:</strong> <?= esc($row['ack_id_num']) ?>
@@ -195,21 +229,22 @@
         </div>
 
     <?php else: ?>
+
         <form action="<?= site_url('trouble/saveAck') ?>" method="post">
             <?= csrf_field() ?>
 
             <input type="hidden" name="id" value="<?= $row['id'] ?>">
 
-            <input type="text" 
+            <input type="text"
                    name="id_num"
-                   class="form-control form-control-sm mb-1" 
-                   placeholder="ID Number" 
+                   class="form-control form-control-sm mb-1"
+                   placeholder="ID Number"
                    required>
 
-            <input type="text" 
+            <input type="text"
                    name="full_name"
-                   class="form-control form-control-sm mb-1" 
-                   placeholder="Full Name" 
+                   class="form-control form-control-sm mb-1"
+                   placeholder="Full Name"
                    required>
 
             <textarea
@@ -218,23 +253,23 @@
                 placeholder="Enter caller remarks"
                 rows="3"></textarea>
 
+            <div class="mb-2">
+                <label class="form-label"><strong>Rate Service:</strong></label><br>
 
-                <div class="mb-2">
-                    <label class="form-label"><strong>Rate Service:</strong></label><br>
-
-                    <div class="star-rating" data-id="<?= $row['id'] ?>">
-                        <?php for ($i = 1; $i <= 5; $i++): ?>
-                            <span class="star" data-value="<?= $i ?>">★</span>
-                        <?php endfor; ?>
-                    </div>
-
-                    <input type="hidden" name="rating" data-id="<?= $row['id'] ?>" class="rating-value" required>
+                <div class="star-rating" data-id="<?= $row['id'] ?>">
+                    <?php for ($i = 1; $i <= 5; $i++): ?>
+                        <span class="star" data-value="<?= $i ?>">★</span>
+                    <?php endfor; ?>
                 </div>
-                
+
+                <input type="hidden" name="rating" data-id="<?= $row['id'] ?>" class="rating-value" required>
+            </div>
+
             <button type="submit" class="btn btn-primary btn-sm w-100">
                 Save
             </button>
         </form>
+
     <?php endif; ?>
 </td>
 

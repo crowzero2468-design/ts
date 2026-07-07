@@ -29,6 +29,7 @@ $routes->post('tech/update/(:num)', 'TechController::update/$1');
 $routes->post('tech/delete/(:num)', 'TechController::delete/$1');
 $routes->get('ongoing', 'OngoingController::index', ['filter' => 'auth']);
 $routes->post('trouble/delete', 'OngoingController::delete');
+$routes->post('trouble/updateStatus', 'TroubleController::updateStatus', ['filter' => 'auth']);
 $routes->get('dashboard/refreshTodayTable', 'DashboardController::refreshTodayTable', ['filter' => 'auth']);
 $routes->get('dashboard/refresh-counts', 'DashboardController::refreshCounts', ['filter' => 'auth']);
 

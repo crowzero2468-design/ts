@@ -92,6 +92,36 @@ $this->section('body');
 
                 <!-- Remarks / Action Column -->
               <td>
+                    <?php if ($row['status'] !== 'Done' && !in_array($row['status'], ['Deleted', 'Cancelled'], true)): ?>
+                    <div class="d-flex flex-column gap-2">
+
+                        <form action="<?= site_url('trouble/updateStatus') ?>" method="post" class="m-0 statusForm">
+                            <?= csrf_field() ?>
+                            <input type="hidden" name="id" value="<?= $row['id'] ?>">
+                            <input type="hidden" name="status" value="Deleted">
+
+                            <button type="submit"
+                                class="btn btn-outline-danger btn-sm w-100"
+                                data-status="Delete">
+                                Delete
+                            </button>
+                        </form>
+
+                        <form action="<?= site_url('trouble/updateStatus') ?>" method="post" class="m-0 statusForm">
+                            <?= csrf_field() ?>
+                            <input type="hidden" name="id" value="<?= $row['id'] ?>">
+                            <input type="hidden" name="status" value="Cancelled">
+
+                            <button type="submit"
+                                class="btn btn-outline-secondary btn-sm w-100"
+                                data-status="Cancel">
+                                Cancel
+                            </button>
+                        </form>
+
+                    </div>
+                <?php endif; ?>
+
                 <?php if ($row['status'] === 'Ongoing' && !empty($row['Acknoby'])): ?>
                     <div class="d-flex align-items-center gap-1">
 
@@ -115,18 +145,10 @@ $this->section('body');
                             <i class="fa-solid fa-arrows-rotate"></i>
                         </button>
 
-                        <!-- DELETE BUTTON -->
-                        <form action="<?= site_url('trouble/delete') ?>" method="post" class="delete-form m-0">
-                            <?= csrf_field() ?>
-                            <input type="hidden" name="id" value="<?= $row['id'] ?>">
-                            <button type="button"
-                                    class="btn btn-danger btn-sm btn-delete"
-                                    title="Delete">🗑</button>
-                        </form>
 
                     </div>
                 <?php else: ?>
-                    <?= esc($row['remarks'] ?? '-') ?>
+                    <?= esc($row['remarks']) ?>
                 <?php endif; ?>
             </td>
 
@@ -406,6 +428,30 @@ let table = $('#activityTable').DataTable({
     });
 
 
+});
+
+document.querySelectorAll('.statusForm').forEach(form => {
+    form.addEventListener('submit', function(e) {
+        e.preventDefault();
+
+        const button = this.querySelector('button[type="submit"]');
+        const action = button.dataset.status;
+
+        Swal.fire({
+            title: 'Are you sure?',
+            text: `Are you sure you want to ${action} this trouble?`,
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: action === 'Delete' ? '#d33' : '#6c757d',
+            cancelButtonColor: '#3085d6',
+            confirmButtonText: `Yes, ${action} it!`,
+            cancelButtonText: 'No'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                form.submit();
+            }
+        });
+    });
 });
 </script>
 

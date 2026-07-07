@@ -113,7 +113,7 @@ $this->section('body');
             <?php if (session()->get('role') == 3): ?>
                 <div class="col-md-3">
                     <button type="button" id="viewFormBtn" class="btn btn-danger w-100">
-                        <i class="fas fa-file-alt me-1"></i> Generate PDF
+                        <i class="fas fa-file-alt me-1"></i> Generate Excel Form
                     </button>
                 </div>
             <?php endif; ?>
