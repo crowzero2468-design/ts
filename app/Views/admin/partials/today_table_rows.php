@@ -1,6 +1,6 @@
 <?php if (!$todayTroubles): ?>
 <tr>
-    <td colspan="10" class="text-center text-muted">
+    <td colspan="11" class="text-center text-muted">
         No records today
     </td>
 </tr>
@@ -69,35 +69,6 @@
 </td>
     
     <td>
-       <?php if ($row['status'] !== 'Done' && !in_array($row['status'], ['Deleted', 'Cancelled'], true)): ?>
-    <div class="d-flex flex-column gap-2">
-
-        <form action="<?= site_url('trouble/updateStatus') ?>" method="post" class="m-0 statusForm">
-            <?= csrf_field() ?>
-            <input type="hidden" name="id" value="<?= $row['id'] ?>">
-            <input type="hidden" name="status" value="Deleted">
-
-            <button type="submit"
-                class="btn btn-outline-danger btn-sm w-100"
-                data-status="Delete">
-                Delete
-            </button>
-        </form>
-
-        <form action="<?= site_url('trouble/updateStatus') ?>" method="post" class="m-0 statusForm">
-            <?= csrf_field() ?>
-            <input type="hidden" name="id" value="<?= $row['id'] ?>">
-            <input type="hidden" name="status" value="Cancelled">
-
-            <button type="submit"
-                class="btn btn-outline-secondary btn-sm w-100"
-                data-status="Cancel">
-                Cancel
-            </button>
-        </form>
-
-    </div>
-<?php endif; ?>
 
     <?php if ($row['status'] === 'Ongoing' && !empty($row['Acknoby'])): ?>
 
@@ -148,6 +119,8 @@
                                 data-id="<?= $row['id'] ?>">
                             <i class="fa-solid fa-arrows-rotate"></i>
                         </button>
+
+                        
                     </div>
                 </div>
             </form>
@@ -155,6 +128,7 @@
         <?php endif; ?>
 
 <?php else: ?>
+
     <div>
         <?= esc($row['remarks']) ?>
 
@@ -169,6 +143,36 @@
         <?php endif; ?>
     </div>
 <?php endif; ?>
+
+<?php if ($row['status'] !== 'Done' && !in_array($row['status'], ['Deleted', 'Cancelled'], true) && empty($row['Acknoby'])): ?>
+                            <div class="d-flex flex-column gap-2">
+
+                                <form action="<?= site_url('trouble/updateStatus') ?>" method="post" class="m-0 statusForm">
+                                    <?= csrf_field() ?>
+                                    <input type="hidden" name="id" value="<?= $row['id'] ?>">
+                                    <input type="hidden" name="status" value="Deleted">
+
+                                    <button type="submit"
+                                        class="btn btn-outline-danger btn-sm w-100"
+                                        data-status="Delete">
+                                        Delete
+                                    </button>
+                                </form>
+
+                                <form action="<?= site_url('trouble/updateStatus') ?>" method="post" class="m-0 statusForm">
+                                    <?= csrf_field() ?>
+                                    <input type="hidden" name="id" value="<?= $row['id'] ?>">
+                                    <input type="hidden" name="status" value="Cancelled">
+
+                                    <button type="submit"
+                                        class="btn btn-outline-secondary btn-sm w-100"
+                                        data-status="Cancel">
+                                        Cancel
+                                    </button>
+                                </form>
+
+                            </div>
+                        <?php endif; ?>
 </td>
 
     <td>

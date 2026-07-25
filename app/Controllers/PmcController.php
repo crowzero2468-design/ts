@@ -74,9 +74,24 @@ public function addPmsForm()
 public function savePms()
 {
     $model = new \App\Models\PmsModel();
+    $area = trim($this->request->getPost('location'));
+
+    if ($area !== '') {
+        $db = \Config\Database::connect();
+        $wardBuilder = $db->table('tb_ward');
+
+        $existingWard = $wardBuilder
+            ->where('ward', $area)
+            ->get()
+            ->getRowArray();
+
+        if (!$existingWard) {
+            $wardBuilder->insert(['ward' => $area]);
+        }
+    }
 
     $data = [
-        'area' => $this->request->getPost('location'),
+        'area' => $area,
         'datetime' => $this->request->getPost('datetime'),
         'computerlabel' => $this->request->getPost('computerlabel'),
         'keyboard' => $this->request->getPost('keyboard') ?? 0,

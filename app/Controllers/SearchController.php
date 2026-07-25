@@ -9,7 +9,7 @@ class SearchController extends BaseController
 {
     /**
      * 🔍 Live search for WARD / OFFICE
-     * Saves typed value if not found (frontend logic)
+     * Returns matching ward names from tb_ward
      */
     public function ward()
     {

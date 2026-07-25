@@ -19,12 +19,22 @@ class TroubleController extends BaseController
     $personnels = $this->request->getPost('person_id');
 
     $loggedUser = session()->get('name');
+    $location = strtoupper(trim($this->request->getPost('location')));
+
+    if ($location !== '') {
+        $wardBuilder = $db->table('tb_ward');
+        $existingWard = $wardBuilder->where('ward', $location)->get()->getRowArray();
+
+        if (!$existingWard) {
+            $wardBuilder->insert(['ward' => $location]);
+        }
+    }
 
     $baseData = [
-        'name'        => strtoupper($this->request->getPost('name')),
-        'location'    => $this->request->getPost('location'),
-        'ts_type'     => $this->request->getPost('ts_type'),
-        'description' => strtoupper($this->request->getPost('description')),
+        'name'        => strtoupper(trim($this->request->getPost('name'))),
+        'location'    => $location,
+        'ts_type'     => strtoupper(trim($this->request->getPost('ts_type'))),
+        'description' => strtoupper(trim($this->request->getPost('description'))),
         'status'      => !empty($personnels) ? 'Ongoing' : 'Waiting',
         'time'        => date('Y-m-d H:i:s'),
         'personnel'   => $loggedUser,
@@ -158,7 +168,7 @@ public function saveAck()
 
     $ackTable     = $db->table('tb_AcknowledgedBy');
     $remarksTable = $db->table('tb_AcknowledgedByRemarks');
-    $rateTable    = $db->table('tb_rate'); // ⭐ NEW
+    $rateTable    = $db->table('tb_rate'); 
 
     $rateColumns = array_column($db->query("SHOW COLUMNS FROM tb_rate")->getResultArray(), 'Field');
     $rateTroubleColumn = in_array('trouble_id', $rateColumns) ? 'trouble_id' : 'arta_id';
