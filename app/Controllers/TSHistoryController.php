@@ -20,43 +20,126 @@ class TSHistoryController extends BaseController
     {
         $db = \Config\Database::connect();
 
-        $start   = $this->request->getGet('start_date');
-        $end     = $this->request->getGet('end_date');
-        $name    = $this->request->getGet('name');
-        $ts_type = $this->request->getGet('ts_type'); // NEW
+        $draw   = (int) $this->request->getGet('draw');
+        $start  = max(0, (int) $this->request->getGet('start'));
+        $length = (int) $this->request->getGet('length');
+        $length = $length > 0 ? min($length, 100) : 25;
 
-        $builder = $db->table('tbtrouble');
+        $startDate = $this->request->getGet('start_date');
+        $endDate   = $this->request->getGet('end_date');
+        $name      = trim($this->request->getGet('name') ?? '');
+        $tsType    = $this->request->getGet('ts_type');
+        $search    = trim($this->request->getGet('search')['value'] ?? '');
 
-        $builder->select('tbtrouble.*, tb_it.name as personnel_name, a.id_num as ack_id_num, a.full_name as ack_full_name, r.remarks as ack_remarks');
-        $builder->join('tb_it', 'tb_it.id = tbtrouble.person', 'left');
-        $builder->join('tb_AcknowledgedBy a', 'a.id = tbtrouble.Acknoby', 'left');
-        $builder->join('tb_AcknowledgedByRemarks r', 'r.id_ack = a.id AND r.trouble_id = tbtrouble.id', 'left');
+        $builder = $db->table('tbtrouble t');
+        $builder->select([
+            't.id',
+            't.name',
+            't.location',
+            't.description',
+            't.status',
+            'it.name as personnel',
+            't.remarks',
+            't.time',
+            't.time_started',
+            't.completion_time',
+            't.Acknoby',
+            't.ts_type',
+            'it.name as personnel_name',
+            'a.id_num as ack_id_num',
+            'a.full_name as ack_full_name',
+            'r.remarks as ack_remarks'
+        ]);
+        $builder->join('tb_it it', 'it.id = t.person', 'left');
+        $builder->join('tb_AcknowledgedBy a', 'a.id = t.Acknoby', 'left');
+        $builder->join('tb_AcknowledgedByRemarks r', 'r.id_ack = a.id AND r.trouble_id = t.id', 'left');
 
-        if (!empty($start)) {
-            $builder->where('tbtrouble.time >=', $start);
+        if (!empty($startDate)) {
+            $builder->where('t.time >=', $startDate);
         }
 
-        if (!empty($end)) {
-            $builder->where('tbtrouble.time <=', $end);
+        if (!empty($endDate)) {
+            $builder->where('t.time <=', $endDate);
         }
 
         if (!empty($name)) {
-            $builder->like('tb_it.name', $name, 'both');
+            $builder->like('t.name', $name, 'both');
         }
 
-        // FILTER BY TS TYPE
-        if (!empty($ts_type)) {
-            $builder->where('tbtrouble.ts_type', $ts_type);
+        if (!empty($tsType)) {
+            $builder->where('t.ts_type', $tsType);
+        }
+
+        if (!empty($search)) {
+            $builder->groupStart()
+                ->like('t.name', $search, 'both')
+                ->orLike('t.location', $search, 'both')
+                ->orLike('t.description', $search, 'both')
+                ->orLike('t.status', $search, 'both')
+                ->orLike('t.remarks', $search, 'both')
+                ->orLike('t.ts_type', $search, 'both')
+                ->orLike('it.name', $search, 'both')
+                ->groupEnd();
         }
 
         $records = $builder
-            ->orderBy('tbtrouble.time', 'DESC')
+            ->orderBy('t.time', 'DESC')
+            ->limit($length, $start)
             ->get()
             ->getResultArray();
 
+        $recordsFiltered = count($records) > 0 || !empty($search) || !empty($name) || !empty($tsType) || !empty($startDate) || !empty($endDate)
+            ? $this->getFilteredCount($db, $builder, $startDate, $endDate, $name, $tsType, $search)
+            : $this->getBaseCount($db);
+
+        $recordsTotal = $this->getBaseCount($db);
+
         return $this->response->setJSON([
+            'draw' => $draw,
+            'recordsTotal' => $recordsTotal,
+            'recordsFiltered' => $recordsFiltered,
             'data' => $records
         ]);
+    }
+
+    private function getBaseCount($db)
+    {
+        return (int) $db->table('tbtrouble')->countAllResults(false);
+    }
+
+    private function getFilteredCount($db, $builder, $startDate, $endDate, $name, $tsType, $search)
+    {
+        $countBuilder = clone $builder;
+
+        if (!empty($startDate)) {
+            $countBuilder->where('t.time >=', $startDate);
+        }
+
+        if (!empty($endDate)) {
+            $countBuilder->where('t.time <=', $endDate);
+        }
+
+        if (!empty($name)) {
+            $countBuilder->like('t.name', $name, 'both');
+        }
+
+        if (!empty($tsType)) {
+            $countBuilder->where('t.ts_type', $tsType);
+        }
+
+        if (!empty($search)) {
+            $countBuilder->groupStart()
+                ->like('t.name', $search, 'both')
+                ->orLike('t.location', $search, 'both')
+                ->orLike('t.description', $search, 'both')
+                ->orLike('t.status', $search, 'both')
+                ->orLike('t.remarks', $search, 'both')
+                ->orLike('t.ts_type', $search, 'both')
+                ->orLike('t.person', $search, 'both')
+                ->groupEnd();
+        }
+
+        return (int) $countBuilder->countAllResults(false);
     }
 
         public function printForm()

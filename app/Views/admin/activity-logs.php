@@ -238,9 +238,12 @@ $(document).ready(function () {
     })
     .DataTable({
         pageLength: 10,
-        order: [[0, 'asc']],
+        lengthMenu: [[10, 25, 50, 100], [10, 25, 50, 100]],
+        order: [[8, 'desc']],
         responsive: true,
         processing: true,
+        serverSide: true,
+        deferRender: true,
         ajax: {
             url: "<?= base_url('tshistory/getData') ?>",
             type: "GET",
@@ -254,6 +257,24 @@ $(document).ready(function () {
                 d.name    = $('input[name="name"]').val();
                 d.ts_type = $('#tsTypeSelect').val(); 
             }
+        },
+        initComplete: function () {
+            const tableApi = this.api();
+            const searchInput = $('#activityTable_filter input');
+            let searchTimer = null;
+
+            searchInput.off('keyup input').on('input', function () {
+                const value = $(this).val();
+
+                if (value.length > 0 && value.length < 2) {
+                    return;
+                }
+
+                clearTimeout(searchTimer);
+                searchTimer = setTimeout(() => {
+                    tableApi.search(value).draw();
+                }, 300);
+            });
         },
         columns: [
             { data: null, render: (data, type, row, meta) => meta.row + 1 },
